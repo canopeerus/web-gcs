@@ -1,0 +1,21 @@
+body {
+    font-family:Roboto;
+}
+
+input.giantbuttonleft {
+    font-family:Roboto;
+    position:absolute;
+    left:100px
+    top:150px;
+}
+
+input.giantbuttonright {
+    position:absolute;
+    right:100px;
+    top:150px;
+    padding-right:30px;
+}
+
+.nav a {
+    font-size:1.8em !important;
+}

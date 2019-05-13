@@ -9,13 +9,22 @@
         <title>Redwing GCS</title>
 
         <!--Load local jquery and bootstrap min js-->
-        <script src="{{url_for('static',filename='js/jquery.min.js') }}"></script>
-        <script src="{{url_for('static',filename='js/bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
 
         <!--Load bootstrap css-->
-        <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
+
+        <!--Load page specific CSS-->
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/index.css') }}"/>
 
     </head>
     <body>
+        <form action="/customer" method="POST">
+            <input type="submit" class="giantbuttonleft" value="Customer Portal"></input>
+        </form>
+        <form action="/gcsportal" method="POST">
+            <input type="submit" class="giantbuttonright" value="Ground Control Station"></input>
+        </form>
     </body>
 </html>
