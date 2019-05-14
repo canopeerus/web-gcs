@@ -1,33 +1,28 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width,initial-scale=1.0">
-		<meta http-equiv="X-UA-Compatible" content="ie=edge">
-
-		<!--Set title-->
-		<title>Redwing GCS Login</title>
-
-		<!--Load local jquery and bootstrap min js-->
-		<script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
-		<script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
-
-		<!--Load bootstrap css-->
-		<link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
-
-		<!--Load page specific CSS-->
-		<link rel="stylesheet" href="{{ url_for('static',filename='style/gcslogin.css') }}"/>
-
-	</head>
-	<body>
-		<div id="container">       
-			<form action="/gcsloginform" method="POST">
-				<label for="username">Username:</label><input type="text" id="username" name="username" required>
-				<label for="password">Password:</label>
-				<input type="password" id="password" name="password" required>
-				<div id="lower">
-					<input type="submit" value="Login">
-				</div><!--/ lower--></form>
-		</div>
-	</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <!--Set title-->
+        <title>Redwing GCS Login</title>
+        <!--Load local jquery and bootstrap min js-->
+        <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+        <!--Load bootstrap css-->
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
+        <!--Load page specific CSS-->
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/gcslogin.css') }}"/>
+    </head>
+    <body>
+        <div id="container">       
+            <form action="/gcsloginform" method="POST">
+                <label for="username">Username:</label><input type="text" id="username" name="username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <div id="lower">
+                    <input type="submit" class="btn btn-primary btn-secondary-outline" value="Login">
+                </div></form>
+        </div>
+    </body>
 </html>
