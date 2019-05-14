@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 from flask import Flask,render_template,redirect,session,abort,request,flash
+from flask_sqlalchemy import SQLAlchemy
 import os
+
 app = Flask (__name__)
-app.secret_key = os.urandom (24)
+app.config.from_object (os.environ['APP_SETTINGS'])
+db = SQLAlchemy (app)
+
+from models import GCSUser
+
 @app.route ('/')
 def homepage ():
     return render_template("index.html")
@@ -34,9 +40,13 @@ def gcs_signup ():
     return render_template ("gcs_signup.html")
 
 # GCS Sign up page form action route
-@app.route ("/gcssignupform",methods=['POST'])
+@app.route ("/gcssignupform",methods=['POST','GET'])
 def gcs_signup_action ():
+    gcsuser_instance = GCSUser (request.form['username'],request.form['password'])
+    db.session.add (gcsuser_instance)
+    db.session.commit ()
     return "Registered"
 
 if __name__ == "__main__":
+    db.create_all ()
     app.run (debug = True)
