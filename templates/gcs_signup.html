@@ -8,6 +8,7 @@
         <title>Redwing GCS Sign Up Page</title>
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static',filename='js/jquery.validate.min.js') }}"></script>
         <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
         <!--Load bootstrap css-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
@@ -16,55 +17,75 @@
     </head>
     <body>
         <div class="main">
-            <section class="signup">
+            <!--section class="signup"-->
                 <div class="container">
                     <div class="signup-content">
                         <form method="POST" id="signup-form" class="signup-form" action="/gcssignupform">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="first_name">Username</label>
-                                    <input type="text" class="form-control" name="username" id="username" required/>
+                                    <!--label for="first_name">Username</label-->
+                                    <input type="text" class="form-control" name="username" id="username" required placeholder="USERNAME"/>
+                                </div>
+                                <div class="form-group err0">
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="password">Password</label>
-                                    <input type="password" class="form-control" name="password" id="password" required/>
+                                    <!--label for="password">Password</label-->
+                                    <input type="password" class="form-control" name="password" id="password" required placeholder="PASSWORD"/>
+                                </div>
+                                <div class="form-group err1">
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="re_password">Confirm Password</label>
-                                    <input type="password" class="form-control" name="re_password" id="re_password" required/>
+                                    <!--label for="re_password">Confirm Password</label-->
+                                    <input type="password" class="form-control" name="re_password" id="re_password" required placeholder="CONFIRM PASSWORD"/>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <input type="submit" name="submit" id="submit" class="btn
                                 btn-primary btn-outline-secondary" value="Submit"/>
                             </div>
+                            <div class="form-group err2">
+                            </div>
                         </form>
                     </div>
                 </div
-            </section>
+            <!--/section-->
         </div>
         <script type="text/javascript">
-            jQuery (function() {
-                $("#submit").click (function() {
-                    $(".error").hide ()
-                    var hasError = false;
-                    var usernameVal = $("#username").val ()
-                    var passwordVal = $("#password").val ()
-                    var checkVal = $("#re-password").val ()
-                    if ( passwordVal == '' || usernameVal == '' || checkVal == '' ) {
-                        alert ("Please enter all fields.");
+            $(document).ready (function() {
+                $('.signup-form').validate ({
+                    rules: {
+                        username :{
+                            required: true,
+                            minlength: 8
+                        },
+                        password :{
+                            required: true,
+                            minlength: 8
+                        },
+                        re_password: {
+                            required: true,
+                            minlength: 8,
+                            equalTo: "#password"
+                        }
+                    },
+                    errorPlacement: function (error,element) {
+                        if ( element.attr("name") == 'username' ) {
+                            error.appendTo (".err0");
+                        }
+                        else if ( element.attr("name") == 'password' ) {
+                            error.appentTo (".err1");
+                        }
+                        else if ( element.attr("name") == 're-password' ) {
+                            error.appendTo (".err2");
+                        }
+                        else {
+                            error.insertAfter (element);
+                        }
                     }
-                    else if ( passwordVal != checkVal ) {
-                        $("#re-password").after ("<span class='error'>Passwords do not match.</span>");
-                        alert ("Passwords do not match");
-                        hasError = true;
-                    }
-                    if ( hasError )
-                        return false;
                 });
             });
         </script>
