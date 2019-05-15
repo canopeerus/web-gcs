@@ -11,3 +11,8 @@ export FLASK_APP=app.py
 export DATABASE_URL="postgresql://localhost/redwingdb"
 export APP_SETTINGS="config.DevelopmentConfig"
 ```
+
+## Postgres user
+```
+sudo -u postgres psql redwingdb
+```
