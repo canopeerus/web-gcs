@@ -5,24 +5,41 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <!--Set title-->
-        <title>Redwing GCS Login</title>
+        <title>Redwing GCS Login Page</title>
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
         <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
         <!--Load bootstrap css-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
         <!--Load page specific CSS-->
-        <link rel="stylesheet" href="{{ url_for('static',filename='style/gcslogin.css') }}"/>
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/gcssignup.css') }}"/>
     </head>
     <body>
-        <div id="container">       
-            <form action="/gcsloginform" method="POST">
-                <label for="username">Username:</label><input type="text" id="username" name="username" required>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-                <div id="lower">
-                    <input type="submit" class="btn btn-primary btn-secondary-outline" value="Login">
-                </div></form>
+        <div class="main">
+            <section class="signup">
+                <div class="container">
+                    <div class="signup-content">
+                        <form method="POST" id="signup-form" class="signup-form" action="/gcsloginform">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="first_name">Username</label>
+                                    <input type="text" class="form-control" name="username" id="username" required/>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control" name="password" id="password" required/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" name="submit" id="submit" class="btn
+                                btn-primary btn-outline-secondary" value="Sign in"/>
+                            </div>
+                        </form>
+                    </div>
+                </div
+            </section>
         </div>
     </body>
 </html>

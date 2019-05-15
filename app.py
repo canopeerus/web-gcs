@@ -63,8 +63,14 @@ def gcs_login ():
 # GCS Login form action route, accepts only POST requests
 @app.route ("/gcsloginform",methods=['POST'])
 def gcs_login_action ():
-    session['gcs_logged_in'] = True
-    return redirect("/gcsportal",code=302)
+    usernameval = request.form['username']
+    pwval = request.form['password']
+    qpw = GCSUser.query.filter_by (username=usernameval).first()
+    if pwval == qpw:
+        session['gcs_logged_in'] = True
+        return redirect("/gcsportal",code=302)
+    else:
+        return "Incorrect password"
 
 # GCS Sign up page route
 @app.route ("/gcssignup")
