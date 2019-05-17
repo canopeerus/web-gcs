@@ -55,9 +55,29 @@ def gcs_login_action ():
     qsalt = qresult.salt
     if verify_password (qpassword,pwval,qsalt):
         session['gcs_logged_in'] = True
+        session['gcs_user'] = usernameval
         return redirect("/gcsportal",code=302)
     else:
         return "Incorrect password"
+
+# show user profile and account settings
+@app.route ("/gcsuserprofile",methods=['POST'])
+def show_userprofile():
+    if session['gcs_logged_in']:
+        user = session['gcs_user']
+        qresult = GCSUser.query.filter_by(username=user).first()
+        return render_template ("gcsprofile.html",username = qresult.username, firstname = qresult.firstname, 
+                lastname = qresult.lastname,email_id = qresult.email_id)
+    else:
+        return redirect ("/gcslogin",code=302)
+
+# Log out route
+@app.route ("/gcslogout",methods=['POST'])
+def gcs_logout():
+    if session ['gcs_logged_in']:
+        del session['gcs_user']
+        session['gcs_logged_in'] = False;
+    return redirect ("/", code=302)
 
 # GCS Sign up page route
 @app.route ("/gcssignup")
@@ -69,7 +89,9 @@ def gcs_signup ():
 def gcs_signup_action ():
     salt = uuid.uuid4().hex
     pwd_hash = hash_password (request.form['password'],salt)
-    gcsuser_instance = GCSUser (username = request.form['username'],password = pwd_hash,salt = salt)
+    gcsuser_instance = GCSUser (username = request.form['username'],password = pwd_hash,
+            salt = salt, firstname = request.form['firstname'], lastname = request.form['lastname'], 
+            email_id = request.form['email_id'])
     db.session.add (gcsuser_instance)
     db.session.commit ()
     return "Registered"

@@ -12,7 +12,7 @@
         <!--Load bootstrap css-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
         <!--Load page specific CSS-->
-        <link rel="stylesheet" href="{{ url_for('static',filename='style/gcssignup.css') }}"/>
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/gcslogin.css') }}"/>
     </head>
     <body>
         <div class="main">
@@ -20,6 +20,11 @@
                 <div class="container">
                     <div class="signup-content">
                         <form method="POST" id="signup-form" class="signup-form" action="/gcsloginform">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <h1>Sign in</h1>
+                                </div>
+                            </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="first_name">Username</label>
@@ -35,10 +40,15 @@
                             <div class="form-group">
                                 <input type="submit" name="submit" id="submit" class="btn
                                 btn-primary btn-outline-secondary" value="Sign in"/>
-                            </div>
                         </form>
+                        <form action="/gcssignup" method="get">
+                            <br><br>
+                            <input type="submit" name="signup" id="signup" class = "btn btn-primary
+                            btn-outline-secondary" value="Register as new user"/>
+                        </form>
+                            </div>
                     </div>
-                </div
+                </div>
             </section>
         </div>
     </body>
