@@ -83,7 +83,7 @@ def gcs_logout():
     return redirect ("/", code=302)
 
 # GCS Sign up page route
-@app.route ("/gcssignup")
+@app.route ("/gcssignup",methods=['POST','GET'])
 def gcs_signup ():
     return render_template ("gcs_signup.html")
 
@@ -103,24 +103,51 @@ def gcs_signup_action ():
     else:
         return render_template ("gcs_signup_err.html")
 
-
+# POST route for editing GCS profile
 @app.route ("/gcsprofileedit",methods=['POST'])
 def gcs_profile_edit ():
     if 'gcs_user' not in session:
+        print ("Not in session wtf!")
         return redirect ("/gcslogin",code=302)
     user = session['gcs_user']
     user_instance = GCSUser.query.filter_by (username = user).first()
-    if 'firstname' in request.args:
-        n_fname = request.args['firstname']
+    print (request.args)
+    if 'firstname_update' in request.form:
+        print ("firstname found")
+        n_fname = request.form['firstname_update']
         user_instance.firstname = n_fname
-    if 'lastname' in request.args:
-        n_lname = request.args['lastname']
+    else:
+        print ("no firstname")
+    
+    if 'lastname_update' in request.form:
+        print ("lastname found")
+        n_lname = request.form['lastname_update']
         user_instance.lastname = n_lname
-    if 'email' in request.args:
-        n_email = request.args['email']
+    else:
+        print ("no lastname")
+
+    if 'email_update' in request.form:
+        print ("email found")
+        n_email = request.form['email_update']
         user_instance.email_id = n_email
+    else:
+        print ("no email")
+
     db.session.commit()
     return redirect ("/gcsuserprofile",code=302)
 
+# Test GET route to test API
+@app.route ("/api/v1/test")
+def test_api ():
+    msg = ''
+    if 'message' in request.args:
+        msg += request.args.get('message')
+        return msg
+    if 'version' in request.args:
+        return "API v1"
+    else:
+        return "request error"
+
+        
 if __name__ == "__main__":
     app.run (debug = True)

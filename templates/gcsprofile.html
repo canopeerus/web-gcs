@@ -23,27 +23,27 @@
                 <i class="fas fa-user" style="font-size:100px;"></i>
             </center>
             <br><br>
-            <form id="form_edit" name="form_edit" action="/gcsprofileedit" method="POST">
+            <form id="form_edit" name="form_edit" method="POST" action="/gcsprofileedit">
                 <table class="table table-hover">
                     <tbody>
                         <tr class="clickable-row" onclick="update_firstname()" 
                                                   id="tr-firstname">
                             <td>First Name</td>
-                            <td>{{ firstname }}</td>
+                            <td><div id="firstname_input">{{ firstname }}</div></td>
                             <td><i class="fas fa-user-edit" 
                                    style="visibility:hidden;" id="i1"></i></td>
                         </tr>
                         <tr class="clickable-row" onclick="update_lastname()"
                                                   id="tr-lastname">
                             <td>Last Name</td>
-                            <td>{{ lastname }}</td>
+                            <td><div id="lastname_input">{{ lastname }}</div></td>
                             <td><i id="i2" class="fas fa-user-edit"
                                            style="visibility:hidden;" ></i></td>
                         </tr>
                         <tr class="clickable-row" onclick="update_email()"
                                                   id="tr-email">
                             <td>Email Address</td>
-                            <td>{{ email_id }}</td>
+                            <td><div id="email_input">{{ email_id }}</div></td>
                             <td><i id="i3" class="fas fa-user-edit" style="visibility:hidden;"></i></td>
                         </tr>
                         <tr class="clickable-row">
@@ -55,40 +55,43 @@
                 </table>
                 <div class="form-group">
                     <center>
-                        <button id="update-btn" 
+                        <input type="submit" id="update-btn" 
                                 class="btn btn-primary btn-outline-secondary" disabled
-                                onclick="submitform()">Update
-                        </button>
+                                value="Update"/>
                     </center>
             </form>
                 </div>
                 <script type="text/javascript">
+                    var f_trigger = false,e_trigger = false,l_trigger = false;
                     function update_firstname () {
-                        var newfirstname = window.prompt ("Enter your new first name:");
-                        if ( newfirsname != "" && newfirstname != null) {
-                            $("#form_edit").attr("action","/gcsprofileedit?firstname="+newfirstname);
-                            $("#update-btn").attr("disabled",false);
+                        if ( ! f_trigger ) {
+                            $("#firstname_input").html ("<input type='text'"+
+                            " name='firstname_update' id='fname_textbox'/>");
+                            $("#fname_textbox").val( "{{ firstname }}");
                         }
+                        f_trigger = true;
+                        $("#update-btn").attr("disabled",false);
                     }
                     function update_lastname () {
-                        var newlastname = window.prompt ("Enter new last name:");
-                        if ( newlastname != "" && newlastname != null) {
-                            $("#form_edit").attr("action","/gcsprofileedit?lastname="+newlastname);
-                            $("#update-btn").attr("disabled",false);
+                        if ( ! l_trigger ) {
+                            $("#lastname_input").html ("<input type='text'"+
+                            " name='lastname_update' id='lname_textbox'/>");
+                            $("#lname_textbox").val ("{{ lastname }}");
                         }
+                        l_trigger = true;
+                        $("#update-btn").attr ("disabled",false);
                     }
                     function update_email () {
-                        var newemail = window.prompt ("Enter new email address:");
-                        if ( newemail != "" && newemail != null) {
-                            $("#form_edit").attr("action","/gcsprofileedit?email="+newemail);
-                            $("#update-btn").attr("disabled",false);
+                        if ( ! e_trigger ) {
+                            $("#email_input").html ("<input type='email'"+
+                            " name='email_update' id='email_textbox'/>");
+                            $("#email_textbox").val ("{{ email_id }}");
 
                         }
-                    }
-                    function submitform() {
-                        $("#form-edit").submit();
-                    }
+                        e_trigger = true;
+                        $("#update-btn").attr ("disabled",false);
 
+                    }
                     $(document).ready (function () {
                         $("#tr-firstname").hover ( 
                             function () { 
