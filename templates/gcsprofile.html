@@ -19,13 +19,18 @@
     <body>
         <div class="container">
             <br><br><br>
-            <center>
+            <div style="text-align:center;">
                 <i class="fas fa-user" style="font-size:100px;"></i>
-            </center>
+            </div>
             <br><br>
             <form id="form_edit" name="form_edit" method="POST" action="/gcsprofileedit">
                 <table class="table table-hover">
                     <tbody>
+                        <tr>
+                            <td>Username</td>
+                            <td>{{ username }}</td>
+                            <td></td>
+                        </tr>
                         <tr class="clickable-row" onclick="update_firstname()" 
                                                   id="tr-firstname">
                             <td>First Name</td>
@@ -46,78 +51,98 @@
                             <td><div id="email_input">{{ email_id }}</div></td>
                             <td><i id="i3" class="fas fa-user-edit" style="visibility:hidden;"></i></td>
                         </tr>
-                        <tr class="clickable-row">
-                            <td>Username</td>
-                            <td>{{ username }}</td>
-                            <td></td>
+                        <tr class="clickable-row" id="pw-tr" onclick="window.location.href='/updatepassword'">
+                            <td>Password</td>
+                            <td>***************</td>
+                            <td><i id="i4" class="fas fa-user-edit" style="visibility:hidden;"></i></td>
                         </tr>
                     </tbody>
                 </table>
-                <div class="form-group">
-                    <center>
-                        <input type="submit" id="update-btn" 
-                                class="btn btn-primary btn-outline-secondary" disabled
-                                value="Update"/>
-                    </center>
-            </form>
+                <div class="form-group" style="text-align:center;">
+                    <input type="submit" id="update-btn" 
+                                         class="btn btn-primary btn-outline-secondary" disabled
+                                         value="Update"/>
+                    <br><br>
+                    <button id="reset-btn" class="btn btn-primary btn-block btn-outline-secondary" disabled
+                                           onclick="resetchanges()">Reset</button>
                 </div>
-                <script type="text/javascript">
-                    var f_trigger = false,e_trigger = false,l_trigger = false;
-                    function update_firstname () {
-                        if ( ! f_trigger ) {
-                            $("#firstname_input").html ("<input type='text'"+
-                            " name='firstname_update' id='fname_textbox'/>");
-                            $("#fname_textbox").val( "{{ firstname }}");
-                        }
-                        f_trigger = true;
-                        $("#update-btn").attr("disabled",false);
-                    }
-                    function update_lastname () {
-                        if ( ! l_trigger ) {
-                            $("#lastname_input").html ("<input type='text'"+
-                            " name='lastname_update' id='lname_textbox'/>");
-                            $("#lname_textbox").val ("{{ lastname }}");
-                        }
-                        l_trigger = true;
-                        $("#update-btn").attr ("disabled",false);
-                    }
-                    function update_email () {
-                        if ( ! e_trigger ) {
-                            $("#email_input").html ("<input type='email'"+
-                            " name='email_update' id='email_textbox'/>");
-                            $("#email_textbox").val ("{{ email_id }}");
+            </form>
+        </div>
+        <script type="text/javascript">
+            var f_trigger = false,e_trigger = false,l_trigger = false;
+            function update_firstname () {
+                if ( ! f_trigger ) {
+                    $("#firstname_input").html ("<input type='text'"+
+                    " name='firstname_update' id='fname_textbox'/>");
+                    $("#fname_textbox").val( "{{ firstname }}");
+                }
+                f_trigger = true;
+                $("#update-btn").attr("disabled",false);
+                $("#reset-btn").attr ("disabled",false);
+            }
+            function update_lastname () {
+                if ( ! l_trigger ) {
+                    $("#lastname_input").html ("<input type='text'"+
+                    " name='lastname_update' id='lname_textbox'/>");
+                    $("#lname_textbox").val ("{{ lastname }}");
+                }
+                l_trigger = true;
+                $("#update-btn").attr ("disabled",false);
+                $("#reset-btn").attr("disabled",false);
+            }
+            function update_email () {
+                if ( ! e_trigger ) {
+                    $("#email_input").html ("<input type='email'"+
+                    " name='email_update' id='email_textbox'/>");
+                    $("#email_textbox").val ("{{ email_id }}");
 
-                        }
-                        e_trigger = true;
-                        $("#update-btn").attr ("disabled",false);
+                }
+                e_trigger = true;
+                $("#update-btn").attr ("disabled",false);
+                $("#reset-btn").attr ("disabled",false);
 
-                    }
-                    $(document).ready (function () {
-                        $("#tr-firstname").hover ( 
-                            function () { 
-                                $("#i1").css("visibility","visible");
-                            },
-                            function () {
-                                $("#i1").css("visibility","hidden");
-                            }
-                        );
-                        $("#tr-lastname").hover (
-                            function () {
-                                $("#i2").css("visibility","visible");
-                            },
-                            function () {
-                                $("#i2").css("visibility","hidden");
-                            }
-                        );
-                        $("#tr-email").hover (
-                            function () {
-                                $("#i3").css("visibility","visible");
-                            },
-                            function () {
-                                $("#i3").css("visibility","hidden");
-                            }
-                        );
-                    });
-                </script>
+            }
+            function resetchanges () {
+                $("#firstname_input").html (" {{ firstname }}");
+                $("#lastname_input").html (" {{ lastname }}");
+                $("#email_input").html (" {{ email_id }}");
+                $("#update-btn").attr ("disabled",true);
+            }
+$(document).ready (function () {
+    $("#tr-firstname").hover ( 
+        function () { 
+            $("#i1").css("visibility","visible");
+        },
+        function () {
+            $("#i1").css("visibility","hidden");
+        }
+    );
+    $("#tr-lastname").hover (
+        function () {
+            $("#i2").css("visibility","visible");
+        },
+        function () {
+            $("#i2").css("visibility","hidden");
+        }
+    );
+    $("#tr-email").hover (
+        function () {
+            $("#i3").css("visibility","visible");
+        },
+        function () {
+            $("#i3").css("visibility","hidden");
+        }
+    );
+    $("#pw-tr").hover (
+        function () {
+            $("#i4").css("visibility","visible");
+        },
+        function () {
+            $("#i4").css ("visibility","hidden");
+        }
+    );
+
+});
+        </script>
     </body>
 </html>

@@ -52,7 +52,7 @@ def gcs_login_action ():
     pwval = request.form['password']
     qresult = GCSUser.query.filter_by (username=usernameval).first()
     if qresult is None:
-        return render_template ("gcsloginerr.html")
+        return render_template ("gcs_login.html",result="error")
     qpassword = qresult.password
     qsalt = qresult.salt
     if verify_password (qpassword,pwval,qsalt):
@@ -60,7 +60,7 @@ def gcs_login_action ():
         session['gcs_user'] = usernameval
         return redirect("/gcsportal",code=302)
     else:
-        return render_template ("gcsloginerr.html")
+        return render_template ("gcs_login.html", result="error")
 
 # show user profile and account settings
 @app.route ("/gcsuserprofile",methods=['POST','GET'])
@@ -75,11 +75,12 @@ def show_userprofile():
         return redirect ("/gcslogin",code=302)
 
 # Log out route
-@app.route ("/gcslogout",methods=['POST'])
+@app.route ("/gcslogout",methods=['POST','GET'])
 def gcs_logout():
-    if session ['gcs_logged_in']:
-        del session['gcs_user']
-        session['gcs_logged_in'] = False;
+    if 'gcs_logged_in' in session:
+        if session ['gcs_logged_in']:
+            del session['gcs_user']
+            session['gcs_logged_in'] = False;
     return redirect ("/", code=302)
 
 # GCS Sign up page route
@@ -101,7 +102,7 @@ def gcs_signup_action ():
         db.session.commit ()
         return redirect ("/gcslogin",code=302)
     else:
-        return render_template ("gcs_signup_err.html")
+        return render_template ("gcs_signup.html",result = "error")
 
 # POST route for editing GCS profile
 @app.route ("/gcsprofileedit",methods=['POST'])
@@ -135,6 +136,30 @@ def gcs_profile_edit ():
 
     db.session.commit()
     return redirect ("/gcsuserprofile",code=302)
+
+@app.route ("/updatepassword")
+def change_password ():
+    if 'gcs_logged_in' in session:
+        if session ['gcs_logged_in']:
+            return render_template ("changepassword.html")
+    else:
+        return redirect ("/gcslogin",code=302)
+
+@app.route ("/updatepassword_action",methods=['POST'])
+def update_password_action ():
+    if 'gcs_user' in session:
+        gcsuser = GCSUser.query.filter_by (username = session['gcs_user']).first()
+        gsalt = gcsuser.salt
+        oldpas = hash_password (request.form['old_password'],gsalt)
+        if oldpas == gcsuser.password:
+            newpas = hash_password (request.form['password'],gsalt)
+            gcsuser.password = newpas
+            db.session.commit()
+            return redirect ("/gcsuserprofile",code=302)
+        else:
+            return render_template ("changepassword_err.html")
+    else:
+        return redirect ("/gcslogin",code=302)
 
 # Test GET route to test API
 @app.route ("/api/v1/test")

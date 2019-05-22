@@ -1,3 +1,5 @@
+# Describes models for various entities in the GCS
+
 from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy ()
 
@@ -21,4 +23,18 @@ class GCSUser (db.Model):
 
     def __repr__ (self):
         return '<id {}>'.format (self.id)
+
+class Drone (db.Model):
+    __tablename__ = 'drones'
+    id = db.Column (db.Integer,primary_key = True)
+    drone_name = db.Column (db.String(), unique = True)
+    model = db.Column (db.String())
+    motor_count = db.Column (db.Integer)
+    battery_type = db.Column (db.String())
+
+    def __init__ (self,drone_name,model,motor_count,battery_type):
+        self.drone = drone
+        self.model = model
+        self.motor_count = motor_count
+        self.battery_type = battery_type
 

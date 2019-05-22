@@ -40,18 +40,26 @@
                             <div class="form-group">
                                 <input type="submit" name="submit" id="submit" class="btn
                                 btn-primary btn-outline-secondary" value="Sign in"/>
-                                <br><br>
-                                <a href="/gcssignup" class="btn btn-primary btn-outline-secondary">Register as new user</a>
-                                <!--form action="/gcssignup" method="post">
-                                    <br><br>
-                                    <input type="submit" name="signup" id="signup" class = "btn btn-primary
-                                    btn-outline-secondary" value="Register as new user"/>
-                                    </form-->
-                            </div>
                         </form>
+                        <form action="/gcssignup" method="get">
+                            <br><br>
+                            <input type="submit" name="signup" id="signup" class = "btn btn-primary
+                            btn-outline-secondary" value="Register as new user"/>
+                        </form>
+                            </div>
                     </div>
                 </div>
             </section>
         </div>
+        <script type="text/javascript">
+        $(document).ready ( function () {
+            var result = "{{ result }}";
+            console.log (result);
+            if ( result == "error" ) {
+                alert ("Incorrect username or password.");
+            }
+    });
+    
+    </script>
     </body>
 </html>

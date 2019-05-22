@@ -80,6 +80,13 @@
                     $("#submit").attr ("disabled",true);
                 }
             });
+$(document).ready (function () {
+    var result = "{{ result }}";
+    console.log (result);
+    if ( result == "error" ) {
+        alert (" This username already exists");
+    }
+});
         </script>
     </body>
 </html>
