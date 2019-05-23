@@ -137,14 +137,22 @@ def gcs_profile_edit ():
     db.session.commit()
     return redirect ("/gcsuserprofile",code=302)
 
+# Route for password change input form
 @app.route ("/updatepassword")
 def change_password ():
-    if 'gcs_logged_in' in session:
-        if session ['gcs_logged_in']:
+    err = False
+    if 'error' in request.args:
+        err = True
+        print ("ERRRRROOOORRR")
+    if 'gcs_logged_in' in session and session['gcs_logged_in']:
+        if err:
+            return render_template ("changepassword.html",result="error")
+        else:
             return render_template ("changepassword.html")
     else:
         return redirect ("/gcslogin",code=302)
 
+# Form action route for /updatepassword
 @app.route ("/updatepassword_action",methods=['POST'])
 def update_password_action ():
     if 'gcs_user' in session:
@@ -157,7 +165,7 @@ def update_password_action ():
             db.session.commit()
             return redirect ("/gcsuserprofile",code=302)
         else:
-            return render_template ("changepassword_err.html")
+            return redirect ("/updatepassword?error",code=302)
     else:
         return redirect ("/gcslogin",code=302)
 
