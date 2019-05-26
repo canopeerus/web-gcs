@@ -27,6 +27,7 @@ class GCSUser (db.Model):
 class Drone (db.Model):
     __tablename__ = 'drones'
     id = db.Column (db.Integer,primary_key = True)
+    drone_img_location = db.Column (db.String(), unique = True)
     drone_name = db.Column (db.String(), unique = True)
     model = db.Column (db.String())
     motor_count = db.Column (db.Integer)

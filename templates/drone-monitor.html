@@ -29,13 +29,13 @@
             <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2" id="navbarNavDropdown">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="/gcsportal">Home <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Job Tracker</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/dronemonitor">Drone Monitor</a>
+                        <a class="nav-link" href="#">Drone Monitor</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="https://www.redwinglabs.in/about">About Us</a>
@@ -56,5 +56,30 @@
                 </ul>
             </div>
         </nav>
+        <div id="no-msg" style="display:none;">
+            <br><br><br>
+            <h3 style="text-align:center;">
+                There is currently no information about any drone in the database!
+            </h3>
+        </div>
+        <div class="list-group">
+            {% for row in drones %}
+            <a href="#" class="list-group-item">
+                <img alt='drone_img_1' 
+                        src="{{ url_for('static',filename='images/{{ row[1] }}') }}"/> &nbsp; {{ row[0] }}</a>
+            {% endfor %}
+        </div>
+        <br><br>
+        <div class="container" style="text-align:center;">
+        <a href="/newdrone" class="btn btn-primary">Add new drone</a>
+        </div>
     </body>
+    <script>
+        var count = parseInt("{{ count }}");
+        $(document).ready (function() {
+            if ( count == 0 ) {
+                $("#no-msg").css("display","block");
+            }
+        });
+    </script>
 </html>

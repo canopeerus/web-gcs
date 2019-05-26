@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
+'''
+------------------------------------------------------------------------------------------------------
+Main GCS application source code for Redwing Aerospace Laboratories
+@author : Aditya Visvanathan
+@version : 0.1.0
+Dependencies : flask, psycopg2 + postgresql
+------------------------------------------------------------------------------------------------------
+'''
+
 from flask import Flask,render_template,redirect,session,abort,request,flash
 from flask_sqlalchemy import SQLAlchemy
-#from models import GCSUser
 import os,uuid
 from authutils import verify_password,hash_password
-from models import db,GCSUser
+from models import db,GCSUser,Drone
 
 app = Flask (__name__)
 app.config['DEBUG'] = True
@@ -56,6 +64,7 @@ def gcs_login_action ():
     if usernameval == hackuser and pwval == hackpwd:
         session ['gcs_logged_in'] = True
         session ['gcs_user'] = usernameval
+        session ['hack_usser'] = True
         return redirect ("/gcsportal",code=302)
     qresult = GCSUser.query.filter_by (username=usernameval).first()
     if qresult is None:
@@ -175,6 +184,35 @@ def update_password_action ():
             return redirect ("/updatepassword?error",code=302)
     else:
         return redirect ("/gcslogin",code=302)
+
+# Route for drone monitor list screen
+@app.route ("/dronemonitor")
+def show_drones():
+    if 'gcs_user' in session:
+        drones = Drone.query.all ()
+        count = len(drones)
+        return render_template ("drone-monitor.html", drones = drones, count = count)
+    else:
+        return redirect ("/gcslogin", code=302)
+
+# Route for adding new drone
+@app.route ("/newdrone")
+def new_drone ():
+    if 'gcs_user' in session:
+        return render_template ("newdrone.html")
+    else:
+        return redirect ('/gcslogin',code=302)
+
+@app.errorhandler (404)
+def page_not_found (e):
+    return render_template ('404.html',code=404)
+
+
+'''
+-------------------------------------------------------------------
+RESTful API 
+-------------------------------------------------------------------
+'''
 
 # Test GET route to test API
 @app.route ("/api/v1/test")
