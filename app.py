@@ -190,8 +190,13 @@ def update_password_action ():
 def show_drones():
     if 'gcs_user' in session:
         drones = Drone.query.all ()
+        drone_list = []
+        for x in drones:
+            y = [x.drone_name,x.model,x.motor_count,x.battery_type]
+            drone_list.append (y)
+
         count = len(drones)
-        return render_template ("drone-monitor.html", drones = drones, count = count)
+        return render_template ("drone-monitor.html", drones = drone_list, count = count)
     else:
         return redirect ("/gcslogin", code=302)
 
@@ -202,6 +207,20 @@ def new_drone ():
         return render_template ("newdrone.html")
     else:
         return redirect ('/gcslogin',code=302)
+
+@app.route ("/newdroneaction",methods=['POST'])
+def add_new_drone():
+    if 'gcs_user' in session:
+        drone = Drone (drone_name = request.form['droneName'],
+            model = request.form['droneModel'],
+            motor_count = request.form['motorCount'],
+            battery_type = request.form['batteryType'])
+        db.session.add (drone)
+        db.session.commit()
+        return redirect ('/dronemonitor',code=302)
+    else:
+        return redirect ("/gcslogin",code = 302)
+
 
 @app.errorhandler (404)
 def page_not_found (e):

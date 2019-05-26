@@ -27,14 +27,13 @@ class GCSUser (db.Model):
 class Drone (db.Model):
     __tablename__ = 'drones'
     id = db.Column (db.Integer,primary_key = True)
-    drone_img_location = db.Column (db.String(), unique = True)
     drone_name = db.Column (db.String(), unique = True)
     model = db.Column (db.String())
     motor_count = db.Column (db.Integer)
     battery_type = db.Column (db.String())
 
     def __init__ (self,drone_name,model,motor_count,battery_type):
-        self.drone = drone
+        self.drone_name = drone_name
         self.model = model
         self.motor_count = motor_count
         self.battery_type = battery_type
