@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>Redwing GCS</title>
+        <title>Deployment/Job Tracker</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -18,7 +18,23 @@
         <!--Load page specific CSS-->
         <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
+        
+        <!--Airmap/Mapbox stuff-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+        <script src="https://cdn.airmap.io/js/contextual-airspace/v1.0/airmap.contextual-airspace-plugin.min.js" async=false defer=false></script>       
+        <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.js"></script>
+        <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.css" rel="stylesheet" />
+        <style>
+            body { margin: 0; padding: 0; }
+            .map {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                right: 0;
+            }
+        </style>
+ 
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -38,7 +54,7 @@
                         <a class="nav-link" href="#">Incidents</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/jobtracker">Job Tracker</a>
+                        <a class="nav-link" href="#">Job Tracker</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/dronemonitor">Fleet Monitor</a>
@@ -52,15 +68,54 @@
                 <ul class="navbar-nav ml-auto dropdown-menu-right"> 
                     <li class="nav-item dropdown ml-auto">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-user"></i>
+                            <i class="fas fa-user"></i>
                         </a>
                         <div class="dropdown-menu dropdowm-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                            <a href="/gcsuserprofile" class="dropdown-item"><i class="fas fa-user-cog"></i> Account Settings</a>
+                            <a href="/gcsuserprofile" class="dropdown-item"><i class="fas fa-user-cog"></i> Aclength Settings</a>
                             <a href="/gcslogout" class="dropdown-item"><i class="fas fa-sign-out-alt"></i>Log out</a>
                         </div>
                     </li>
                 </ul>
             </div>
         </nav>
+        <div id="map" class="map"></div>
+        <div class="dcontainer">
+            <div id="no-msg" style="display:none">
+                <br><br>
+                <h4 style="text-align:center;">No deployments in database</h4>
+            </div>
+            <table id='jobtable' class='table table-hover'>
+                <thead id='thead' style='display:none;'>
+                    <tr>
+                        <th></th>
+                        <th>Date</th>
+                        <th>Drop Point</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in deployments %}
+                    <tr class="clickable-row" id="{{ row[2] }}">
+                        <td><input type='checkbox' id="checkbox_{{ row[2] }}"/></td>
+                        {% for item in row %}
+                        <td>{{ item }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+            <script>
+                $(document).ready (function() {
+                    var length = parseInt("{{ length }}");
+                    console.log ("length = "+length);
+                    if ( length == 0 ) {
+                        $("#no-msg").css("display","block");
+                    }
+                    else {
+                        $("#thead").css ("display","table-header-group");
+                    }
+                });
+
+            </script>
     </body>
 </html>

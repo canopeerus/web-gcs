@@ -12,7 +12,7 @@ from flask import Flask,render_template,redirect,session,abort,request,flash
 from flask_sqlalchemy import SQLAlchemy
 import os,uuid
 from authutils import verify_password,hash_password
-from models import db,GCSUser,Drone
+from models import db,GCSUser,Drone,Job,Payload
 
 app = Flask (__name__)
 app.config['DEBUG'] = True
@@ -181,6 +181,7 @@ def update_password_action ():
     else:
         return redirect ("/gcslogin",code=302)
 
+
 # Route for drone monitor list screen
 @app.route ("/dronemonitor")
 def show_drones():
@@ -216,6 +217,32 @@ def add_new_drone():
         return redirect ('/dronemonitor',code=302)
     else:
         return redirect ("/gcslogin",code = 302)
+
+
+@app.route ("/droneview")
+def individual_drone ():
+    if 'gcs_user' in session:
+        if 'drone' not in request.args:
+            return "<h2>The given request was not understood correctly</h2>"
+        r_drone_name = request.args.get('drone')
+        drone_instance = Drone.query.filter_by (drone_name = r_drone_name).first()
+        return drone_instance.drone_name + drone_instance.model
+
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+@app.route ("/jobtracker")
+def show_jobs ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        jobs = Job.query.all()
+        jobslist = []
+        for job in jobs:
+            jobslist.append ([job.date,job.location_dest_string])
+        count = len(jobs)
+        return render_template ("jobs.html", deployments = jobslist, length = count)
+    else:
+        return redirect ('/gcslogin',code = 302)
+            
 
 
 @app.errorhandler (404)

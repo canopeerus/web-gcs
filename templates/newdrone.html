@@ -32,7 +32,13 @@
                         <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Job Tracker</a>
+                        <a class="nav-link" href="#">Map</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Incidents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/jobtracker">Job Tracker</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/dronemonitor">Fleet Monitor</a>
@@ -60,22 +66,23 @@
             <br><br>
             <h2 style="text-align:center;">Details for New Drone</h2>
             <br><br>
+            <div style="text-align:center;">
             <form id="newdrone-form" action="/newdroneaction" method="POST">
                 <div class="form-group">
-                    <label for="droneName">Drone Name</label>
-                    <input type="text" required name="droneName" id="droneName" placeholder="dronexyz"/>
+                    <!--label for="droneName">Drone Name</label-->
+                    <input type="text" required name="droneName" id="droneName" placeholder="Drone Name"/>
                 </div>
                 <div class="form-group">
-                    <label for="droneModel">Drone Model</label>
-                    <input type="text" required name='droneModel' id='droneModel'/>
+                    <!--label for="droneModel">Drone Model</label-->
+                    <input type="text" required name='droneModel' id='droneModel' placeholder="Drone Model"/>
                 </div>
                 <div class="form-group">
-                    <label for='motorCount'>Motor Count</label>
-                    <input type="text" required name='motorCount' id='motorCount'/>
+                    <!--label for='motorCount'>Motor Count</label-->
+                    <input type="text" required name='motorCount' id='motorCount' placeholder="Motor Count"/>
                 </div>
                 <div class="form-group">
-                    <label for='batteryType'>Battery Type</label>
-                    <input type='text' required name='batteryType' id='batteryType'/>
+                    <!--label for='batteryType'>Battery Type</label-->
+                    <input type='text' required name='batteryType' id='batteryType' placeholder="Battery Type"/>
                 </div>
                 <div class="form-group" style="text-align:center;">
                     <input type="submit" class="btn btn-primary" value="Submit"/>

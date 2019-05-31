@@ -32,7 +32,13 @@
                         <a class="nav-link" href="/gcsportal">Home <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Job Tracker</a>
+                        <a class="nav-link" href="#">Map</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Incidents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/jobtracker">Job Tracker</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Fleet Monitor</a>
@@ -89,7 +95,6 @@
         <div class="container" style="text-align:center;">
         <a href="/newdrone" class="btn btn-primary">Add new drone</a>
         </div>
-    </body>
     <script>
         var count = parseInt("{{ count }}");
         $(document).ready (function() {
@@ -102,9 +107,11 @@
         });
         
         $("#dronetable").find ('tr').click ( function() {
-            alert ("You clicked " + ($(this).attr("id")));
+            window.location.href = '/droneview?drone='+($(this).attr("id"));
+            //alert ("You clicked " + ($(this).attr("id")));
         });
 
 
     </script>
+    </body>
 </html>
