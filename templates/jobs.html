@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
 
         <!--Load page specific CSS-->
-        <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/jobtrack.css') }}"/>
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         
         <!--Airmap/Mapbox stuff-->
@@ -78,8 +78,11 @@
                 </ul>
             </div>
         </nav>
-        <div id="map" class="map"></div>
-        <div class="dcontainer">
+        <!--div id="map" class="map"></div-->
+        <div class="lcontainer">
+            <div class="job-topbar">
+                <i class="fas fa-plus-circle"></i>
+            </div>
             <div id="no-msg" style="display:none">
                 <br><br>
                 <h4 style="text-align:center;">No deployments in database</h4>
@@ -103,6 +106,9 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+        <div class="rcontainer">
+            I'm on the right
         </div>
             <script>
                 $(document).ready (function() {
