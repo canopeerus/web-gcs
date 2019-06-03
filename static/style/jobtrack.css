@@ -3,6 +3,13 @@ html, body {
     font-family:Roboto;
 }
 
+.topbaricon { 
+    font-size:2em;
+}
+.hidden {
+    display:none;
+}
+
 div.shadowborder {
     height:100%;
     box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
@@ -20,3 +27,8 @@ div.shadowborder {
     position:relative;
     margin:auto;
 }
+
+.fa-times {
+    visibility:hidden;
+}
+

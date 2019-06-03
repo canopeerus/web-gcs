@@ -51,7 +51,7 @@ body { margin: 0; padding: 0; }
                                     <a class="nav-link" href="/gcsportal">Home<span class="sr-only">(current)</span></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="#">Map</a>
+                                    <a class="nav-link" href="/map">Map</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="#">Incidents</a>
@@ -83,10 +83,18 @@ body { margin: 0; padding: 0; }
         </div>
 
         <!--div id="map" class="map"></div-->
-        <div class="container">
-            <div class="container">     
+        <div class="container-fluid">
+            <div class="container-fluid">     
                 <div class="row">
                     <div class="col-sm-6 shadowborder">
+                        <div class="job-topbar">
+                            <a href='/newdeployment'>
+                                <i class="fas fa-plus-circle topbaricon"></i>
+                            </a> &nbsp;&nbsp;&nbsp;
+                            <a href='/deletedeployment'>
+                                <i class="fas fa-times topbaricon hidden"></i>
+                            </a> <br>
+                        </div>
                         <div id="no-msg" style="display:none;">
                             <br>
                             <br>

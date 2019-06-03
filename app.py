@@ -205,6 +205,7 @@ def new_drone ():
     else:
         return redirect ('/gcslogin',code=302)
 
+# New drone input form action route
 @app.route ("/newdroneaction",methods=['POST'])
 def add_new_drone():
     if 'gcs_user' in session:
@@ -219,6 +220,7 @@ def add_new_drone():
         return redirect ("/gcslogin",code = 302)
 
 
+# View particular drone
 @app.route ("/droneview")
 def individual_drone ():
     if 'gcs_user' in session:
@@ -231,6 +233,15 @@ def individual_drone ():
     else:
         return redirect ('/gcslogin',code = 302)
 
+# Map action
+@app.route ('/map')
+def show_map ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        return render_template ('maps.html')
+    else:
+        return redirect ('/gcslogin',code=302)
+
+# Deployment/job tracker
 @app.route ("/jobtracker")
 def show_jobs ():
     if 'gcs_user' in session and session['gcs_logged_in']:
@@ -243,7 +254,18 @@ def show_jobs ():
     else:
         return redirect ('/gcslogin',code = 302)
             
+# Form page for adding new job
+@app.route ("/newdeployment")
+def new_job ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        drones = Drone.query.all()
+        droneslist = []
+        for x in drones:
+            droneslist.append ([x.drone_name,x.id])
 
+        return render_template ('newjob.html',drones = droneslist)
+    else:
+        return redirect ('/gcslogin',code = 302)
 
 @app.errorhandler (404)
 def page_not_found (e):
