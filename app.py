@@ -248,7 +248,7 @@ def show_jobs ():
         jobs = Job.query.all()
         jobslist = []
         for job in jobs:
-            jobslist.append ([job.date,job.location_dest_string])
+            jobslist.append ([job.date,job.location_dest_string,job.status])
         count = len(jobs)
         return render_template ("jobs.html", deployments = jobslist, length = count)
     else:
@@ -266,6 +266,18 @@ def new_job ():
         return render_template ('newjob.html',drones = droneslist)
     else:
         return redirect ('/gcslogin',code = 302)
+
+@app.route ('/newjobform',methods=['POST'])
+def new_job_formaction ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        date_sel = request.form.get ('date')
+        time_sel = request.form.get ('time')
+        drone_id = int(str (request.form.get ('drone_select')))
+
+        return "Deployment acknowledged! Not added to database (Work in Progress)"
+    else:
+        return redirect ('/gcslogin',code = 302)
+
 
 @app.errorhandler (404)
 def page_not_found (e):
