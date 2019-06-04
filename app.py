@@ -16,7 +16,7 @@ from models import db,GCSUser,Drone
 
 app = Flask (__name__)
 app.config['DEBUG'] = True
-app.config['SECRET_KEY'] = os.urandom (24)
+app.config['SECRET_KEY'] = b'\xad]\xb8\xcf\x85\xe0\x0cp\xecf\x8ez\x86\x9d\x16%\xa5F\x08\x9c\xb6\x11\xc2\x86'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 POSTGRES = {
         'user': 'postgres',
