@@ -111,7 +111,7 @@
                 <div class="vmap" id='vmap'>
                 </div>
                 <div class="form-group">
-                    <input type='submit' class='btn-default' value='Submit'>
+                    <input type='submit' class='btn btn-default' value='Submit'>
                 </div>
             </form>
         </div>
@@ -158,81 +158,74 @@
                 var map = new mapboxgl.Map ({
                     container:'vmap',
                     style:'https://api.airmap.io/maps/v4/tilejson/airports_recreational,class_b?apikey='+AIRMAP_API_KEY+'&theme=standard',
-                    zoom:1,
+                    zoom:10,
                     center:[lon,lat]
                 });
-                map.addControl (new mapboxgl.NavigationControl());
-                var size = 200;
-                var pulsingDot = {
-					width: size,
-					height: size,
-					data: new Uint8Array(size * size * 4),
- 
-					onAdd: function() {
-						var canvas = document.createElement('canvas');
-						canvas.width = this.width;
-						canvas.height = this.height;
-						this.context = canvas.getContext('2d');
-					},
- 
-					render: function() {
-						var duration = 1000;
-						var t = (performance.now() % duration) / duration;
- 
-						var radius = size / 2 * 0.3;
-						var outerRadius = size / 2 * 0.7 * t + radius;
-						var context = this.context;
- 
-						// draw outer circle
-						context.clearRect(0, 0, this.width, this.height);
-						context.beginPath();
-						context.arc(this.width / 2, this.height / 2, outerRadius, 0, Math.PI * 2);
-						context.fillStyle = 'rgba(255, 200, 200,' + (1 - t) + ')';
-						context.fill();
- 
-						// draw inner circle
-						context.beginPath();
-						context.arc(this.width / 2, this.height / 2, radius, 0, Math.PI * 2);
-						context.fillStyle = 'rgba(255, 100, 100, 1)';
-						context.strokeStyle = 'white';
-						context.lineWidth = 2 + 4 * (1 - t);
-						context.fill();
-						context.stroke();
- 
-						// update this image's data with data from the canvas
-						this.data = context.getImageData(0, 0, this.width, this.height).data;
- 
-						// keep the map repainting
-						map.triggerRepaint();
- 
-						// return `true` to let the map know that the image was updated
-						return true;
-					}
-				};
-                map.on ('load',function () {
-                    map.addImage('pulsing-dot', pulsingDot, { pixelRatio: 2 });
-                    map.addLayer ({
-                        "id":"points",
-                        "type":"symbol",
-                        "source": {
-                            "type":"geojson",
-                            "data":{
-                                "type":"FeatureCollection",
-                                "features": [{
-                                    "type":"Feature",
-                                    "geometry": {
-                                        "type":"Point",
-                                        "coordinates":[lon,lat]
-                                    }
-                                }]
-                            }
-                        },
-                        "layout": {
-                            "icon-image": "pulsing-dot"
-                        }
-                        });
-                    });
+                var framesPerSecond = 15; 
+var initialOpacity = 1
+var opacity = initialOpacity;
+var initialRadius = 8;
+var radius = initialRadius;
+var maxRadius = 18;
 
+map.on('load', function () {
+
+    // Add a source and layer displaying a point which will be animated in a circle.
+    map.addSource('point', {
+        "type": "geojson",
+        "data": {
+            "type": "Point",
+            "coordinates": [
+                lon, lat
+            ]
+        }
+    });
+
+    map.addLayer({
+        "id": "point",
+        "source": "point",
+        "type": "circle",
+        "paint": {
+            "circle-radius": initialRadius,
+            "circle-radius-transition": {duration: 0},
+            "circle-opacity-transition": {duration: 0},
+            "circle-color": "#007cbf"
+        }
+    });
+
+    map.addLayer({
+        "id": "point1",
+        "source": "point",
+        "type": "circle",
+        "paint": {
+            "circle-radius": initialRadius,
+            "circle-color": "#007cbf"
+        }
+    });
+
+
+    function animateMarker(timestamp) {
+        setTimeout(function(){
+            requestAnimationFrame(animateMarker);
+
+            radius += (maxRadius - radius) / framesPerSecond;
+            opacity -= ( .9 / framesPerSecond );
+
+            map.setPaintProperty('point', 'circle-radius', radius);
+            map.setPaintProperty('point', 'circle-opacity', opacity);
+
+            if (opacity <= 0) {
+                radius = initialRadius;
+                opacity = initialOpacity;
+            } 
+
+        }, 1000 / framesPerSecond);
+        
+    }
+
+    // Start the animation.
+    animateMarker(0);
+});
 	}
     </script>
     </body>
