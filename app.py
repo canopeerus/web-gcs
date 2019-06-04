@@ -12,7 +12,7 @@ from flask import Flask,render_template,redirect,session,abort,request,flash
 from flask_sqlalchemy import SQLAlchemy
 import os,uuid
 from authutils import verify_password,hash_password
-from models import db,GCSUser,Drone
+from models import db,GCSUser,Drone,Job,Payload
 
 app = Flask (__name__)
 app.config['DEBUG'] = True
@@ -181,6 +181,7 @@ def update_password_action ():
     else:
         return redirect ("/gcslogin",code=302)
 
+
 # Route for drone monitor list screen
 @app.route ("/dronemonitor")
 def show_drones():
@@ -204,6 +205,7 @@ def new_drone ():
     else:
         return redirect ('/gcslogin',code=302)
 
+# New drone input form action route
 @app.route ("/newdroneaction",methods=['POST'])
 def add_new_drone():
     if 'gcs_user' in session:
@@ -217,6 +219,53 @@ def add_new_drone():
     else:
         return redirect ("/gcslogin",code = 302)
 
+
+# View particular drone
+@app.route ("/droneview")
+def individual_drone ():
+    if 'gcs_user' in session:
+        if 'drone' not in request.args:
+            return "<h2>The given request was not understood correctly</h2>"
+        r_drone_name = request.args.get('drone')
+        drone_instance = Drone.query.filter_by (drone_name = r_drone_name).first()
+        return drone_instance.drone_name + drone_instance.model
+
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+# Map action
+@app.route ('/map')
+def show_map ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        return render_template ('maps.html')
+    else:
+        return redirect ('/gcslogin',code=302)
+
+# Deployment/job tracker
+@app.route ("/jobtracker")
+def show_jobs ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        jobs = Job.query.all()
+        jobslist = []
+        for job in jobs:
+            jobslist.append ([job.date,job.location_dest_string])
+        count = len(jobs)
+        return render_template ("jobs.html", deployments = jobslist, length = count)
+    else:
+        return redirect ('/gcslogin',code = 302)
+            
+# Form page for adding new job
+@app.route ("/newdeployment")
+def new_job ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        drones = Drone.query.all()
+        droneslist = []
+        for x in drones:
+            droneslist.append ([x.drone_name,x.id])
+
+        return render_template ('newjob.html',drones = droneslist)
+    else:
+        return redirect ('/gcslogin',code = 302)
 
 @app.errorhandler (404)
 def page_not_found (e):

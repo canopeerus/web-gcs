@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+        <!--Set title-->
+        <title>GCS Live Map</title>
+
+        <!--Load local jquery and bootstrap min js-->
+        <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+
+        <!--Load bootstrap css-->
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
+
+        <!--Load page specific CSS-->
+        <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+        <script src="https://cdn.airmap.io/js/contextual-airspace/v1.0/airmap.contextual-airspace-plugin.min.js" async=false defer=false></script>       
+        <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.js"></script>
+        <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.css" rel="stylesheet" />
+        <style>
+            body { margin: 0; padding: 0; }
+            .map {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                right: 0;
+            }
+        </style>
+ 
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="https://redwinglabs.in"><img height='45' width='120' src="{{ url_for('static',filename='images/redwing-logo-current.png') }}" alt='redwing_logo'/></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2" id="navbarNavDropdown">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Map</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Incidents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Job Tracker</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dronemonitor">Fleet Monitor</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.redwinglabs.in/about">About Us</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+                <ul class="navbar-nav ml-auto dropdown-menu-right"> 
+                    <li class="nav-item dropdown ml-auto">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user"></i>
+                        </a>
+                        <div class="dropdown-menu dropdowm-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                            <a href="/gcsuserprofile" class="dropdown-item"><i class="fas fa-user-cog"></i> Account Settings</a>
+                            <a href="/gcslogout" class="dropdown-item"><i class="fas fa-sign-out-alt"></i>Log out</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div id="map" class="map"></div>
+        <!--div class="dcontainer">
+            <div id="no-msg" style="display:none">
+                <h3 style="text-align:center;">No deployments in database</h3>
+            </div>
+            <table id='jobtable' class='table table-hover'>
+                <thead id='thead' style='display:none;'>
+                    <tr>
+                        <th></th>
+                        <th>Date</th>
+                        <th>Drop Point</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in deployments %}
+                    <tr class="clickable-row" id="{{ row[2] }}">
+                        <td><input type='checkbox' id="checkbox_{{ row[2] }}"/></td>
+                        {% for item in row %}
+                        <td>{{ item }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div-->
+            <script>
+                const AIRMAP_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHxKZ1FseEV6aDNhWFh2TENvZU1Za1JUeXFiZDJhIiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxHeGFZNTVxdFo4ZUE3Q1hBUEV3a2NuZ2RNTVEiLCJvcmdhbml6YXRpb25faWQiOiJkZXZlbG9wZXJ8S1ltUUd5WGZSd1o5MkxIZ2VaeG9SU0FHUkdQMyIsImlhdCI6MTU1OTI5MTAwNn0.f5BBtwQwuCNuiqDSQD3rQdNOfilmRzpcFYoDqXDYlTs'
+                const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw'
+
+                if (AIRMAP_API_KEY && MAPBOX_ACCESS_TOKEN) {
+                    mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
+                    const map = new mapboxgl.Map({
+                        container: 'map',
+                        style: 'mapbox://styles/mapbox/streets-v8',
+                        center: [-118.496475, 34.024212],
+                        zoom: 13
+                })
+
+                } else {
+                    console.error(
+                        'Missing AIRMAP_API_KEY or MAPBOX_ACCESS_TOKEN. ' +
+                        'These are required for developing locally.\n\n' +
+                        'Please save these values in localStorage by entering the following in your browser console:\n\n' +
+                        'localStorage.setItem(\'AIRMAP_API_KEY\', \'<your_key>\');\n' +
+                        'localStorage.setItem(\'MAPBOX_ACCESS_TOKEN\', \'<your_token>\');\n\n'
+                    );
+                }
+        </script>
+    </body>
+</html>
