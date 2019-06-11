@@ -35,6 +35,7 @@
                                 <div class="form-group">
                                     <label for="password">Password</label>
                                     <input type="password" class="form-control" name="password" id="password" required/>
+                                    <span id="error" style="visibility:hidden;color:red;">Incorrect login credentials</span>
                                 </div>
                             <!--/div-->
                             <div class="form-group">
@@ -56,7 +57,7 @@
             var result = "{{ result }}";
             console.log (result);
             if ( result == "error" ) {
-                alert ("Incorrect username or password.");
+                $("#error").css('visibility','visible');
             }
     });
     

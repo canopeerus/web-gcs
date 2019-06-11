@@ -46,6 +46,7 @@
                         <!--div class="form-row"-->
                             <div class="form-group">
                                 <input type="text" class="form-control" name="username" id="username" required placeholder="USERNAME"/>
+                                <span id="error" style="visibility:hidden;color:red;">This username is taken.Please choose a different one.</span>
                             </div>
                         <!--/div-->
                         <!--div class="form-row"-->
@@ -83,7 +84,7 @@ $(document).ready (function () {
     var result = "{{ result }}";
     console.log (result);
     if ( result == "error" ) {
-        alert (" This username already exists");
+        $("#error").css('visibility','visible');
     }
 });
         </script>
