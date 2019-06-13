@@ -10,14 +10,20 @@ Dependencies : flask, psycopg2 + postgresql
 
 from flask import Flask,render_template,redirect,session,abort,request,flash
 from flask_sqlalchemy import SQLAlchemy
-import os,uuid
+from datetime import datetime
+import os,uuid,visualise
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
+
+UPLOADS_FOLDER = 'uploads/'
+ALLOWED_LOGS_EXTENSIONS = set (['csv'])
 
 app = Flask (__name__)
 app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = b'\xad]\xb8\xcf\x85\xe0\x0cp\xecf\x8ez\x86\x9d\x16%\xa5F\x08\x9c\xb6\x11\xc2\x86'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['UPLOAD_FOLDER'] = UPLOADS_FOLDER
+
 POSTGRES = {
         'user': 'postgres',
         'pw': 'redwingpostgres',
@@ -34,8 +40,10 @@ db.init_app (app)
 db.create_all ()
 db.session.commit ()
 
-hackuser = 'arjun'
-hackpwd = 'password'
+
+def allowed_file (filename):
+    return '.' in filename and \
+            filename.rsplit ('.',1)[1].lower() in ALLOWED_LOGS_EXTENSIONS
 
 @app.route ('/')
 def homepage ():
@@ -241,6 +249,36 @@ def show_map ():
     else:
         return redirect ('/gcslogin',code=302)
 
+# Visualisations/plot from arjun
+@app.route ('/logplotter')
+def visualize_logs_input ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        return render_template ('visualize_input.html')
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+@app.route ('/visualizefile',methods=['GET','POST'])
+def visualize_logs ():
+    if request.method == 'POST':
+        if 'gcs_user' in session and session['gcs_logged_in']:
+            if not 'file' in request.files:
+                return 'error:no file'
+            inputfile = request.files.get ('file')
+            if allowed_file (inputfile.filename):
+                filename = inputfile.filename
+                outpath = os.path.join (app.config['UPLOAD_FOLDER'],filename)
+                inputfile.save (outpath)
+                visualise.rvisualize (outpath,'static/images/plot.png')
+                os.path.remove (outpath)
+                return render_template ('visualize_input.html',image = 'plot.png')
+            else:
+                return "Invalid file format"
+        else:
+            return redirect ('/gcslogin',code = 302)
+        return "done"
+    else:
+        return redirect ('/gcsportal',code = 302)
+
 # Deployment/job tracker
 @app.route ("/jobtracker")
 def show_jobs ():
@@ -272,9 +310,20 @@ def new_job_formaction ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         date_sel = request.form.get ('date')
         time_sel = request.form.get ('time')
+        datetime_sel = datetime.strptime (date_sel + ' ' + time_sel, '%Y-%m-%d %I:%M %p')
         drone_id = int(str (request.form.get ('drone_select')))
-
-        return "Deployment acknowledged! Not added to database (Work in Progress)"
+        location_origin_lat_sel = request.form.get ('origin-lat')
+        location_origin_lon_sel = request.form.get ('origin-lon')
+        location_dest_lat_sel = request.form.get ('dest-lat')
+        location_dest_lon_sel = request.form.get ('dest-lon')
+        job_instance = Job (date_sel,drone_id,location_origin_lat_sel,
+                location_origin_lon_sel,location_dest_lat_sel,location_dest_lon_sel,1)
+        return "Deployment input detected! Database in progress(payloads unavailable)"
+        '''
+        db.session.add (job_instance)
+        db.session.commit()
+        return redirect ('/jobtracker',code = 302)
+        '''
     else:
         return redirect ('/gcslogin',code = 302)
 
