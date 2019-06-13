@@ -15,7 +15,7 @@ import os,uuid,visualise
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
 
-UPLOADS_FOLDER = 'uploads/'
+UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])
 
 app = Flask (__name__)
