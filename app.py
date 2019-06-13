@@ -8,10 +8,10 @@ Dependencies : flask, psycopg2 + postgresql
 ------------------------------------------------------------------------------------------------------
 '''
 
-from flask import Flask,render_template,redirect,session,abort,request,flash
+from flask import Flask,render_template,redirect,session,abort,request,flash,url_for,send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import os,uuid,visualise
+import os,uuid,visualise,shutil
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
 
@@ -40,6 +40,9 @@ db.init_app (app)
 db.create_all ()
 db.session.commit ()
 
+@app.route ('/image/<path:filename>')
+def download_file (filename):
+	return send_from_directory (app.config["UPLOAD_FOLDER"],filename, as_attachment=True)
 
 def allowed_file (filename):
     return '.' in filename and \
@@ -270,7 +273,7 @@ def visualize_logs ():
                 imgpath = os.path.join (app.config['UPLOAD_FOLDER'],'plot.png')
                 inputfile.save (outpath)
                 visualise.rvisualize (outpath,imgpath)
-                os.path.remove (outpath)
+                os.remove (outpath)
                 return render_template ('visualize_input.html',image = 'plot.png')
             else:
                 return "Invalid file format"
