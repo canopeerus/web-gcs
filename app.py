@@ -267,8 +267,9 @@ def visualize_logs ():
             if allowed_file (inputfile.filename):
                 filename = inputfile.filename
                 outpath = os.path.join (app.config['UPLOAD_FOLDER'],filename)
+                imgpath = os.path.join (app.config['UPLOAD_FOLDER'],'plot.png')
                 inputfile.save (outpath)
-                visualise.rvisualize (outpath,'static/images/plot.png')
+                visualise.rvisualize (outpath,imgpath)
                 os.path.remove (outpath)
                 return render_template ('visualize_input.html',image = 'plot.png')
             else:
