@@ -269,6 +269,7 @@ def visualize_logs ():
                 outpath = os.path.join (app.config['UPLOAD_FOLDER'],filename)
                 inputfile.save (outpath)
                 visualise.rvisualize (outpath,'static/images/plot.png')
+                os.path.remove (outpath)
                 return render_template ('visualize_input.html',image = 'plot.png')
             else:
                 return "Invalid file format"
