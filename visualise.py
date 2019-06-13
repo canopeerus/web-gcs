@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-matplotlib.use ('Agg')
 import seaborn as sb
 sb.set()
 
