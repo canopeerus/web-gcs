@@ -22,7 +22,11 @@ app = Flask (__name__)
 app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = b'\xad]\xb8\xcf\x85\xe0\x0cp\xecf\x8ez\x86\x9d\x16%\xa5F\x08\x9c\xb6\x11\xc2\x86'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-app.config['UPLOAD_FOLDER'] = UPLOADS_FOLDER
+
+if os.environ['ENV'] == 'prod'
+    app.config['UPLOAD_FOLDER'] = "uploads/"
+else:
+    app.config['UPLOAD_FOLDER'] = UPLOADS_FOLDER
 
 POSTGRES = {
         'user': 'postgres',
