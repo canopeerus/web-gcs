@@ -15,7 +15,7 @@ import os,uuid,visualise
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
 
-UPLOADS_FOLDER = '/home/canopy/'
+UPLOADS_FOLDER = 'uploads/'
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])
 
 app = Flask (__name__)
