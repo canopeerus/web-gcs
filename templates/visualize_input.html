@@ -103,7 +103,7 @@
             var img = "{{ image }}";
             if ( img != '' ) {
                 $("#img-container").css("display","block");
-                $("#plotimg").attr ("src","{{ url_for('static',filename='images/plot.png') }}");
+                $("#plotimg").attr ("src","{{ url_for('uploads',filename='plot.png') }}");
             }
         });
     </script>
