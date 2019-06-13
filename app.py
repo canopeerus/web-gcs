@@ -16,6 +16,7 @@ from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
 
 UPLOADS_FOLDER = '/home/canopy/'
+ALLOWED_LOGS_EXTENSIONS = set (['csv'])
 
 app = Flask (__name__)
 app.config['DEBUG'] = True
@@ -39,6 +40,10 @@ db.init_app (app)
 db.create_all ()
 db.session.commit ()
 
+
+def allowed_file (filename):
+    return '.' in filename and \
+            filename.rsplit ('.',1)[1].lower() in ALLOWED_LOGS_EXTENSIONS
 
 @app.route ('/')
 def homepage ():
@@ -259,16 +264,19 @@ def visualize_logs ():
             if not 'file' in request.files:
                 return 'error:no file'
             inputfile = request.files.get ('file')
-            filename = inputfile.filename
-            outpath = os.path.join (app.config['UPLOAD_FOLDER'],filename)
-            inputfile.save (outpath)
-            visualise.rvisualize (outpath,'static/images/plot.png')
-            return render_template ('visualize_input.html',image = 'plot.png')
+            if allowed_file (inputfile.filename):
+                filename = inputfile.filename
+                outpath = os.path.join (app.config['UPLOAD_FOLDER'],filename)
+                inputfile.save (outpath)
+                visualise.rvisualize (outpath,'static/images/plot.png')
+                return render_template ('visualize_input.html',image = 'plot.png')
+            else:
+                return "Invalid file format"
         else:
             return redirect ('/gcslogin',code = 302)
         return "done"
     else:
-        return redirect ('/gcslogin',code = 302)
+        return redirect ('/gcsportal',code = 302)
 
 # Deployment/job tracker
 @app.route ("/jobtracker")
