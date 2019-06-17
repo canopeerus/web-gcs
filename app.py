@@ -11,7 +11,7 @@ Dependencies : flask, psycopg2 + postgresql
 from flask import Flask,render_template,redirect,session,abort,request,flash,url_for,send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import os,uuid,visualise,shutil
+import os,uuid,visualise,shutil,time
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
 
@@ -60,10 +60,10 @@ def homepage ():
 # Main GCS Page route, redirects to 'gcslogin' if not logged in
 @app.route ("/gcsportal",methods=['GET','POST'])
 def gcs_home():
-    if not session.get ('gcs_logged_in'):
-        return redirect("/gcslogin",code=302)
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        return render_template ('gcshome.html')
     else:
-        return render_template("gcshome.html")
+        return redirect ('/gcslogin',code = 302)
 
 # GCS Login page route
 @app.route ("/gcslogin")
@@ -260,7 +260,7 @@ def show_map ():
 @app.route ('/logplotter')
 def visualize_logs_input ():
     if 'gcs_user' in session and session['gcs_logged_in']:
-        return render_template ('visualize_input.html')
+        return render_template ('visualize_input.html',parameters = visualise.params_list)
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -273,12 +273,16 @@ def visualize_logs ():
             inputfile = request.files.get ('file')
             if allowed_file (inputfile.filename):
                 filename = inputfile.filename
+                s_param = request.form.get ('para_select')
                 outpath = os.path.join (app.config['UPLOAD_FOLDER'],filename)
                 imgpath = os.path.join (app.config['UPLOAD_FOLDER'],'plot.png')
                 inputfile.save (outpath)
-                visualise.rvisualize (outpath,imgpath)
-                os.remove (outpath)
-                return render_template ('visualize_input.html',image = 'plot.png')
+                ret_val = visualise.rvisualize (outpath,imgpath,param = s_param)
+                if ret_val == 0:
+                    os.remove (outpath)
+                    image = 'plot.png'
+                    return render_template ('visualize_input.html',
+                            image = image,parameters = visualise.params_list)
             else:
                 return "Invalid file format"
         else:

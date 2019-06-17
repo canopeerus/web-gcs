@@ -10,11 +10,13 @@ def convert_time(s):
     return pd.datetools.timedelta(hours=h, minutes=m, seconds=s)
 
 
-def rvisualize (filename,outfile):
+params_list = ['Date','time','roll','pitch','yaw','airspeed','groundspeed','alt','hdg','climb','xac','yac','zac','xmag','ymag','zmag','lat','lon','raw_alt','direction','speed']
+
+def rvisualize (filename,outfile,param):
     data = pd.read_csv(filename,converters={'split':convert_time})
 
     #data=pd.read_csv('jakkur-loiter-test-sim10x.csv', sep=',',header=None,parse_dates=[0])
-    data.columns = ['Date','time','roll','pitch','yaw','airspeed','groundspeed','alt','hdg','climb','xac','yac','zac','xmag','ymag','zmag','lat','lon','raw_alt','direction','speed']
+    data.columns = params_list
     data = data.drop(data.index[0])
 
     #converting datatypes into required formats
@@ -38,6 +40,7 @@ def rvisualize (filename,outfile):
     data['speed'] = pd.to_numeric(data.speed)
 
     #plotting the data
-    sb.lineplot(x="time", y="alt", data=data)
+    #sb.lineplot(x="time", y="alt", data=data)
+    sb.lineplot (x = "time",y = param,data = data)
     plt.savefig(outfile)
-    return
+    return 0
