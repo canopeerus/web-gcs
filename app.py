@@ -248,6 +248,20 @@ def individual_drone ():
     else:
         return redirect ('/gcslogin',code = 302)
 
+
+# Inventory
+@app.route ('/inventory')
+def main_inventory (methods=['GET']):
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        payloads = Payload.query.all ()
+        payloads_list = []
+        for p in payloads:
+            payloads_list.append ([p.id,p.name,p.weight])
+        count = len (payloads_list)
+        return render_template ("inventory.html",inventory = payloads_list,count = count)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
 # Map action
 @app.route ('/map')
 def show_map ():
