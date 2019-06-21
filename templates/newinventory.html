@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>Inventory</title>
+        <title>Add New Item to Inventory</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -47,7 +47,7 @@
                                     <a class="nav-link" href='/dronemonitor'><i class="fab fa-avianex"></i> Fleet Monitor</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href='#'><i class="fas fa-boxes"></i> Inventory</a>
+                                    <a class="nav-link" href='/inventory'><i class="fas fa-boxes"></i> Inventory</a>
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLinkx" data-toggle="dropdown"><i class="fas fa-tools"></i> Tools</a>
@@ -74,46 +74,24 @@
                 </div>
             </div>
         </div>
-            <div id="no-msg" style="display:none;">
-                <br><br><br>
-                <h3 style="text-align:center;">
-                    There are currently no items in inventory
-                </h3>
-            </div>
-            <table id='inventory_table' class="table table-hover">
-                <thead id="thead" style="display:none;">
-                    <tr>
-                        <th>Name</th>
-                        <th>Unit Weight (grams)</th>
-                        <th>Available Stock</th>
-                    </tr>
-                <tbody>
-                    {% for row in inventory %}
-                        <tr class="clickable-row" id="{{ row[0] }}">
-                            <td>{{ row[1] }}</td>
-                            <td>{{ row[2] }}</td>
-                            <td>{{ row[3] }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <div class="container" style="text-align:center;">
-                <a href='/addinventory' class="btn btn-primary">Add new item to inventory</a>
-            </div>
-        <script type="text/javascript">
-            var count = parseInt ("{{ count }}");
-            $(document).ready (function() {
-                if ( count == 0 ) {
-                    $("#no-msg").css ("display","block");
-                }
-                else {
-                    $("#thead").css ("display","table-header-group");
-                }
-            });
-            console.log (count);
-            $("#inventory_table").find ('tr').click ( function() {
-            window.location.href = '/inventoryitem?item='+($(this).attr("id"));
-            });
-        </script>
+        <div class="container-fluid">
+            <form id="newinventory-form" action='/newinventoryaction' method='POST'>
+                <div class="form-group">
+                    <label for='itemName'>Item Name</label>
+                    <input type="text" class="form-control" required name='itemName' id='itemName'/>
+                </div>
+                <div class="form-group">
+                    <label for='itemWeight'>Item Unit Weight</label>
+                    <input type="text" class="form-control" required name='itemWeight' id='itemWeight'/>
+                </div>
+                <div class="form-group">
+                    <label for='itemStock'>Item Stock in Inventory</label>
+                    <input type="text" class="form-control" required name='itemStock' id='itemStock'/>
+                </div>
+                <div class="form-group" style="text-align:center;">
+                    <input type="submit" class="btn btn-primary" value="Submit"/>
+                </div>
+            </form>
+        </div>
     </body>
 </html>

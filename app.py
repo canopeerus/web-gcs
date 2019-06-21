@@ -281,11 +281,39 @@ def main_inventory (methods=['GET']):
         payloads = Payload.query.all ()
         payloads_list = []
         for p in payloads:
-            payloads_list.append ([p.id,p.name,p.weight])
+            payloads_list.append ([p.id,p.name,p.weight,p.stock])
         count = len (payloads_list)
         return render_template ("inventory.html",inventory = payloads_list,count = count)
     else:
         return redirect ('/gcslogin',code = 302)
+
+#@app.route ('/inventoryitem')
+#def edit_inventory_item (methods=['GET']):
+
+@app.route ('/addinventory')
+def new_inventory (methods=['GET']):
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        return render_template ('newinventory.html')
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+
+@app.route ('/newinventoryaction',methods=['POST'])
+def inventoryformaction ():
+    if request.method == 'POST':
+        if 'gcs_user' in session and session ['gcs_logged_in']:
+            itemName = request.form['itemName']
+            itemWeight = float (request.form['itemWeight'])
+            itemStock = int (request.form['itemStock'])
+            payload = Payload (itemName, itemWeight, itemStock)
+            db.session.add (payload)
+            db.session.commit ()
+            return redirect ('/inventory',code = 302)
+        else:
+            return redirect ('/gcslogin',code = 302)
+    else:
+        return redirect ('/gcsportal',code = 302)
+        
 
 
 '''

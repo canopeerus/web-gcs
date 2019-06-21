@@ -45,10 +45,12 @@ class Payload (db.Model):
     id = db.Column (db.Integer,primary_key = True)
     name = db.Column (db.String())
     weight = db.Column (db.Float)
+    stock = db.Column (db.Integer)
 
-    def __init__ (self, name, weight):
+    def __init__ (self, name, weight, stock):
         self.name = name
         self.weight = weight
+        self.stock = stock
 
 
 class Job (db.Model):
