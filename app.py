@@ -313,7 +313,23 @@ def inventoryformaction ():
             return redirect ('/gcslogin',code = 302)
     else:
         return redirect ('/gcsportal',code = 302)
-        
+    
+@app.route ('/inventoryitem',methods=['GET'])
+def inventoryitemdisplay ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        if 'item' in request.args:
+            itemId = request.args['item']
+            itemId = int (itemId)
+            payload = Payload.query.filter_by (id = itemId)
+            if payload is not None:
+                return "Item not Found"
+            else:
+                return render_template ('editinventory.html',name = payload.name,
+                    weight = payload.weight,stock = payload.stock)
+        else:
+            return redirect ('/gcsportal',code = 302)
+    else:
+        return redirect ('/gcslogin',code = 302)
 
 
 '''
