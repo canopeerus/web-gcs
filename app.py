@@ -44,6 +44,11 @@ db.init_app (app)
 db.create_all ()
 db.session.commit ()
 
+'''
+---------------------------------------------------
+IMAGE UPLOAD LOADING FOR PLOTS AND VISUALIZATIONS
+---------------------------------------------------
+'''
 @app.route ('/image/<path:filename>')
 def download_file (filename):
 	return send_from_directory (app.config["UPLOAD_FOLDER"],filename, as_attachment=True)
@@ -56,7 +61,12 @@ def allowed_file (filename):
 def homepage ():
     return render_template("index.html")
     
-    
+  
+'''
+---------------------------------
+LANDING PAGE
+---------------------------------
+'''
 # Main GCS Page route, redirects to 'gcslogin' if not logged in
 @app.route ("/gcsportal",methods=['GET','POST'])
 def gcs_home():
@@ -65,6 +75,11 @@ def gcs_home():
     else:
         return redirect ('/gcslogin',code = 302)
 
+'''
+----------------------------------
+GCS USER PROFILE ACTIONS
+----------------------------------
+'''
 # GCS Login page route
 @app.route ("/gcslogin")
 def gcs_login ():
@@ -197,6 +212,11 @@ def update_password_action ():
         return redirect ("/gcslogin",code=302)
 
 
+'''
+-------------------------------
+DRONE ACTION ROUTES
+-------------------------------
+'''
 # Route for drone monitor list screen
 @app.route ("/dronemonitor")
 def show_drones():
@@ -249,6 +269,11 @@ def individual_drone ():
         return redirect ('/gcslogin',code = 302)
 
 
+'''
+--------------------------------
+INVENTORY
+--------------------------------
+'''
 # Inventory
 @app.route ('/inventory')
 def main_inventory (methods=['GET']):
@@ -262,6 +287,12 @@ def main_inventory (methods=['GET']):
     else:
         return redirect ('/gcslogin',code = 302)
 
+
+'''
+-----------------------------------
+MAP
+-----------------------------------
+'''
 # Map action
 @app.route ('/map')
 def show_map ():
@@ -270,6 +301,12 @@ def show_map ():
     else:
         return redirect ('/gcslogin',code=302)
 
+
+'''
+------------------------------------------
+LOG FILE VISUALIZATION
+------------------------------------------
+'''
 # Visualisations/plot from arjun
 @app.route ('/logplotter')
 def visualize_logs_input ():
@@ -305,6 +342,12 @@ def visualize_logs ():
     else:
         return redirect ('/gcsportal',code = 302)
 
+
+'''
+---------------------------------------
+JOBS/DEPLOYMENT RELATED ACTIONS
+---------------------------------------
+'''
 # Deployment/job tracker
 @app.route ("/jobtracker")
 def show_jobs ():
