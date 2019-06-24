@@ -11,7 +11,7 @@ Dependencies : flask, psycopg2 + postgresql
 from flask import Flask,render_template,redirect,session,abort,request,flash,url_for,send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import os,uuid,visualise,shutil,time
+import os,uuid,visualise,shutil,time,geocoder
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
 
@@ -222,13 +222,8 @@ DRONE ACTION ROUTES
 def show_drones():
     if 'gcs_user' in session:
         drones = Drone.query.all ()
-        drone_list = []
-        for x in drones:
-            y = [x.drone_name,x.model,x.motor_count,x.battery_type]
-            drone_list.append (y)
-
         count = len(drones)
-        return render_template ("drone-monitor.html", drones = drone_list, count = count)
+        return render_template ("drone-monitor.html", drones = drones, count = count)
     else:
         return redirect ("/gcslogin", code=302)
 
@@ -261,8 +256,8 @@ def individual_drone ():
     if 'gcs_user' in session:
         if 'drone' not in request.args:
             return "<h2>The given request was not understood correctly</h2>"
-        r_drone_name = request.args.get('drone')
-        drone_instance = Drone.query.filter_by (drone_name = r_drone_name).first()
+        r_drone_id = request.args.get('drone')
+        drone_instance = Drone.query.filter_by (id = r_drone_id).first()
         return drone_instance.drone_name + drone_instance.model
 
     else:
@@ -279,11 +274,8 @@ INVENTORY
 def main_inventory (methods=['GET']):
     if 'gcs_user' in session and session['gcs_logged_in']:
         payloads = Payload.query.all ()
-        payloads_list = []
-        for p in payloads:
-            payloads_list.append ([p.id,p.name,p.weight,p.stock])
-        count = len (payloads_list)
-        return render_template ("inventory.html",inventory = payloads_list,count = count)
+        count = len (payloads)
+        return render_template ("inventory.html",inventory = payloads,count = count)
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -397,11 +389,8 @@ JOBS/DEPLOYMENT RELATED ACTIONS
 def show_jobs ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         jobs = Job.query.all()
-        jobslist = []
-        for job in jobs:
-            jobslist.append ([job.date,job.location_dest_string,job.status])
         count = len(jobs)
-        return render_template ("jobs.html", deployments = jobslist, length = count)
+        return render_template ("jobs.html", deployments = jobs, length = count)
     else:
         return redirect ('/gcslogin',code = 302)
             
@@ -413,8 +402,11 @@ def new_job ():
         droneslist = []
         for x in drones:
             droneslist.append ([x.drone_name,x.id])
-
-        return render_template ('newjob.html',drones = droneslist)
+        payloads = Payload.query.all ()
+        payloadslist = []
+        for p in payloads:
+            payloadslist.append ([p.id,p.name,p.stock])
+        return render_template ('newjob.html',drones = drones,payloads = payloadslist)
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -426,11 +418,20 @@ def new_job_formaction ():
         datetime_sel = datetime.strptime (date_sel + ' ' + time_sel, '%Y-%m-%d %I:%M %p')
         drone_id = int(str (request.form.get ('drone_select')))
         location_origin_lat_sel = request.form.get ('origin-lat')
-        location_origin_lon_sel = request.form.get ('origin-lon')
+        location_origin_lon_sel = request.form.get ('origin-long')
         location_dest_lat_sel = request.form.get ('dest-lat')
-        location_dest_lon_sel = request.form.get ('dest-lon')
+        location_dest_lon_sel = request.form.get ('dest-long')
+        payload_id = request.form.get ('payload_select')
+        latlng = [float (location_dest_lat_sel),float (location_dest_lon_sel)]
+       
+        g = geocoder.mapbox (latlng,method='reverse',key='pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw')
+        location_str = g.json['address']
         job_instance = Job (date_sel,drone_id,location_origin_lat_sel,
-                location_origin_lon_sel,location_dest_lat_sel,location_dest_lon_sel,1)
+                location_origin_lon_sel,location_dest_lat_sel,location_dest_lon_sel,
+                location_str,int (payload_id))
+        db.session.add (job_instance)
+        db.session.commit ()
+       
         return "Deployment input detected! Database in progress(payloads unavailable)"
         '''
         db.session.add (job_instance)

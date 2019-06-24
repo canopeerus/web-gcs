@@ -101,9 +101,10 @@ body { margin: 0; padding: 0; }
                                 <i class="fas fa-plus-circle topbaricon"></i>
                             </a> &nbsp;&nbsp;&nbsp;
                             <a href='/deletedeployment'>
-                                <i class="fas fa-times topbaricon hidden"></i>
+                                <i class="fas fa-minus topbaricon" id="delete" style="display:none;"></i>
                             </a> <br>
                         </div>
+                        <br>
                         <div id="no-msg" style="display:none;">
                             <br>
                             <br>
@@ -112,19 +113,23 @@ body { margin: 0; padding: 0; }
                         <table>
                             <thead id="thead" style="display:none;">
                                 <tr>
-                                    <th></th>
-                                    <th>Date</th>
-                                    <th>Location</th>
-                                    <th>Status</th>
+                                    <th class="padded"></th>
+                                    <th class="padded">Date</th>
+                                    <th class="padded">Location</th>
+                                    <th class="padded">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for row in deployments %}
-                                    <tr class="clickable-row" id="checkbox_{{ row[2] }}">
-                                        <td id="checkbox_{{ row[2] }}">
-                                        {% for item in row %}
-                                            <td>{{ item }}</td>
-                                        {% endfor %}
+                                    <tr class="clickable-row" id="{{ row.id }}">
+                                        <td id="checkbox_{{ row.id }}">
+                                            <div class="input-group mb3 padded">
+                                                <input type="checkbox"/>
+                                            </div>
+                                        </td>
+                                        <td class="padded">{{ row.date }}</td>
+                                        <td class="padded">{{ row.location_dest_string }}</td>
+                                        <td class="padded status">{{ row.status }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -145,8 +150,22 @@ body { margin: 0; padding: 0; }
                 }
                 else {
                     $("#thead").css ("display","table-header-group");
+                    $("#delete").css ("display","inline");
                 }
+                $(".status").each (function () {
+                    var status = $(this).html();
+                    if ( status == 'Pending Approval' ) {
+                        console.log ("Approval");
+                        $(this).css ("background-color","yellow");
+                        $(this).css ("color","white");
+                    } 
+                    else if ( status == 'Scheduled') {
+                        $(this).css ("background-color","blue");
+                        $(this).css ("color","white");
+                    }
+                });
             });
+
 
         </script>
     </body>

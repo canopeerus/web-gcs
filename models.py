@@ -67,7 +67,8 @@ class Job (db.Model):
     payload_id = db.Column (db.Integer, db.ForeignKey ('payloads.id'))
 
     def __init__ (self, date, drone_id, location_origin_lat,
-            location_origin_long, location_dest_lat, location_dest_long, payload_id):
+            location_origin_long, location_dest_lat, location_dest_long,
+            location_dest_string,payload_id):
         self.date = date
         self.drone_id = drone_id
         self.location_origin_lat = location_origin_lat
@@ -75,6 +76,7 @@ class Job (db.Model):
         self.location_dest_lat = location_dest_lat
         self.location_dest_long = location_dest_long
         self.payload_id = payload_id
+        self.location_dest_string = location_dest_string
 
         self.status = 'Scheduled'
     

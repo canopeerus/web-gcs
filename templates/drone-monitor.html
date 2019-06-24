@@ -93,13 +93,14 @@
             </thead>
             <tbody>
                 {% for row in drones %}
-                    <tr class="clickable-row" id="{{ row[0] }}">
+                    <tr class="clickable-row" id="{{ row.id }}">
                         <td>
                             <img src="{{ url_for('static',filename='images/drone.jpg') }}" height='50' width='50'/>
                         </td>
-                        {% for item in row %}
-                            <td>{{ item }}</td>
-                        {% endfor %}
+                        <td>{{ row.drone_name }}</td>
+                        <td>{{ row.model }}</td>
+                        <td>{{ row.motor_count }}</td>
+                        <td>{{ row.battery_type }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

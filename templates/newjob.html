@@ -102,9 +102,24 @@
                     <label for='drone'>Drone:</label>
                     <select required class="form-control" id="drone_select" name='drone_select'>
                         {% for item in drones %}
-                            <option value='{{ item[1] }}'>{{ item[0] }}</option>
+                        <option value="{{ item.id }}">{{ item.drone_name }}</option>
                         {% endfor %}
                     </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for='payload'>Payload:</label>
+                        <select required class="form-control" id="payload_select" name="payload_select">
+                            {% for item in payloads %}
+                                <option value="{{ item[0] }}">{{ item[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    &nbsp;&nbsp;
+                    <div class="form-group">
+                        <label for='stock'>Unit Count:</label>
+                        <input required type="number" class="form-control" name="count" id="count">
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -289,6 +304,28 @@
                 });
 	        }
         }
+        function update_max () {
+            var sel_id = parseInt ($("#payload_select").val());
+            var max_count;
+            var rows = {{ payloads|safe }};
+            var i;
+            for (i = 0;i < rows.length;i++ ) {
+                var row = rows[i];
+                if ( parseInt (row[0]) == sel_id ) {
+                    max_count = row[2];
+                    console.log ("Matched")
+                }
+            }
+            console.log (max_count);
+            $("#count").attr ("max",max_count);
+        }
+        $(document).ready (function () {
+            update_max ();
+            $("#payload_select").change (function () {
+                update_max ();
+            });
+        });
+        
     </script>
     </body>
 </html>

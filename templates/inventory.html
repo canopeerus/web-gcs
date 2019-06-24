@@ -89,10 +89,10 @@
                     </tr>
                 <tbody>
                     {% for row in inventory %}
-                        <tr class="clickable-row" id="{{ row[0] }}">
-                            <td>{{ row[1] }}</td>
-                            <td>{{ row[2] }}</td>
-                            <td>{{ row[3] }}</td>
+                        <tr class="clickable-row" id="{{ row.id }}">
+                            <td>{{ row.name }}</td>
+                            <td>{{ row.weight }}</td>
+                            <td>{{ row.stock }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
