@@ -14,6 +14,7 @@ from datetime import datetime
 import os,uuid,visualise,shutil,time,geocoder
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
+from momentjs import momentjs
 
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])
@@ -22,8 +23,9 @@ app = Flask (__name__)
 app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = b'\xad]\xb8\xcf\x85\xe0\x0cp\xecf\x8ez\x86\x9d\x16%\xa5F\x08\x9c\xb6\x11\xc2\x86'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.jinja_env.globals['momentjs'] = momentjs
 
-if os.environ['ENV'] == 'prod':
+if os.environ.get('ENV') == 'prod':
     app.config['UPLOAD_FOLDER'] = "uploads/"
 else:
     app.config['UPLOAD_FOLDER'] = UPLOADS_FOLDER
@@ -416,6 +418,7 @@ def new_job_formaction ():
         date_sel = request.form.get ('date')
         time_sel = request.form.get ('time')
         datetime_sel = datetime.strptime (date_sel + ' ' + time_sel, '%Y-%m-%d %I:%M %p')
+        print (datetime_sel)
         drone_id = int(str (request.form.get ('drone_select')))
         location_origin_lat_sel = request.form.get ('origin-lat')
         location_origin_lon_sel = request.form.get ('origin-long')
@@ -432,12 +435,7 @@ def new_job_formaction ():
         db.session.add (job_instance)
         db.session.commit ()
        
-        return "Deployment input detected! Database in progress(payloads unavailable)"
-        '''
-        db.session.add (job_instance)
-        db.session.commit()
         return redirect ('/jobtracker',code = 302)
-        '''
     else:
         return redirect ('/gcslogin',code = 302)
 
