@@ -32,3 +32,11 @@ div.shadowborder {
     visibility:hidden;
 }
 
+.padded {
+    padding: 5px 10px 5px 5px;
+    text-align:center;
+}
+
+#thead {
+    font-size:1.1em;
+}

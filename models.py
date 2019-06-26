@@ -78,5 +78,5 @@ class Job (db.Model):
         self.payload_id = payload_id
         self.location_dest_string = location_dest_string
 
-        self.status = 'Scheduled'
+        self.status = 'Pending Approval'
     

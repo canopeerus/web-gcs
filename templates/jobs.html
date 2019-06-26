@@ -11,6 +11,7 @@
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
         <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+        <script src="/static/js/moment.js"></script>
 
         <!--Load bootstrap css-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
@@ -121,13 +122,14 @@ body { margin: 0; padding: 0; }
                             </thead>
                             <tbody>
                                 {% for row in deployments %}
-                                    <tr class="clickable-row" id="{{ row.id }}">
-                                        <td id="checkbox_{{ row.id }}">
+                                    <tr class="clickable-row" id="tr_{{ row.id }}">
+                                        <td>
                                             <div class="input-group mb3 padded">
-                                                <input type="checkbox"/>
+                                                <input type="checkbox" class="chk"
+                                                id="{{row.id}}"/>
                                             </div>
                                         </td>
-                                        <td class="padded">{{ row.date }}</td>
+                                        <td class="padded">{{ momentjs(row.date).format('YYYY-MM-DD HH:mm') }}</td>
                                         <td class="padded">{{ row.location_dest_string }}</td>
                                         <td class="padded status">{{ row.status }}</td>
                                     </tr>
@@ -164,7 +166,23 @@ body { margin: 0; padding: 0; }
                         $(this).css ("color","white");
                     }
                 });
+                $("input.chk").change (function () {
+                    console.log ("change");
+                    var id = $(this).prop ('id');
+                    var rowid = "#row_"+id;
+                    if  ( this.checked) {
+                        $(rowid).css ("background-color","#f0f99f");
+                    }
+                    else {
+                        $(rowid).css ("background-color","white");
+                    }
+                });
+
             });
+            
+
+
+
 
 
         </script>
