@@ -429,7 +429,7 @@ def new_job_formaction ():
        
         g = geocoder.mapbox (latlng,method='reverse',key='pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw')
         location_str = g.json['address']
-        job_instance = Job (date_sel,drone_id,location_origin_lat_sel,
+        job_instance = Job (datetime_sel,drone_id,location_origin_lat_sel,
                 location_origin_lon_sel,location_dest_lat_sel,location_dest_lon_sel,
                 location_str,int (payload_id))
         db.session.add (job_instance)

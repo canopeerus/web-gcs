@@ -129,7 +129,7 @@ body { margin: 0; padding: 0; }
                                                 id="{{row.id}}"/>
                                             </div>
                                         </td>
-                                        <td class="padded">{{ momentjs(row.date).format('YYYY-MM-DD HH:mm') }}</td>
+                                        <td class="padded">{{ row.date.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
                                         <td class="padded">{{ row.location_dest_string }}</td>
                                         <td class="padded status">{{ row.status }}</td>
                                     </tr>
@@ -159,7 +159,7 @@ body { margin: 0; padding: 0; }
                     if ( status == 'Pending Approval' ) {
                         console.log ("Approval");
                         $(this).css ("background-color","yellow");
-                        $(this).css ("color","white");
+                        $(this).css ("color","black");
                     } 
                     else if ( status == 'Scheduled') {
                         $(this).css ("background-color","blue");
