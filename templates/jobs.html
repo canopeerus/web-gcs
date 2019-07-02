@@ -38,7 +38,7 @@ body { margin: 0; padding: 0; }
 
     </head>
     <body>
-            <div class="container-fluid">
+        <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
                     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -94,54 +94,44 @@ body { margin: 0; padding: 0; }
 
         <!--div id="map" class="map"></div-->
         <div class="container-fluid">
-            <div class="container-fluid">     
-                <div class="row">
-                    <div class="col-sm-6 shadowborder">
-                        <div class="job-topbar">
-                            <a href='/newdeployment'>
-                                <i class="fas fa-plus-circle topbaricon"></i>
-                            </a> &nbsp;&nbsp;&nbsp;
-                            <a href='/deletedeployment'>
-                                <i class="fas fa-minus topbaricon" id="delete" style="display:none;"></i>
-                            </a> <br>
-                        </div>
-                        <br>
-                        <div id="no-msg" style="display:none;">
-                            <br>
-                            <br>
-                            <h4 style="text-align:center;">No deployments found</h4>
-                        </div>
-                        <table>
-                            <thead id="thead" style="display:none;">
-                                <tr>
-                                    <th class="padded"></th>
-                                    <th class="padded">Date</th>
-                                    <th class="padded">Location</th>
-                                    <th class="padded">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in deployments %}
-                                    <tr class="clickable-row" id="tr_{{ row.id }}">
-                                        <td>
-                                            <div class="input-group mb3 padded">
-                                                <input type="checkbox" class="chk"
-                                                id="{{row.id}}"/>
-                                            </div>
-                                        </td>
-                                        <td class="padded">{{ row.date.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
-                                        <td class="padded">{{ row.location_dest_string }}</td>
-                                        <td class="padded status">{{ row.status }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-
-                    </div>
-                    <div class="col-sm-6 shadowborder">
-                    </div>
-                </div>
+            <div class="job-topbar">
+                <a href='/newdeployment'>
+                    <i class="fas fa-plus-circle topbaricon"></i>
+                </a> &nbsp;&nbsp;&nbsp;
+                <a href='/deletedeployment'>
+                    <i class="fas fa-minus topbaricon" id="delete" style="display:none;"></i>
+                </a> <br>
             </div>
+            <br>
+            <div id="no-msg" style="display:none;">
+                <br>
+                <br>
+                <h4 style="text-align:center;">No deployments found</h4>
+            </div>
+            <table class="table table-hover" id="jobtable">
+                <thead id="thead" style="display:none;">
+                    <tr>
+                        <th class="padded">DATE</th>
+                        <th class="padded">ORIGIN</th>
+                        <th class="padded">DESTINATION</th>
+                        <th class="padded">PAYLOAD NET WEIGHT(GRAMS)</th>
+                        <th class="padded">STATUS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in deployments %}
+                    <tr class="clickable-row" id="{{ row.id }}">
+                        <td class="padded">{{ row.date.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td class="padded">{{ row.location_dest_string }}</td>
+                        <td class="padded">{{ row.location_origin_string }}</td>
+                        <td class="padded">{{ row.payload_weight }}</td>
+                        <td class="padded status">
+                                {{ row.status }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         <script>
             $(document).ready (function() {
@@ -155,13 +145,15 @@ body { margin: 0; padding: 0; }
                     $("#delete").css ("display","inline");
                 }
                 $(".status").each (function () {
+                    console.log ("LOOP");
                     var status = $(this).html();
-                    if ( status == 'Pending Approval' ) {
+                    console.log (status);
+                    if ( status == 'PENDING APPROVAL' ) {
                         console.log ("Approval");
                         $(this).css ("background-color","yellow");
                         $(this).css ("color","black");
                     } 
-                    else if ( status == 'Scheduled') {
+                    else if ( status == 'SCHEDULED') {
                         $(this).css ("background-color","blue");
                         $(this).css ("color","white");
                     }
@@ -177,14 +169,11 @@ body { margin: 0; padding: 0; }
                         $(rowid).css ("background-color","white");
                     }
                 });
+                $("#jobtable").find ('tr').click ( function() {
+                    window.location.href = '/jobview?job='+($(this).attr("id"));
+                });
 
             });
-            
-
-
-
-
-
         </script>
     </body>
 </html>

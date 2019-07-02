@@ -4,7 +4,7 @@
 Main GCS application source code for Redwing Aerospace Laboratories
 @author : Aditya Visvanathan
 @version : 0.1.0
-Dependencies : flask, psycopg2 + postgresql
+Dependencies : flask, psycopg2 + postgresql,geocoer,flask_sqlalchemy
 ------------------------------------------------------------------------------------------------------
 '''
 
@@ -14,7 +14,6 @@ from datetime import datetime
 import os,uuid,visualise,shutil,time,geocoder
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
-from momentjs import momentjs
 
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])
@@ -23,7 +22,6 @@ app = Flask (__name__)
 app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = b'\xad]\xb8\xcf\x85\xe0\x0cp\xecf\x8ez\x86\x9d\x16%\xa5F\x08\x9c\xb6\x11\xc2\x86'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-app.jinja_env.globals['momentjs'] = momentjs
 
 if os.environ.get('ENV') == 'prod':
     app.config['UPLOAD_FOLDER'] = "uploads/"
@@ -109,22 +107,20 @@ def gcs_login_action ():
 # show user profile and account settings
 @app.route ("/gcsuserprofile",methods=['POST','GET'])
 def show_userprofile():
-    if 'gcs_logged_in' in session:
-        if session['gcs_logged_in']:
-            user = session['gcs_user']
-            qresult = GCSUser.query.filter_by(username=user).first()
-            return render_template ("gcsprofile.html",username = qresult.username, firstname = qresult.firstname, lastname = qresult.lastname,email_id = qresult.email_id)
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        user = session['gcs_user']
+        qresult = GCSUser.query.filter_by(username=user).first()
+        return render_template ("gcsprofile.html",username = qresult.username, firstname = qresult.firstname, lastname = qresult.lastname,email_id = qresult.email_id)
 
     else:
         return redirect ("/gcslogin",code=302)
 
 # Log out route
 @app.route ("/gcslogout",methods=['POST','GET'])
-def gcs_logout():
-    if 'gcs_logged_in' in session:
-        if session ['gcs_logged_in']:
-            del session['gcs_user']
-            session['gcs_logged_in'] = False;
+def gcs_logout ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        del session['gcs_user']
+        session['gcs_logged_in'] = False
     return redirect ("/", code=302)
 
 # GCS Sign up page route
@@ -259,9 +255,20 @@ def individual_drone ():
         if 'drone' not in request.args:
             return "<h2>The given request was not understood correctly</h2>"
         r_drone_id = request.args.get('drone')
-        drone_instance = Drone.query.filter_by (id = r_drone_id).first()
-        return drone_instance.drone_name + drone_instance.model
-
+        print("Drone id="+r_drone_id)
+        drone_instance = Drone.query.filter_by (id = int(r_drone_id)).first()
+        id_str = drone_instance.jobid_queue
+        jobslist = []
+        if not id_str is None and not id_str == '':
+            print ("ID Matched")
+            id_array = id_str.split ('-')
+            id_array = list (map(int,id_array))
+            for iden in id_array:
+                job = Job.query.filter_by (id = iden).first()
+                jobslist.append (job)
+        count = len(jobslist)
+        print ("Count="+str(count))
+        return render_template ("droneview.html",drone = drone_instance,jobs = jobslist,count = count)
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -426,16 +433,28 @@ def new_job_formaction ():
         location_dest_lon_sel = request.form.get ('dest-long')
         payload_id = request.form.get ('payload_select')
         latlng = [float (location_dest_lat_sel),float (location_dest_lon_sel)]
-       
+        count = int (request.form.get ('count'))
         g = geocoder.mapbox (latlng,method='reverse',key='pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw')
         if g.json is None:
-            location_str = "Unknown Location"
+            location_str_dest = "Unknown Location"
         else:
-            location_str = g.json['address']
+            location_str_dest = g.json['address']
+        
+        latlng = [float (location_origin_lat_sel),float(location_origin_lon_sel)]
+        g = geocoder.mapbox (latlng,method='reverse',key='pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw')
+        if g.json is None:
+            location_str_origin = "Unknown Location"
+        else:
+            location_str_origin = g.json['address']
         job_instance = Job (datetime_sel,drone_id,location_origin_lat_sel,
                 location_origin_lon_sel,location_dest_lat_sel,location_dest_lon_sel,
-                location_str,int (payload_id))
+                location_str_dest,int (payload_id),count,location_str_origin)
+
         db.session.add (job_instance)
+        db.session.commit ()
+
+        drone_sel = Drone.query.filter_by(id = drone_id).first ()
+        drone_sel.assign_job (job_instance.id)
         db.session.commit ()
        
         return redirect ('/jobtracker',code = 302)

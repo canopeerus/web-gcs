@@ -1,0 +1,9 @@
+th {
+    text-transform:uppercase;
+    font-weight:bold;
+}
+
+.status {
+    font-size:15px;
+    font-weight:bold;
+}

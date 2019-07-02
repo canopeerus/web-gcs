@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>Add New Item to Inventory</title>
+        <title>{{ drone.drone_name }}</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
 
         <!--Load page specific CSS-->
-        <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/droneview.css') }}">
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     </head>
@@ -75,23 +75,53 @@
             </div>
         </div>
         <div class="container-fluid">
-            <form id="newinventory-form" action='/newinventoryaction' method='POST'>
-                <div class="form-group">
-                    <label for='itemName'>Item Name</label>
-                    <input type="text" class="form-control" required name='itemName' id='itemName'/>
+            <div id="header" style="display:none;">
+                <br><br>
+                <h2 style="text-align:center;">Job Schedule for Drone {{ drone.drone_name }}</h2>
+                <br><br>
+            </div>
+            <div id="no-msg" style="display:none;">
+                <br><br><br>
+                <h3 style="text-align:center;">
+                    There are currently no jobs assigned to this drone
+                </h3>
+                <br><br>
+                <div style="text-align:center;">
+                    <a href='/newdeployment' style="text-align:center;" class="btn btn-primary">Assign new job</a>
                 </div>
-                <div class="form-group">
-                    <label for='itemWeight'>Item Unit Weight (in Grams)</label>
-                    <input type="text" class="form-control" required name='itemWeight' id='itemWeight'/>
-                </div>
-                <div class="form-group">
-                    <label for='itemStock'>Item Stock in Inventory</label>
-                    <input type="text" class="form-control" required name='itemStock' id='itemStock'/>
-                </div>
-                <div class="form-group" style="text-align:center;">
-                    <input type="submit" class="btn btn-primary" value="Submit"/>
-                </div>
-            </form>
+            </div>
+            <table class="table table-hover">
+                <thead id="thead" style="display:none;">
+                    <tr>
+                        <th>Date/Time</th>
+                        <th>Origin</th>
+                        <th>Destination</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in jobs %}
+                        <tr class="clickable-row" id="{{ row.id }}">
+                            <td>{{ row.date }}</td>
+                            <td>{{ row.location_origin_string }}</td>
+                            <td>{{ row.location_dest_string }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+    <script>
+        var count = {{ count }};
+        $(document).ready (function () {
+            console.log ("Count is ");
+            console.log (count);
+            if ( count == 0 ) {
+                $("#no-msg").css ('display','block');
+            }
+            else {
+                $("#thead").css ('display','table-header-group');
+                $("#header").css ('display','block');
+            }
+        });
+    </script>
     </body>
 </html>

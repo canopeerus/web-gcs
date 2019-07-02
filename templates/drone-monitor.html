@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
 
         <!--Load page specific CSS-->
-        <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/dmonitor.css') }}"/-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     </head>
@@ -89,6 +89,7 @@
                     <th>Model</th>
                     <th>Motor Count</th>
                     <th>Battery Type</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -101,6 +102,7 @@
                         <td>{{ row.model }}</td>
                         <td>{{ row.motor_count }}</td>
                         <td>{{ row.battery_type }}</td>
+                        <td class="status">{{ row.status }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

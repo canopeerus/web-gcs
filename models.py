@@ -2,6 +2,7 @@
 
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from queue import Queue
 
 db = SQLAlchemy ()
 
@@ -33,13 +34,25 @@ class Drone (db.Model):
     model = db.Column (db.String())
     motor_count = db.Column (db.Integer)
     battery_type = db.Column (db.String())
+    status  = db.Column (db.String())
+    jobid_queue = db.Column (db.String())
 
     def __init__ (self,drone_name,model,motor_count,battery_type):
         self.drone_name = drone_name
         self.model = model
         self.motor_count = motor_count
         self.battery_type = battery_type
+        self.status = 'Available'
 
+    def assign_job (self,job_id):
+        if self.jobid_queue is None:
+            self.jobid_queue = str(job_id)
+        else:
+            self.jobid_queue += "-"+str(job_id)
+        self.status = "Jobs in Queue"
+
+
+    
 class Payload (db.Model):
     __tablename__ = 'payloads'
     id = db.Column (db.Integer,primary_key = True)
@@ -64,11 +77,14 @@ class Job (db.Model):
     location_dest_lat = db.Column (db.String())
     location_dest_long = db.Column (db.String())
     location_dest_string = db.Column (db.String())
+    location_origin_string = db.Column (db.String())
     payload_id = db.Column (db.Integer, db.ForeignKey ('payloads.id'))
+    payload_count = db.Column (db.Integer)
+    payload_weight = db.Column (db.Integer)
 
     def __init__ (self, date, drone_id, location_origin_lat,
             location_origin_long, location_dest_lat, location_dest_long,
-            location_dest_string,payload_id):
+            location_dest_string,payload_id,payload_stock,location_origin_string):
         self.date = date
         self.drone_id = drone_id
         self.location_origin_lat = location_origin_lat
@@ -77,6 +93,13 @@ class Job (db.Model):
         self.location_dest_long = location_dest_long
         self.payload_id = payload_id
         self.location_dest_string = location_dest_string
+        self.location_origin_string = location_origin_string
+        self.status = "PENDING APPROVAL"
+        self.payload_count = payload_stock
+        
+        payload = Payload.query.filter_by (id = payload_id).first ()
+        payload.stock -= self.payload_count
+        db.session.commit ()
 
-        self.status = 'Pending Approval'
-    
+        self.payload_weight = payload.weight * payload_stock
+        self.location_origin_string = location_origin_string
