@@ -20,11 +20,10 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/jobtrack.css') }}"/>
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
 
-        <!--Airmap/Mapbox stuff-->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
-        <script src="https://cdn.airmap.io/js/contextual-airspace/v1.0/airmap.contextual-airspace-plugin.min.js" async=false defer=false></script>       
-        <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.js"></script>
-        <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.css" rel="stylesheet" />
+        <!--Timepicker-->
+        <script src="{{ url_for ('static',filename='js/bootstrap-timepicker.min.js') }}"></script>
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap-timepicker.min.css') }}"/>
+
         <style>
 body { margin: 0; padding: 0; }
 .map {
@@ -94,13 +93,31 @@ body { margin: 0; padding: 0; }
 
         <!--div id="map" class="map"></div-->
         <div class="container-fluid">
-            <div class="job-topbar">
-                <a href='/newdeployment'>
-                    <i class="fas fa-plus-circle topbaricon"></i>
-                </a> &nbsp;&nbsp;&nbsp;
-                <a href='/deletedeployment'>
-                    <i class="fas fa-minus topbaricon" id="delete" style="display:none;"></i>
-                </a> <br>
+            <div class="job-topbar" style='display:none;'>
+                <form method='POST' action='/filterjobs'>
+                    <div class="form-row">
+                        <div class="col">
+                            <label for="datePicker">Begin Date:</label>
+                            <input type="date" name='begindate' id='bdate' placeholder='DD/MM/YYYY' class='form-control'>
+                        </div>
+                        <div class='col'>
+                            <label for='datePicker'>End Date:</label>
+                            <input type='date' name='enddate' id='edate' placeholder='DD/MM/YYYY' class='form-control'>
+                        </div>
+                        <div class='col'>
+                            <label for='timePicker'>Start Time:</label>
+                            <input type='text' class='form-control' name='begintime' id='btime'/>
+                        </div>
+                        <div class='col'>
+                            <label for='timePicker'>End Time:</label>
+                            <input type='timePicker' class='form-control' name='endtime' id='etime'/>
+                        </div>
+                        <div class='col'>
+                            <label for='submit' style="visibility:hidden;">HMMM</label>
+                            <input type='submit' class='form-control btn btn-primary' value='Search'/>
+                        </div>
+                    </div>
+                </form>
             </div>
             <br>
             <div id="no-msg" style="display:none;">
@@ -134,6 +151,8 @@ body { margin: 0; padding: 0; }
             </table>
         </div>
         <script>
+            $('#btime').timepicker();
+            $('#etime').timepicker();
             $(document).ready (function() {
                 var length = parseInt("{{ length }}");
                 console.log ("length = "+length);
@@ -141,6 +160,7 @@ body { margin: 0; padding: 0; }
                     $("#no-msg").css("display","block");
                 }
                 else {
+                    $('.job-topbar').css ('display','inline');
                     $("#thead").css ("display","table-header-group");
                     $("#delete").css ("display","inline");
                 }
