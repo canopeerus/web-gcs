@@ -446,6 +446,7 @@ def new_job ():
     else:
         return redirect ('/gcslogin',code = 302)
 
+# Form action route for adding new job/deployment
 @app.route ('/newjobform',methods=['POST'])
 def new_job_formaction ():
     if 'gcs_user' in session and session['gcs_logged_in']:
@@ -490,6 +491,33 @@ def new_job_formaction ():
         return redirect ('/gcslogin',code = 302)
 
 
+# Form action for filters for job search
+@app.route ('/filterjobs',methods=['POST'])
+def filterjobs ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        begindatetimestr = request.form.get ('begindate') + ' ' + request.form.get ('begintime')
+        begindatetime = datetime.strptime (begindatetimestr, '%Y-%m-%d %I:%M %p')
+
+        endstr = request.form.get ('enddate') + ' ' + request.form.get ('endtime')
+        enddatetime = datetime.strptime (endstr,'%Y-%m-%d %I:%M %p')
+
+
+        jobmatch = Job.query.filter (Job.date < enddatetime,Job.date >= begindatetime).all()
+        if jobmatch is not None:
+            return render_template ('jobs.html',deployments = jobmatch)
+        else:
+            return render_template ('jobs.html',error = 'matcherror')
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+
+
+
+'''
+-----------------------------------------------------------------
+ERROR HANDLER/SPECIAL FUNCTIONS
+-----------------------------------------------------------------
+'''
 @app.errorhandler (404)
 def page_not_found (e):
     return render_template ('404.html',code=404)

@@ -90,7 +90,9 @@ body { margin: 0; padding: 0; }
                 </div>
             </div>
         </div>
-
+        <br>
+        <h2 style="text-align:center;">Job Tracker System</h2>
+        <br>
         <!--div id="map" class="map"></div-->
         <div class="container-fluid">
             <div class="job-topbar" style='display:none;'>
@@ -98,23 +100,27 @@ body { margin: 0; padding: 0; }
                     <div class="form-row">
                         <div class="col">
                             <label for="datePicker">Begin Date:</label>
-                            <input type="date" name='begindate' id='bdate' placeholder='DD/MM/YYYY' class='form-control'>
+                            <input required type="date" name='begindate' id='bdate' placeholder='DD/MM/YYYY' class='form-control'>
                         </div>
                         <div class='col'>
                             <label for='datePicker'>End Date:</label>
-                            <input type='date' name='enddate' id='edate' placeholder='DD/MM/YYYY' class='form-control'>
+                            <input required type='date' name='enddate' id='edate' placeholder='DD/MM/YYYY' class='form-control'>
                         </div>
                         <div class='col'>
                             <label for='timePicker'>Start Time:</label>
-                            <input type='text' class='form-control' name='begintime' id='btime'/>
+                            <input required type='text' class='form-control' name='begintime' id='btime'/>
                         </div>
                         <div class='col'>
                             <label for='timePicker'>End Time:</label>
-                            <input type='timePicker' class='form-control' name='endtime' id='etime'/>
+                            <input required type='timePicker' class='form-control' name='endtime' id='etime'/>
                         </div>
                         <div class='col'>
                             <label for='submit' style="visibility:hidden;">HMMM</label>
-                            <input type='submit' class='form-control btn btn-primary' value='Search'/>
+                            <input required type='submit' class='form-control btn btn-primary' value='Search'/>
+                        </div>
+                        <div class='col'>
+                            <label for='newdep' style='visibility:hidden;'>asd</label>
+                            <a href='/newdeployment' class='btn btn-primary form-control'>Add new job</a>
                         </div>
                     </div>
                 </form>
@@ -123,8 +129,15 @@ body { margin: 0; padding: 0; }
             <div id="no-msg" style="display:none;">
                 <br>
                 <br>
-                <h4 style="text-align:center;">No deployments found</h4>
+                <div style="text-align:center;">
+                    <h4>No deployments found</h4>
+                    <a href='/newdeployment' class="btn btn-primary">Add new deployment</a>
+                </div>
             </div>
+            <div class="errormsg" style="display:none;color:red;">
+                No matches found for the filters applied
+            </div>
+
             <table class="table table-hover" id="jobtable">
                 <thead id="thead" style="display:none;">
                     <tr>
@@ -153,7 +166,11 @@ body { margin: 0; padding: 0; }
         <script>
             $('#btime').timepicker();
             $('#etime').timepicker();
+            var errmsg = "{{ error }}";
             $(document).ready (function() {
+                if ( errmsg == "matcherror" ) {
+                    $(".errormsg").css("display","block");
+                }
                 var length = parseInt("{{ length }}");
                 console.log ("length = "+length);
                 if ( length == 0 ) {
