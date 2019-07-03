@@ -251,26 +251,53 @@ def add_new_drone():
 # View particular drone
 @app.route ("/droneview")
 def individual_drone ():
-    if 'gcs_user' in session:
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        
         if 'drone' not in request.args:
             return "<h2>The given request was not understood correctly</h2>"
+        
         r_drone_id = request.args.get('drone')
-        print("Drone id="+r_drone_id)
         drone_instance = Drone.query.filter_by (id = int(r_drone_id)).first()
-        id_str = drone_instance.jobid_queue
+        if drone_instance is None:
+            return "<h2 style='text-align:center;'>Unable to process this request</h2>"
         jobslist = []
-        if not id_str is None and not id_str == '':
-            print ("ID Matched")
-            id_array = id_str.split ('-')
-            id_array = list (map(int,id_array))
+        
+        if drone_instance.has_jobs_scheduled:
+            id_array = drone_instance.job_queue_int ()
+            print (id_array)
             for iden in id_array:
                 job = Job.query.filter_by (id = iden).first()
                 jobslist.append (job)
+        
         count = len(jobslist)
-        print ("Count="+str(count))
-        return render_template ("droneview.html",drone = drone_instance,jobs = jobslist,count = count)
+        
+        if 'error' in request.args:
+            strerr = 'deleteerror'
+        else:
+            strerr = 'noerror'
+        return render_template ("droneview.html",drone = drone_instance,jobs = jobslist,count = count,error = strerr)
     else:
         return redirect ('/gcslogin',code = 302)
+
+# Disable drone
+@app.route ("/disabledrone")
+def terminate_drone ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        
+        if 'drone' not in request.args:
+            return "<h2>The given request was not understood correctly</h2>"
+        r_drone_id = int(request.args.get ('drone'))
+        drone = Drone.query.filter_by (id = r_drone_id).first ()
+        if drone.disable ():
+            return redirect ('/dronemonitor',code = 302)
+        else:
+            return redirect ('/droneview?error&drone='
+                    +str(r_drone_id),code = 302)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+
+
 
 
 '''
@@ -425,7 +452,6 @@ def new_job_formaction ():
         date_sel = request.form.get ('date')
         time_sel = request.form.get ('time')
         datetime_sel = datetime.strptime (date_sel + ' ' + time_sel, '%Y-%m-%d %I:%M %p')
-        print (datetime_sel)
         drone_id = int(str (request.form.get ('drone_select')))
         location_origin_lat_sel = request.form.get ('origin-lat')
         location_origin_lon_sel = request.form.get ('origin-long')
@@ -434,6 +460,7 @@ def new_job_formaction ():
         payload_id = request.form.get ('payload_select')
         latlng = [float (location_dest_lat_sel),float (location_dest_lon_sel)]
         count = int (request.form.get ('count'))
+        
         g = geocoder.mapbox (latlng,method='reverse',key='pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw')
         if g.json is None:
             location_str_dest = "Unknown Location"
@@ -446,6 +473,7 @@ def new_job_formaction ():
             location_str_origin = "Unknown Location"
         else:
             location_str_origin = g.json['address']
+        
         job_instance = Job (datetime_sel,drone_id,location_origin_lat_sel,
                 location_origin_lon_sel,location_dest_lat_sel,location_dest_lon_sel,
                 location_str_dest,int (payload_id),count,location_str_origin)

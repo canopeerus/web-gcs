@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
 
         <!--Load page specific CSS-->
-        <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/droneview.css') }}"/>
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     </head>
@@ -83,16 +83,16 @@
             <table id='inventory_table' class="table table-hover">
                 <thead id="thead" style="display:none;">
                     <tr>
-                        <th>Name</th>
-                        <th>Unit Weight (grams)</th>
-                        <th>Available Stock</th>
+                        <th class="padded">Name</th>
+                        <th class="padded">Unit Weight (grams)</th>
+                        <th class="padded">Available Stock</th>
                     </tr>
                 <tbody>
                     {% for row in inventory %}
                         <tr class="clickable-row" id="{{ row.id }}">
-                            <td>{{ row.name }}</td>
-                            <td>{{ row.weight }}</td>
-                            <td>{{ row.stock }}</td>
+                            <td class="padded">{{ row.name }}</td>
+                            <td class="padded">{{ row.weight }}</td>
+                            <td class="padded">{{ row.stock }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

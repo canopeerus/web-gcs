@@ -2,3 +2,8 @@
     font-size:1.1em;
     text-transform:uppercase;
 }
+
+.padded {
+    padding: 5px 5px 5px 5px;
+    text-align:center;
+}

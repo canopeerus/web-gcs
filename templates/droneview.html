@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>{{ drone.drone_name }}</title>
+        <title>Jobs Schedule for {{ drone.drone_name }}</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -78,14 +78,14 @@
             <div id="header" style="display:none;">
                 <br><br>
                 <h2 style="text-align:center;">Job Schedule for Drone {{ drone.drone_name }}</h2>
-                <br><br>
+                <br>
             </div>
             <div id="no-msg" style="display:none;">
                 <br><br><br>
                 <h3 style="text-align:center;">
                     There are currently no jobs assigned to this drone
                 </h3>
-                <br><br>
+                <br>
                 <div style="text-align:center;">
                     <a href='/newdeployment' style="text-align:center;" class="btn btn-primary">Assign new job</a>
                 </div>
@@ -93,26 +93,40 @@
             <table class="table table-hover">
                 <thead id="thead" style="display:none;">
                     <tr>
-                        <th>Date/Time</th>
-                        <th>Origin</th>
-                        <th>Destination</th>
+                        <th class="padded">Date/Time</th>
+                        <th class="padded">Origin</th>
+                        <th class="padded">Destination</th>
+                        <th class="padded">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in jobs %}
                         <tr class="clickable-row" id="{{ row.id }}">
-                            <td>{{ row.date }}</td>
-                            <td>{{ row.location_origin_string }}</td>
-                            <td>{{ row.location_dest_string }}</td>
+                            <td class="padded">{{ row.date }}</td>
+                            <td class="padded">{{ row.location_origin_string }}</td>
+                            <td class="padded">{{ row.location_dest_string }}</td>
+                            <td class="padded">{{ row.status }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            <br><br>
+            <div style="text-align:center;">
+                <button id='deldrone' onclick='checkconfirm()' class="btn btn-primary">Disable this drone</button>
+                <br><br>
+                <div style="color:red;display:none;" id='error'>
+                    Error: This drone has pending jobs. Unable to disable! Please clear the job queue first.
+                </div>
+            </div>
         </div>
     <script>
         var count = {{ count }};
+        var errorstr = "{{ error }}";
         $(document).ready (function () {
-            console.log ("Count is ");
+            if ( errorstr == 'deleteerror' ) {
+                console.log (error);
+                $("#error").css ('display','block');
+            }
             console.log (count);
             if ( count == 0 ) {
                 $("#no-msg").css ('display','block');
@@ -122,6 +136,12 @@
                 $("#header").css ('display','block');
             }
         });
+        function checkconfirm () {
+            if ( confirm ("Are you sure you want to disable this drone?(It may have pending jobs scheduled!)") ) {
+                window.location.href = '/disabledrone?drone={{ drone.id }}';
+            }
+        }
+
     </script>
     </body>
 </html>

@@ -50,7 +50,22 @@ class Drone (db.Model):
         else:
             self.jobid_queue += "-"+str(job_id)
         self.status = "Jobs in Queue"
+    
+    def disable (self):
+        if self.jobid_queue is None:
+            self.status = 'Disabled'
+            return True
+        else:
+            return False
 
+    def has_jobs_scheduled (self):
+        return not self.jobid_queue is None
+ 
+    def job_queue_int (self):
+        str_arr = self.jobid_queue.split ('-')
+        for i in range (len (str_arr)):
+            str_arr[i] = int (str_arr[i])
+        return str_arr
 
     
 class Payload (db.Model):
