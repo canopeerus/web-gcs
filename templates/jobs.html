@@ -183,7 +183,7 @@ body { margin: 0; padding: 0; }
                 }
                 $(".status").each (function () {
                     console.log ("LOOP");
-                    var status = $(this).html();
+                    var status = $(this).html().trim();;
                     console.log (status);
                     if ( status == 'PENDING APPROVAL' ) {
                         console.log ("Approval");

@@ -39,6 +39,7 @@ div.shadowborder {
 
 #thead {
     font-size:1.1em;
+    background-color:grey;
 }
 
 .status {
@@ -48,4 +49,6 @@ div.shadowborder {
 
 th {
     font-weight:bold;
+    background-color:#cacccf;
+}
 }

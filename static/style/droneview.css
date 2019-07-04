@@ -1,8 +1,12 @@
 #thead {
     font-size:1.1em;
     text-transform:uppercase;
+    background-color:grey;
 }
 
+th {
+    background-color:#cacccf;
+}
 .padded {
     padding: 5px 5px 5px 5px;
     text-align:center;
