@@ -262,7 +262,7 @@ def individual_drone ():
             return "<h2 style='text-align:center;'>Unable to process this request</h2>"
         jobslist = []
         
-        if drone_instance.has_jobs_scheduled:
+        if drone_instance.has_jobs_scheduled ():
             id_array = drone_instance.job_queue_int ()
             print (id_array)
             for iden in id_array:

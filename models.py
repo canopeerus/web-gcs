@@ -60,7 +60,7 @@ class Drone (db.Model):
 
     def has_jobs_scheduled (self):
         return not self.jobid_queue is None
- 
+
     def job_queue_int (self):
         str_arr = self.jobid_queue.split ('-')
         for i in range (len (str_arr)):

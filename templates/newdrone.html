@@ -75,27 +75,35 @@
             </div>
         </div>
 
-        <div class="container">
+        <div class="container-fluid">
             <br><br>
             <h2 style="text-align:center;">Details for New Drone</h2>
             <br><br>
             <div style="text-align:center;">
             <form id="newdrone-form" action="/newdroneaction" method="POST">
-                <div class="form-group">
-                    <!--label for="droneName">Drone Name</label-->
-                    <input type="text" required name="droneName" id="droneName" placeholder="Drone Name"/>
+                <div class="form-group row">
+                    <label for="droneName" class="col-sm-2 col-form-label">Drone Name</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" required name="droneName" id="droneName"/>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <!--label for="droneModel">Drone Model</label-->
-                    <input type="text" required name='droneModel' id='droneModel' placeholder="Drone Model"/>
+                <div class="form-group row">
+                    <label for="droneModel" class="col-sm-2 col-form-label">Drone Model</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" required name='droneModel' id='droneModel'/>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <!--label for='motorCount'>Motor Count</label-->
-                    <input type="text" required name='motorCount' id='motorCount' placeholder="Motor Count"/>
+                <div class="form-group row">
+                    <label for='motorCount' class="col-sm-2 col-form-label">Motor Count</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" required name='motorCount' id='motorCount'/>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <!--label for='batteryType'>Battery Type</label-->
-                    <input type='text' required name='batteryType' id='batteryType' placeholder="Battery Type"/>
+                <div class="form-group row">
+                    <label for='batteryType' class="col-sm-2 col-form-label">Battery Type</label>
+                    <div class="col-sm-10">
+                        <input type='text' class="form-control" required name='batteryType' id='batteryType'/>
+                    </div>
                 </div>
                 <div class="form-group" style="text-align:center;">
                     <input type="submit" class="btn btn-primary" value="Submit"/>
