@@ -307,7 +307,7 @@ INVENTORY
 '''
 # Inventory
 @app.route ('/inventory')
-def main_inventory (methods=['GET']):
+def main_inventory ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         payloads = Payload.query.all ()
         count = len (payloads)
@@ -319,7 +319,7 @@ def main_inventory (methods=['GET']):
 #def edit_inventory_item (methods=['GET']):
 
 @app.route ('/addinventory')
-def new_inventory (methods=['GET']):
+def new_inventory ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         return render_template ('newinventory.html')
     else:
@@ -348,8 +348,8 @@ def inventoryitemdisplay ():
         if 'item' in request.args:
             itemId = request.args['item']
             itemId = int (itemId)
-            payload = Payload.query.filter_by (id = itemId)
-            if payload is not None:
+            payload = Payload.query.filter_by (id = itemId).first ()
+            if payload is None:
                 return "Item not Found"
             else:
                 return render_template ('editinventory.html',name = payload.name,
