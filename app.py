@@ -255,8 +255,12 @@ def individual_drone ():
         
         if 'drone' not in request.args:
             return "<h2>The given request was not understood correctly</h2>"
+       
+        drone_arg = request.args.get ('drone')
+        if drone_arg == 'undefined' or drone_arg is None:
+            return "<h2> The given request was not understood correctly</h2>"
         
-        r_drone_id = request.args.get('drone')
+        r_drone_id = int (drone_arg)
         drone_instance = Drone.query.filter_by (id = int(r_drone_id)).first()
         if drone_instance is None:
             return "<h2 style='text-align:center;'>Unable to process this request</h2>"
@@ -509,6 +513,28 @@ def filterjobs ():
             return render_template ('jobs.html',error = 'matcherror')
     else:
         return redirect ('/gcslogin',code = 302)
+
+# particular Job details view
+@app.route ('/jobview')
+def jobview ():
+    if 'gcs_user' in session and sesssion['gcs_logged_in']:
+        if 'job' in request.args:
+            jobid_str = request.args.get ('job')
+            if jobid_str == 'undefined' or jobid_str is None:
+                return "<h2 style='text-align:center;'>The request was not understood</h2>"
+            else:
+                jobid = int (jobid_str)
+                job_instance = Job.query.filter_by (id = jobid).first ()
+                if job_instance is not None:
+                    return render_template ('/jobview.html',job = job_instance)
+                else:
+                    return redirect ('/jobtracker',code = 302)
+        else:
+            return "<h2 style='text-align:center;'>ERROR,Something went wrong</h2>"
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+
 
 
 
