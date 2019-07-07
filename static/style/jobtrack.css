@@ -39,6 +39,7 @@ div.shadowborder {
 .status {
     font-size:15px;
     font-weight:bold;
+    text-transform:uppercase;
 }
 
 th {

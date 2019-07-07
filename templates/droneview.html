@@ -105,7 +105,7 @@
                             <td class="padded">{{ row.date }}</td>
                             <td class="padded">{{ row.location_origin_string }}</td>
                             <td class="padded">{{ row.location_dest_string }}</td>
-                            <td class="padded">{{ row.status }}</td>
+                            <td class="padded status">{{ row.status }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -134,6 +134,17 @@
             else {
                 $("#thead").css ('display','table-header-group');
                 $("#header").css ('display','block');
+            }
+        });
+        $(".status").each (function () {
+            var status = $(this).html().trim();
+            if ( status == 'PENDING APPROVAL') {
+                $(this).css ("background-color","yellow");
+                $(this).css ("color","black");
+            }
+            else if ( status == "SCHEDULED" ) {
+                $(this).css ("background-color","blue");
+                $(this).css ("color","white");
             }
         });
         function checkconfirm () {

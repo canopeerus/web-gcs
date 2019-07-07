@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>Fleet Monitor</title>
+        <title>Deployment Initiation Authentication</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -16,12 +16,12 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
 
         <!--Load page specific CSS-->
-        <link rel="stylesheet" href="{{ url_for('static',filename='style/dmonitor.css') }}"/-->
+        <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     </head>
     <body>
-            <div class="container-fluid">
+        <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
                     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -32,7 +32,7 @@
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="navbar-nav">
                                 <li class="nav-item active">
-                                    <a class="nav-link" href="/gcsportal"><i class="fas fa-home"></i> Home<span class="sr-only">(current)</span></a>
+                                    <a class="nav-link" href="#"><i class="fas fa-home"></i> Home<span class="sr-only">(current)</span></a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/map"><i class="fas fa-map-marker-alt"></i> Map</a>
@@ -44,7 +44,7 @@
                                     <a class="nav-link" href='/jobtracker'><i class="fas fa-business-time"></i> Job Tracker</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href='#'><i class="fab fa-avianex"></i> Fleet Monitor</a>
+                                    <a class="nav-link" href='/dronemonitor'><i class="fab fa-avianex"></i> Fleet Monitor</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href='/inventory'><i class="fas fa-boxes"></i> Inventory</a>
@@ -56,7 +56,7 @@
                                     </div>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="https://www.redwinglabs.in/about"><i class="fas fa-address-card"></i> About Us</a>
+                                    <a class="nav-link" href="http://www.redwinglabs.in/about"><i class="fas fa-address-card"></i> About Us</a>
                                 </li>
                             </ul>
                             <ul class="navbar-nav ml-md-auto">
@@ -74,65 +74,22 @@
                 </div>
             </div>
         </div>
-
-        <div id="no-msg" style="display:none;">
-            <br><br><br>
-            <h3 style="text-align:center;">
-                There is currently no information about any drone in the database!
-            </h3>
-        </div>
-        <br>
-        <h2 style="text-align:center;">
-            FLEET MONITOR
-        </h2>
-        <br>
-        <table id='dronetable' class="table table-hover">
-            <thead id='thead' style='display:none;'>
-                <tr>
-                    <th></th>
-                    <th>Name</th>
-                    <th>Model</th>
-                    <th>Motor Count</th>
-                    <th>Battery Type</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in drones %}
-                    <tr class="clickable-row" id="{{ row.id }}">
-                        <td>
-                            <img src="{{ url_for('static',filename='images/drone.jpg') }}" height='50' width='50'/>
-                        </td>
-                        <td>{{ row.drone_name }}</td>
-                        <td>{{ row.model }}</td>
-                        <td>{{ row.motor_count }}</td>
-                        <td>{{ row.battery_type }}</td>
-                        <td class="status">{{ row.status }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-                     
-        <div class="container" style="text-align:center;">
-        <a href="/newdrone" class="btn btn-primary">Add new drone</a>
-        </div>
-    <script>
-        var count = parseInt("{{ count }}");
-        $(document).ready (function() {
-            if ( count == 0 ) {
-                $("#no-msg").css("display","block");
-            }
-            else {
-                $("#thead").css("display","table-header-group");
-            }
-        });
-        
-        $("#dronetable").find ('tr.clickable-row').click ( function() {
-            window.location.href = '/droneview?drone='+($(this).attr("id"));
-            //alert ("You clicked " + ($(this).attr("id")));
-        });
-
-
-    </script>
+        <div class="container-fluid">
+            <br><br>
+            <h4 class="otp-header" style="text-align:center;">
+               A One-Time Password has been sent to your mobile number. Please enter the OTP received to authenticate.
+            </h4>
+            <form method='POST' action='/jobotpauth'>
+                <div class="form-group-1" style="text-align:center;">
+                    <input style="text-align:center;" type="password" name="otp" id="otp" placeholder="Enter OTP here" required/>
+                </div>
+                <div style="display:none;">
+                    <input type="text" name="jobid" id="jobid" class="form-control-plaintext" value="{{ jobid }}" readonly/>
+                </div>
+                <br><br>
+                <div class="form-submit" style="text-align:center;">
+                    <input style="text-align:center;" type="submit" class="btn btn-primary" value="Authenticate"/>
+                </div>
+            </form>
     </body>
 </html>

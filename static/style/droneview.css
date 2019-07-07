@@ -11,3 +11,9 @@ th {
     padding: 5px 5px 5px 5px;
     text-align:center;
 }
+
+.status {
+    text-transform:uppercase;
+    font-size:15px;
+    font-weight:bold;
+}

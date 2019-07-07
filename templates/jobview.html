@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>Redwing GCS</title>
+        <title>Initiate Deployment</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -16,9 +16,12 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
 
         <!--Load page specific CSS-->
-        <link rel="stylesheet" href="{{ url_for('static',filename='style/droneview.css') }}"/>
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/gcsmain.css') }}"/>
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+        <script src="https://cdn.airmap.io/js/contextual-airspace/v1.0/airmap.contextual-airspace-plugin.min.js" async=false defer=false></script>       
+        <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.js"></script>
+        <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.css" rel="stylesheet" />
     </head>
     <body>
         <div class="container-fluid">
@@ -74,5 +77,70 @@
                 </div>
             </div>
         </div>
+        <div class="container-fluid">
+            <div class="container-left">
+                <br><br>
+                <h3 style="text-align:center;">
+                    Deployment Details
+                </h3>
+                <br><br>
+                <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            <td class="marked">Drone Assigned</td>
+                            <td>{{ drone.drone_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="marked">Payload Type</td>
+                            <td>{{ payload.name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="marked">Payload Net Weight(grams)</td>
+                            <td>{{ job.payload_weight }}</td>
+                        </tr>
+                        <tr>
+                            <td class="marked">Scheduled Time</td>
+                            <td>{{ job.date }}</td>
+                        </tr>
+                        <tr>
+                            <td class="marked">Origin Location</td>
+                            <td>{{ job.location_origin_string }}</td>
+                        </tr>
+                        <tr>
+                            <td class="marked">Destination Location</td>
+                            <td>{{ job.location_dest_string }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="container-right">
+                <div id = "vmap" class="vmap">
+                </div>
+            </div>
+        </div>
+        <script>
+         const AIRMAP_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHxKZ1FseEV6aDNhWFh2TENvZU1Za1JUeXFiZDJhIiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxHeGFZNTVxdFo4ZUE3Q1hBUEV3a2NuZ2RNTVEiLCJvcmdhbml6YXRpb25faWQiOiJkZXZlbG9wZXJ8S1ltUUd5WGZSd1o5MkxIZ2VaeG9SU0FHUkdQMyIsImlhdCI6MTU1OTI5MTAwNn0.f5BBtwQwuCNuiqDSQD3rQdNOfilmRzpcFYoDqXDYlTs'
+                const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw'
+
+                //if (AIRMAP_API_KEY && MAPBOX_ACCESS_TOKEN) {
+                    mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
+                    var map = new mapboxgl.Map({
+                        container: 'vmap',
+                        style: 'https://api.airmap.io/maps/v4/tilejson/airports_recreational,class_b?apikey='+AIRMAP_API_KEY+'&theme=standard',
+                        center: [{{ job.location_origin_long }}, {{ job.location_origin_lat }}],
+                        zoom: 13
+                });
+
+                /*} else {
+                    console.error(
+                        'Missing AIRMAP_API_KEY or MAPBOX_ACCESS_TOKEN. ' +
+                        'These are required for developing locally.\n\n' +
+                        'Please save these values in localStorage by entering the following in your browser console:\n\n' +
+                        'localStorage.setItem(\'AIRMAP_API_KEY\', \'<your_key>\');\n' +
+                        'localStorage.setItem(\'MAPBOX_ACCESS_TOKEN\', \'<your_token>\');\n\n'
+                    );
+                }*/
+    </script>
+
     </body>
 </html>

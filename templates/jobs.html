@@ -206,7 +206,7 @@ body { margin: 0; padding: 0; }
                         $(rowid).css ("background-color","white");
                     }
                 });
-                $("#jobtable").find ('tr').click ( function() {
+                $("#jobtable").find ('tr.clickable-row').click ( function() {
                     window.location.href = '/jobview?job='+($(this).attr("id"));
                 });
 

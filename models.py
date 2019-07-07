@@ -118,3 +118,6 @@ class Job (db.Model):
 
         self.payload_weight = payload.weight * payload_stock
         self.location_origin_string = location_origin_string
+
+    def is_pending (self):
+        return self.status == 'PENDING APPROVAL'

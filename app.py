@@ -517,7 +517,7 @@ def filterjobs ():
 # particular Job details view
 @app.route ('/jobview')
 def jobview ():
-    if 'gcs_user' in session and sesssion['gcs_logged_in']:
+    if 'gcs_user' in session and session['gcs_logged_in']:
         if 'job' in request.args:
             jobid_str = request.args.get ('job')
             if jobid_str == 'undefined' or jobid_str is None:
@@ -526,7 +526,10 @@ def jobview ():
                 jobid = int (jobid_str)
                 job_instance = Job.query.filter_by (id = jobid).first ()
                 if job_instance is not None:
-                    return render_template ('/jobview.html',job = job_instance)
+                    if job_instance.is_pending ():
+                        return render_template ('jobotp.html',jobid = job_instance.id)
+                    else:
+                        return "<h2>Work In Progress</h2>"
                 else:
                     return redirect ('/jobtracker',code = 302)
         else:
@@ -534,8 +537,39 @@ def jobview ():
     else:
         return redirect ('/gcslogin',code = 302)
 
+# OTP form action route
+@app.route ('/jobotpauth',methods=['POST'])
+def auth_otp ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        if 'otp' in request.form and 'jobid' in request.form:
+            onetime_password = request.form.get ('otp')
+            jobid = request.form.get ('jobid')
+            if onetime_password == '0000':
+                return redirect ('/initiatedeployment?job='+jobid,code = 307)
+            else:
+                return render_template ('jobotp.html',errorstr = "matcherror")
+        else:
+            return render_template ('jobotp.html',errorstr = 'generror')
+    else:
+        return redirect ('/gcslogin',code = 302)
 
 
+# Deployment initiate path
+@app.route ('/initiatedeployment',methods=['POST'])
+def initiate_deployment ():
+    if request.method == 'POST':
+        if 'gcs_user' in session and session['gcs_logged_in']:
+            jobid = int(request.args.get ('job'))
+            job_instance = Job.query.filter_by (id = jobid).first ()
+            if job_instance is not None:
+                drone_instance = Drone.query.filter_by (id = job_instance.id).first()
+                payload_instance = Payload.query.filter_by (id = job_instance.payload_id).first()
+                return render_template ('jobview.html',job = job_instance,
+                        drone = drone_instance, payload = payload_instance)
+        else:
+            return redirect ('/gcslogin',code = 302)
+    else:
+        return "<h2>Error,Only post requests allowed!</h2>"
 
 
 
