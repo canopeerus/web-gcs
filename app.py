@@ -71,7 +71,7 @@ LANDING PAGE
 @app.route ("/gcsportal",methods=['GET','POST'])
 def gcs_home():
     if 'gcs_user' in session and session['gcs_logged_in']:
-        return render_template ('gcshome.html')
+        return redirect ('/jobtracker',code = 302)
     else:
         return redirect ('/gcslogin',code = 302)
 
