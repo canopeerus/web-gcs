@@ -121,3 +121,13 @@ class Job (db.Model):
 
     def is_pending (self):
         return self.status == 'PENDING APPROVAL'
+
+class CustomerUser (db.Model):
+    __tablename__ = 'customers'
+    id = db.Column (db.Integer,primary_key = True)
+    username = db.Column (db.String())
+    firstname = db.Column (db.String())
+    lastname = db.Column (db.String())
+    emailid = db.Column (db.String())
+    phoneno = db.Column (db.String())
+    default_address_str1 = db.Column (db.String())

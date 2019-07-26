@@ -419,6 +419,21 @@ def visualize_logs ():
         return redirect ('/gcsportal',code = 302)
 
 
+
+'''
+--------------------------------------
+NPNT AUTHENTICATION
+--------------------------------------
+'''
+# NPNT tool page
+@app.route ('/npntauthentication')
+def npntauthroute ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        return render_template ('npntpage.html')
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+
 '''
 ---------------------------------------
 JOBS/DEPLOYMENT RELATED ACTIONS
@@ -582,6 +597,22 @@ ERROR HANDLER/SPECIAL FUNCTIONS
 def page_not_found (e):
     return render_template ('404.html',code=404)
 
+
+
+'''
+=======================================================================
+=======================================================================
+CUSTOMER ACTIONS
+=======================================================================
+=======================================================================
+
+---------------------------------------------------------------
+CUSTOMER LANDING PAGE
+---------------------------------------------------------------
+'''
+@app.route ('/customerportal')
+def customer_landing ():
+    return render_template ('customerhome.html')
 
 '''
 -------------------------------------------------------------------

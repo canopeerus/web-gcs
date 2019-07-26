@@ -5,7 +5,7 @@ html,body{
   font-family: 'Josefin Sans', sans-serif;
 
 }
-/*.header{
+.header{
   position:relative;
   overflow:hidden;
   display:flex;
@@ -18,7 +18,7 @@ html,body{
   max-height:550px;
   min-width:300px;
   color:#eee;
-}*/
+}
 .header:after{
   content:"";
   width:100%;
@@ -39,7 +39,8 @@ html,body{
     -webkit-backface-visibility: hidden;
     -webkit-transform: translateZ(0) scale(1.0, 1.0);
     transform: translateZ(0);
-  background: url('/static/images/adi-drone.jpg') top center no-repeat;
+  background:#1B2030 url("/static/images/adi-drone.jpg") top center no-repeat;
+  /*https://unsplash.it/1999/999?image=1063) top center no-repeat;*/
   background-size:cover;
   background-attachment:fixed;
   animation: grow 60s  linear 10ms infinite;
@@ -73,6 +74,7 @@ html,body{
   right:0;
   box-shadow:0 8px, 0 16px
 }
+
 .logo{
   border:2px solid #fff;
   border-radius:3px;
@@ -92,7 +94,6 @@ html,body{
   width:100%;
   padding:15% 10% 0 10%;
   text-align:center;
-  color:white;
   text-shadow:0 2px 3px rgba(0,0,0,0.2)
 }
 .author{
@@ -100,7 +101,7 @@ html,body{
   width:50px;
   height:50px;
   border-radius:50%;
-  background:url(http://favim.com/media/uploads/images/610/140308/black-n-white-cute-funny-iron-man-Favim.com-1462744.jpg) center no-repeat;
+  background:url("{{ url_for ('static',filename=/images/adi-drone.jpg) }}") center no-repeat;
   background-size:cover;
   box-shadow:0 2px 3px rgba(0,0,0,0.3);
   margin-bottom:3px
@@ -117,7 +118,8 @@ html,body{
 }
 .content{  
   padding:5% 10%;
-  text-align:justify
+  text-align:center;
+  font-size:2.5em;
 }
 .btn{
   color:#333;

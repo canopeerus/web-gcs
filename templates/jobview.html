@@ -22,14 +22,6 @@
         <script src="https://cdn.airmap.io/js/contextual-airspace/v1.0/airmap.contextual-airspace-plugin.min.js" async=false defer=false></script>       
         <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.js"></script>
         <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.css" rel="stylesheet" />
-        <style>
-            div.vmap {
-                width:100%;
-                height:100%;
-                display:block;
-                position:absolute;
-            }
-        </style>
 
     </head>
     <body>
@@ -60,6 +52,9 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href='/inventory'><i class="fas fa-boxes"></i> Inventory</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href='/npntauthentication'><i class="fas fa-key"></i> NPNT Authentication</a>
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLinkx" data-toggle="dropdown"><i class="fas fa-tools"></i> Tools</a>
@@ -126,24 +121,24 @@
                 <a href="#" style="text-align:center;" class="btn btn-primary">Initiate Deployment</a>
                 </div>
             </div>
-            <div class="container-right">
-                <div id = "vmap" class="vmap"></div>
+            <div class="container-right border border-white" id="vmap">
             </div>
         </div>
         <script>
          const AIRMAP_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHxKZ1FseEV6aDNhWFh2TENvZU1Za1JUeXFiZDJhIiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxHeGFZNTVxdFo4ZUE3Q1hBUEV3a2NuZ2RNTVEiLCJvcmdhbml6YXRpb25faWQiOiJkZXZlbG9wZXJ8S1ltUUd5WGZSd1o5MkxIZ2VaeG9SU0FHUkdQMyIsImlhdCI6MTU1OTI5MTAwNn0.f5BBtwQwuCNuiqDSQD3rQdNOfilmRzpcFYoDqXDYlTs'
                 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw'
-
-                if (AIRMAP_API_KEY && MAPBOX_ACCESS_TOKEN) {
+                var lat = {{ job.location_origin_lat }};
+                var lon = {{ job.location_origin_long }};
+                //if (AIRMAP_API_KEY && MAPBOX_ACCESS_TOKEN) {
                     mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
                     var map = new mapboxgl.Map({
                         container: 'vmap',
-                        style:'mapbox://styles/mapbox/streets-v8',
+                        style:'https://api.airmap.io/maps/v4/tilejson/airports_recreational,class_b?apikey='+AIRMAP_API_KEY+'&theme=standard',
                         zoom:9,
-                        center: [{{ job.location_origin_long }}, {{ job.location_origin_lat }}]
+                        center: [lon,lat]
                 });
-
-                } else {
+                
+               /* } else {
                     console.error(
                         'Missing AIRMAP_API_KEY or MAPBOX_ACCESS_TOKEN. ' +
                         'These are required for developing locally.\n\n' +
@@ -151,7 +146,13 @@
                         'localStorage.setItem(\'AIRMAP_API_KEY\', \'<your_key>\');\n' +
                         'localStorage.setItem(\'MAPBOX_ACCESS_TOKEN\', \'<your_token>\');\n\n'
                     );
-                }
+                }*/
+                map.on ('load',function () {
+                    console.log ("MAp loaded baby");
+                    new mapboxgl.Marker ()
+                        .setLngLat([lon,lat])
+                        .addTo(map);
+                });
     </script>
 
     </body>
