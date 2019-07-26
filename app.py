@@ -373,7 +373,8 @@ MAP
 @app.route ('/map')
 def show_map ():
     if 'gcs_user' in session and session['gcs_logged_in']:
-        return render_template ('maps.html')
+        jobslist = Job.query.all ()
+        return render_template ('maps.html',jobs = jobslist)
     else:
         return redirect ('/gcslogin',code=302)
 
