@@ -72,6 +72,7 @@ body { margin: 0; padding: 0; }
                                     <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLinkx" data-toggle="dropdown"><i class="fas fa-tools"></i> Tools</a>
                                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkx">
                                         <a class="dropdown-item" href="/logplotter">Log File Parse/Plot</a>
+                                        <a class="dropdown-item" href='/logfilestorage'>Log File Storage</a>
                                     </div>
                                 </li>
                                 <li class="nav-item">
@@ -155,8 +156,8 @@ body { margin: 0; padding: 0; }
                     {% for row in deployments %}
                     <tr class="clickable-row" id="{{ row.id }}">
                         <td class="padded">{{ row.date.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
-                        <td class="padded">{{ row.location_dest_string }}</td>
                         <td class="padded">{{ row.location_origin_string }}</td>
+                        <td class="padded">{{ row.location_dest_string }}</td>
                         <td class="padded">{{ row.payload_weight }}</td>
                         <td class="padded status">
                                 {{ row.status }}

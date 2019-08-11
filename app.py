@@ -14,6 +14,7 @@ from datetime import datetime
 import os,uuid,visualise,shutil,time,geocoder
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
+from pymongo import MongoClient
 
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])
@@ -37,12 +38,15 @@ POSTGRES = {
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
 app.config['WTF_CSRF_ENABLED'] = True
+app.config ['MONGODB_URI'] = 'mongodb://localhost:27017/'
 
 db.app = app
 db.init_app (app)
 
 db.create_all ()
 db.session.commit ()
+
+mongo_client  = MongoClient (app.config['MONGODB_URI'])
 
 '''
 ---------------------------------------------------
@@ -57,16 +61,18 @@ def allowed_file (filename):
     return '.' in filename and \
             filename.rsplit ('.',1)[1].lower() in ALLOWED_LOGS_EXTENSIONS
 
+
+
+'''
+---------------------------------------------
+LANDING PAGE
+---------------------------------------------
+'''
 @app.route ('/')
 def homepage ():
     return render_template("index.html")
     
   
-'''
----------------------------------
-LANDING PAGE
----------------------------------
-'''
 # Main GCS Page route, redirects to 'gcslogin' if not logged in
 @app.route ("/gcsportal",methods=['GET','POST'])
 def gcs_home():
@@ -420,6 +426,14 @@ def visualize_logs ():
         return redirect ('/gcsportal',code = 302)
 
 
+@app.route ('/logfilestorage')
+def log_file_storage ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        drones = Drone.query.all ()
+        count = len(drones)
+        return render_template ('logfilestorage.html',drones = drones,count = count)
+    else:
+        return redirect ('/gcslogin',code = 302)
 
 '''
 --------------------------------------
@@ -582,12 +596,41 @@ def initiate_deployment ():
                 payload_instance = Payload.query.filter_by (id = job_instance.payload_id).first()
                 return render_template ('jobview.html',job = job_instance,
                         drone = drone_instance, payload = payload_instance)
+            else:
+                return "<h3> Something went wrong</h3>"
         else:
             return redirect ('/gcslogin',code = 302)
     else:
         return "<h2>Error,Only post requests allowed!</h2>"
 
 
+@app.route ('/godeployment')
+def go_deployment ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        jobid = int (request.args.get ('job'))
+        job_instance = Job.query.filter_by (id = jobid).first()
+        if job_instance is not None:
+            drone_instance = Drone.query.filter_by (id = job_instance.id).first ()
+            payload_instance = Payload.query.filter_by (id = job_instance.payload_id).first()
+            return render_template ('flytgcs_web/app.html',job = job_instance)
+        else:
+            return "<h3>Something went wrong</h3>"
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+
+@app.route ('/jobcontrol')
+def jobtakeoff ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        jobid = int(request.args.get ('job'))
+        job_instance = Job.query.filter_by (id = jobid).first()
+        if job_instance is not None:
+            drone_instance = Drone.query.filter_by (id = job_instance.id).first ()
+            return render_template ('flytgcs_web/flightcontrol.html',drone = drone_instance)
+        else:
+            return "<h3>Something went wrong</h3>"
+    else:
+        return redirect ('/gcslogin',code = 302)
 
 '''
 -----------------------------------------------------------------

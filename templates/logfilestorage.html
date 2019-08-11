@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>Redwing GCS</title>
+        <title>Log File Storage</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -78,5 +78,67 @@
                 </div>
             </div>
         </div>
+        <div class="container-fluid">
+            <div id="no-msg" style="display:none;">
+                <div style="text-align:center;">
+                    <h4>No deployments found</h4>
+                </div>
+            </div>
+            <table class="table table-hover" id="logtable">
+                <thead id="thead" style="display:none;">
+                    <tr>
+                        <th class="padded">Date/Time</th>
+                        <th class="padded">Uploader</th>
+                        <th class="padded">Aircraft</th>
+                        <th class="padded">Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in files %}
+                    <tr class="clickable-row" id="{{ row.id }}">
+                        <td class="padded">{{ row.datetime.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td class="padded">{{ row.uploader }}</td>
+                        <td class="padded">{{ row.drone_name }}</td>
+                        <td>{{ row.remarks }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+                <form action='/addnewlogfile' method='POST' enctype='multipart/form-data'>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                        </div>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01" name='file'>
+                            <label class="custom-file-label" for="inputGroupFile01">Choose File</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <br><br>
+                        <label for='drone_select'>Drone</label>
+                        <select required class="form-control" id="drone_select" name="drone_select">
+                            {% for item in drones %}
+                                <option value="{{ item.id }}">{{ item.drone_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" style="text-align:center;">
+                        <br><br>
+                        <input type="submit" value="Upload" class="btn btn-default"/>
+                    </div>
+                </form>
+
+        </div>
+    <script type="text/javascript">
+    $(document).ready (function () {
+        var count = {{ count }};
+        if ( count == 0 ) {
+            $("#no-msg").css("display","block");
+        }
+        else {
+            $("#thead").css ("display","table-header-group");
+        }
+    });
     </body>
 </html>

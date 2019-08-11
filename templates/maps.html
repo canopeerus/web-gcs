@@ -116,15 +116,24 @@
                 }*/
                 map.on ('load',function () {
                     var jobcoordslon,jobcoordslat;
+                    var popup_element;
                     {% for job in jobs %}
+                        popup_element = document.createElement ('div');
+                        popup_element.id = 'marker{{ job.id }}';
+
+                        popup_element.addEventListener ('click',function () {
+                            window.location.href = '/jobview?job={{ job.id }}';
+                        });
+
                         jobcoordslon = {{ job.location_dest_long }};
                         jobcoordslat = {{ job.location_dest_lat }};
-                        new mapboxgl.Marker ()
+                        
+                        new mapboxgl.Marker (popup_element) 
                             .setLngLat ([jobcoordslon,jobcoordslat])
                             .addTo(map);
+                                
                     {% endfor %}
                 });
-                    
         </script>
     </body>
 </html>

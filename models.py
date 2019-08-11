@@ -122,6 +122,10 @@ class Job (db.Model):
     def is_pending (self):
         return self.status == 'PENDING APPROVAL'
 
+class LogFile (db.Model):
+    __tablename__ = 'logfiles'
+    id = db.Column (db.Integer,primary_key = True)
+
 class CustomerUser (db.Model):
     __tablename__ = 'customers'
     id = db.Column (db.Integer,primary_key = True)
