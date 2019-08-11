@@ -46,7 +46,7 @@ db.init_app (app)
 db.create_all ()
 db.session.commit ()
 
-mongo_client  = MongoClient (app.config['MONGODB_URI'])
+#mongo_client  = MongoClient (app.config['MONGODB_URI'])
 
 '''
 ---------------------------------------------------
