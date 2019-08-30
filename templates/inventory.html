@@ -47,7 +47,7 @@
                                     <a class="nav-link" href='/dronemonitor'><i class="fab fa-avianex"></i> Fleet Monitor</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href='#'><i class="fas fa-boxes"></i> Inventory</a>
+                                    <a class="nav-link" href='/incidents'><i class="fas fa-boxes"></i> Inventory</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href='/npntauthentication'><i class="fas fa-key"></i> NPNT Authentication</a>
@@ -87,16 +87,26 @@
             <table id='inventory_table' class="table table-hover">
                 <thead id="thead" style="display:none;">
                     <tr>
-                        <th class="padded">Name</th>
-                        <th class="padded">Unit Weight (grams)</th>
+                        <th class="padded">Type</th>
+                        <th class="padded">Item</th>
+                        <th class="padded">Storage Type</th>
+                        <th class="padded">Item Type</th>
+                        <th class="padded">Weight</th>
+                        <th class="padded">UOM</th>
                         <th class="padded">Available Stock</th>
+                        <th class="padded">Item Value</th>
                     </tr>
                 <tbody>
                     {% for row in inventory %}
                         <tr class="clickable-row" id="{{ row.id }}">
-                            <td class="padded">{{ row.name }}</td>
+                            <td class="padded">{{ row.type_str }}</td>
+                            <td class="padded">{{ row.item }}</td>
+                            <td class="padded">{{ row.storage_type }}</td>
+                            <td class="padded">{{ row.item_type }}</td>
                             <td class="padded">{{ row.weight }}</td>
+                            <td class="padded">{{ row.uom }}</td>
                             <td class="padded">{{ row.stock }}</td>
+                            <td class="padded">{{ row.value }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

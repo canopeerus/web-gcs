@@ -17,6 +17,7 @@
 
         <!--Load page specific CSS-->
         <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
+        <link rel="stylesheet" href="/static/style/newinventory.css">
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     </head>
@@ -32,7 +33,7 @@
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="navbar-nav">
                                 <li class="nav-item active">
-                                    <a class="nav-link" href="#"><i class="fas fa-home"></i> Home<span class="sr-only">(current)</span></a>
+                                    <a class="nav-link" href="/gcsportal"><i class="fas fa-home"></i> Home<span class="sr-only">(current)</span></a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/map"><i class="fas fa-map-marker-alt"></i> Map</a>
@@ -78,24 +79,129 @@
                 </div>
             </div>
         </div>
-        <div class="container-fluid">
+        <br><br>
+        <div class="container">
             <form id="newinventory-form" action='/newinventoryaction' method='POST'>
                 <div class="form-group">
-                    <label for='itemName'>Item Name</label>
-                    <input type="text" class="form-control" required name='itemName' id='itemName'/>
+                    <label for='itemType'>Type</label>
+                    <select required class="form-control" id="type_select" name="type_select">
+                        <option value=""></option>
+                        <option value="New Type">New Type</option>
+                        {% for item in types %}
+                            <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                    <br>
+                    <input type="text" class="form-control" name='newitemType' 
+                     id='itemType'/>
                 </div>
                 <div class="form-group">
-                    <label for='itemWeight'>Item Unit Weight (in Grams)</label>
-                    <input type="text" class="form-control" required name='itemWeight' id='itemWeight'/>
+                    <label for='item'>Item</label>
+                    <select required class="form-control" id='item_select' name='item_select'>
+                        <option value=""></option>
+                        <option value='New Item'>New Item</option>
+                        {% for item in items %}
+                            <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                    <br>
+                    <input type="text" class="form-control" required name='item' id='item' disabled/>
                 </div>
                 <div class="form-group">
-                    <label for='itemStock'>Item Stock in Inventory</label>
-                    <input type="text" class="form-control" required name='itemStock' id='itemStock'/>
+                    <label for='storageType'>Storage Type</label>
+                    <select required class="form-control" id="storage_type_select" name="storage_type_select">
+                        <option value=""></option>
+                        <option value="New Storage Type">New Storage Type</option>
+                        {% for item in storage_types %}
+                            <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                    <br>
+                    <input type="text" class="form-control" disabled name='storageType' id='storageType'/>
                 </div>
+                <div class="form-group">
+                    <label for='itemType'>Item Type</label>
+                    <input type="text" class="form-control" required name='itemType' id='itemType'/>
+                </div>
+                <div class="form-group">
+                    <label for='itemWeight'>Weight</label>
+                    <input type="text" class="form-control" required name='weight' id='weight'/>
+                </div>
+                <div class="form-group">
+                    <label for='uom'>Unit of Measurement</label>
+                    <select required class="form-control" id="uom_select" name="uom_select">
+                        <option value=""></option>
+                        <option value="new_uom">New Unit of measure</option>
+                        {% for item in uoms %}
+                            <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                    <br>
+                    <input type="text" class="form-control" disabled name='newUom' id='newUom'/>
+                </div>
+                <div class="form-group">
+                    <label for='stock'>Stock</label>
+                    <input type="text" name="stock" required/>
+                </div>
+                <div class="form-group">
+                    <label for='value'>Value</label>
+                    <input type="text" name='value' required/>
+                </div>
+
                 <div class="form-group" style="text-align:center;">
                     <input type="submit" class="btn btn-primary" value="Submit"/>
                 </div>
+                <div class="form-group" style="text-align:center;">
+                    <a href="/batchinventoryupload" class="btn btn-primary">Batch Upload Inventory Items(CSV)</a>
+                </div>
             </form>
         </div>
+    <script>
+        $(document).ready (function () {
+            $("#type_select").on ('change',function () {
+                if ( $(this).val () == 'New Type' ) {
+                    $("#itemType").attr("disabled",false);
+                    $("#itemType").attr("required",true);
+                }
+                else {
+                    $("#itemType").attr ("disabled",true);
+                    $("#itemType").attr ("required",false);
+                }
+            });
+
+            $("#item_select").on ('change',function () {
+                if ( $(this).val () == 'New Item' ) {
+                    $("#item").attr ("disabled",false);
+                    $("#item").attr ("required",true);
+                }
+                else {
+                    $("#item").attr ("disabled",true);
+                    $("#item").attr ("required",false);
+                }
+            });
+
+            $("#storage_type_select").on ('change',function () {
+                if ( $(this).val() == 'New Storage Type' ) {
+                    $("#storageType").attr("disabled",false);
+                    $("#storageType").attr ("required",true);
+                }
+                else {
+                    $("#storageType").attr ("disabled",true);
+                    $("#storageType").attr ("required",false);
+                }
+            });
+
+            $("#uom_select").on ('change',function () {
+                if ( $(this).val() == 'new_uom' ) {
+                    $("#newUom").attr ("disabled",false);
+                    $("#newUom").attr ("required",true);
+                }
+                else {
+                    $("#newUom").attr ("disabled",true);
+                    $("#newUom").attr ("required",false);
+                }
+            });
+        });
+    </script>
     </body>
 </html>

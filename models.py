@@ -71,14 +71,24 @@ class Drone (db.Model):
 class Payload (db.Model):
     __tablename__ = 'payloads'
     id = db.Column (db.Integer,primary_key = True)
-    name = db.Column (db.String())
-    weight = db.Column (db.Float)
+    type_str = db.Column (db.String())
+    item = db.Column (db.String())
+    storage_type = db.Column (db.String())
+    item_type = db.Column (db.String())
+    weight = db.Column (db.Integer)
+    uom = db.Column (db.String())
     stock = db.Column (db.Integer)
+    value = db.Column (db.Float)
 
-    def __init__ (self, name, weight, stock):
-        self.name = name
+    def __init__ (self, type_str,item,storage_type,item_type,weight,uom,stock,value):
+        self.type_str = type_str
+        self.item = item
+        self.storage_type = storage_type
+        self.item_type = item_type
         self.weight = weight
+        self.uom = uom
         self.stock = stock
+        self.value = value
 
 
 class Job (db.Model):
@@ -125,6 +135,20 @@ class Job (db.Model):
 class LogFile (db.Model):
     __tablename__ = 'logfiles'
     id = db.Column (db.Integer,primary_key = True)
+
+class Incident (db.Model):
+    __tablename__ = 'incidents'
+    id = db.Column (db.Integer,primary_key = True)
+    description = db.Column (db.String())
+    user_issuedId = db.Column (db.Integer,db.ForeignKey ('gcsusers.id'))
+    drone_relatedId = db.Column (db.Integer,db.ForeignKey('drones.id'))
+    status = db.Column (db.String())
+
+    def __init__ (self,description,user_issued,drone_related):
+        self.description = description
+        self.user_issuedId = user_issued
+        self.drone_relatedId = drone_related
+        self.status = 'Pending Action'
 
 class CustomerUser (db.Model):
     __tablename__ = 'customers'

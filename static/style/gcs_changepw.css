@@ -135,7 +135,7 @@ body {
   color: #222;
   font-weight: 600;
   font-family: Roboto;
-  background: #ef585d;
+  background: #49f2c8;
   padding: 115px 0; }
 a {
   color: #1da0f2; }
@@ -150,7 +150,9 @@ a {
   -webkit-box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
   -o-box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
   -ms-box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
-  background: #fff; }
+  background: #fff;
+  border-radius:15px;    
+ }
 .signup-content {
   padding: 10px 0; }
 .signup-form {

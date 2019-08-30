@@ -18,6 +18,7 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap-timepicker.min.css') }}"/>
 
+        <link rel="stylesheet" href="/static/style/newjob.css">
         <!--Load page specific CSS-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
@@ -89,8 +90,9 @@
                 </div>
             </div>
         </div>
-        <h1 style="text-align:center;">Add new job/deployment</h1>
-        <div class="container-fluid">
+        <br><br>
+        <div class="container">
+            <h1 style="text-align:center;">Add new job/deployment</h1>
             <form action='/newjobform' method='POST'>
                 <div class="form-group">
                     <label for="datePicker">Date:</label>
@@ -114,7 +116,7 @@
                         <label for='payload'>Payload:</label>
                         <select required class="form-control" id="payload_select" name="payload_select">
                             {% for item in payloads %}
-                                <option value="{{ item[0] }}">{{ item[1] }}</option>
+                                <option value="{{ item.id }}">{{ item.item_type }}</option>
                             {% endfor %}
                         </select>
                     </div>

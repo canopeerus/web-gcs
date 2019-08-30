@@ -38,7 +38,7 @@
                                     <a class="nav-link" href="/map"><i class="fas fa-map-marker-alt"></i> Map</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="#"><i class="fas fa-exclamation-circle"></i> Incidents</a>
+                                    <a class="nav-link" href="/incidents"><i class="fas fa-exclamation-circle"></i> Incidents</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href='/jobtracker'><i class="fas fa-business-time"></i> Job Tracker</a>
@@ -118,7 +118,6 @@
         $(document).ready (function () {
             var d = new Date();
             var img = "{{ image }}";
-            console.log
             if ( img != '' ) {
                 $("#img-container").css("display","block");
                 var imgpath = "{{ url_for('download_file',filename='plot.png') }}";

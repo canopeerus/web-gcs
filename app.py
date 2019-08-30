@@ -15,9 +15,10 @@ import os,uuid,visualise,shutil,time,geocoder
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload
 from pymongo import MongoClient
-
+import pandas as pd
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])
+ALLOWED_BATCH_INVENTORY_TYPES  = ALLOWED_LOGS_EXTENSIONS
 
 app = Flask (__name__)
 app.config['DEBUG'] = True
@@ -114,9 +115,12 @@ def gcs_login_action ():
 @app.route ("/gcsuserprofile",methods=['POST','GET'])
 def show_userprofile():
     if 'gcs_user' in session and session['gcs_logged_in']:
+        updated = 0
+        if 'updated' in request.args:
+            updated = 1
         user = session['gcs_user']
         qresult = GCSUser.query.filter_by(username=user).first()
-        return render_template ("gcsprofile.html",username = qresult.username, firstname = qresult.firstname, lastname = qresult.lastname,email_id = qresult.email_id)
+        return render_template ("gcsprofile.html",username = qresult.username, firstname = qresult.firstname, lastname = qresult.lastname,email_id = qresult.email_id,updated = updated)
 
     else:
         return redirect ("/gcslogin",code=302)
@@ -181,7 +185,7 @@ def gcs_profile_edit ():
         print ("no email")
 
     db.session.commit()
-    return redirect ("/gcsuserprofile",code=302)
+    return redirect ("/gcsuserprofile?updated",code=302)
 
 # Route for password change input form
 @app.route ("/updatepassword")
@@ -331,7 +335,22 @@ def main_inventory ():
 @app.route ('/addinventory')
 def new_inventory ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
-        return render_template ('newinventory.html')
+        payloads = Payload.query.all ()
+        types = []
+        storage_types = []
+        items = []
+        uoms = []
+        for p in payloads:
+            if p.type_str in types:
+                types.append (p.type_str)
+            if p.storage_type in storage_types:
+                storage_types.append (p.storage_type)
+            if p.item in items:
+                items.append (p.item)
+            if p.uom in uoms:
+                uoms.append (p.uom)
+        return render_template ('newinventory.html',types = types,items = items,
+                storage_types = storage_types,uoms = uoms)
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -340,10 +359,40 @@ def new_inventory ():
 def inventoryformaction ():
     if request.method == 'POST':
         if 'gcs_user' in session and session ['gcs_logged_in']:
-            itemName = request.form['itemName']
-            itemWeight = float (request.form['itemWeight'])
-            itemStock = int (request.form['itemStock'])
-            payload = Payload (itemName, itemWeight, itemStock)
+            type_sel = request.form ['type_select']
+            if type_sel == 'New Type':
+                type_str = request.form ['newitemType']
+            else:
+                type_str = type_sel
+
+            item_sel = request.form ['item_select']
+            if item_sel == 'New Item':
+                item = request.form['item']
+            else:
+                item = item_sel
+
+            storage_sel = request.form ['storage_type_select']
+            if storage_sel == 'New Storage Type':
+                storage_type = request.form['storageType']
+            else:
+                storage_type = storage_sel
+
+            item_type = request.form['itemType']
+            item_weight = request.form['weight']
+            
+            uom_sel = request.form ['uom_select']
+            if uom_sel == 'new_uom':
+                uom = request.form['newUom']
+            else:
+                uom = uom_sel
+
+            stock = request.form ['stock']
+
+            value = request.form['value']
+
+            payload = Payload (type_str,item,storage_type,item_type,item_weight,uom,
+                    stock,value)
+
             db.session.add (payload)
             db.session.commit ()
             return redirect ('/inventory',code = 302)
@@ -351,9 +400,54 @@ def inventoryformaction ():
             return redirect ('/gcslogin',code = 302)
     else:
         return redirect ('/gcsportal',code = 302)
-    
+   
+@app.route ('/batchinventoryupload',methods=['GET'])
+def batchupload_page ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        return render_template ('batchinventory_upload.html')
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+
+def csv_allowed_file (filename):
+    return '.' in filename and  \
+            filename.rsplit ('.',1)[1].lower() in ALLOWED_BATCH_INVENTORY_TYPES
+
+@app.route ('/batchinventoryaction',methods=['POST'])
+def batchinventory_action ():
+    if request.method == 'POST':
+        if 'gcs_user' in session and session ['gcs_logged_in']:
+            if not 'file' in request.files:
+                return 'error:no file'
+            inputfile = request.files.get ('file')
+            if inputfile is None:
+                return "The fuck"
+            if csv_allowed_file (inputfile.filename):
+                filename = inputfile.filename
+                outpath = os.path.join (app.config['UPLOAD_FOLDER'],filename)
+                inputfile.save (outpath)
+                df = pd.read_table (outpath,sep=',')
+                for index,row in df.iterrows():
+                    inventory_item = Payload (row['type'],row['item'],row['storage_type'],
+                            row['item_type'],int(row['weight']),row['uom'],
+                            int(row['stock']),float(row['value']))
+                    db.session.add (inventory_item)
+                db.session.commit ()
+                os.remove (outpath)
+                return redirect ('/inventory',code = 302)
+            else:
+                return "Invalid file format"
+        else:
+            return redirect ('/gcslogin',code = 302)
+    else:
+        return "ERROR"
+
+
+
 @app.route ('/inventoryitem',methods=['GET'])
 def inventoryitemdisplay ():
+    return "<h1 style='text-align:center;'>Inventory edit is being worked on. Unavailable at the moment</h1>"
+    '''
     if 'gcs_user' in session and session['gcs_logged_in']:
         if 'item' in request.args:
             itemId = request.args['item']
@@ -368,7 +462,7 @@ def inventoryitemdisplay ():
             return redirect ('/gcsportal',code = 302)
     else:
         return redirect ('/gcslogin',code = 302)
-
+    '''
 
 '''
 -----------------------------------
@@ -473,10 +567,7 @@ def new_job ():
         for x in drones:
             droneslist.append ([x.drone_name,x.id])
         payloads = Payload.query.all ()
-        payloadslist = []
-        for p in payloads:
-            payloadslist.append ([p.id,p.name,p.stock])
-        return render_template ('newjob.html',drones = drones,payloads = payloadslist)
+        return render_template ('newjob.html',drones = drones,payloads = payloads)
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -557,7 +648,7 @@ def jobview ():
                 job_instance = Job.query.filter_by (id = jobid).first ()
                 if job_instance is not None:
                     if job_instance.is_pending ():
-                        return render_template ('jobotp.html',jobid = job_instance.id)
+                        return render_template ('jobview.html',jobid = job_instance.id)
                     else:
                         return "<h2>Work In Progress</h2>"
                 else:
@@ -575,7 +666,7 @@ def auth_otp ():
             onetime_password = request.form.get ('otp')
             jobid = request.form.get ('jobid')
             if onetime_password == '0000':
-                return redirect ('/initiatedeployment?job='+jobid,code = 307)
+                return redirect ('/godeployment?job='+jobid,code = 307)
             else:
                 return render_template ('jobotp.html',errorstr = "matcherror")
         else:
@@ -631,6 +722,20 @@ def jobtakeoff ():
             return "<h3>Something went wrong</h3>"
     else:
         return redirect ('/gcslogin',code = 302)
+
+
+'''
+----------------------------------------------------------------
+INCIDENT TRACKER
+----------------------------------------------------------------
+'''
+@app.route ('/incidents')
+def incident_landing ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        return render_template ('incidents/index.html')
+    else:
+        return redirect ('/gcslogin',code = 302)
+
 
 '''
 -----------------------------------------------------------------

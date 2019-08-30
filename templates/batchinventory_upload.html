@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>Add New Drone to Fleet</title>
+        <title>Redwing GCS</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -17,12 +17,11 @@
 
         <!--Load page specific CSS-->
         <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
-        <link rel="stylesheet" href="/static/style/newdrone.css">
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     </head>
     <body>
-            <div class="container-fluid">
+        <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
                     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -57,11 +56,11 @@
                                     <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLinkx" data-toggle="dropdown"><i class="fas fa-tools"></i> Tools</a>
                                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkx">
                                         <a class="dropdown-item" href="/logplotter">Log File Parse/Plot</a>
-                                        <a class="dropdown-item" href='/logfilestorage'>Log File Storage</a>
+                                        <a class='dropdown-item' href='/logfilestorage'>Log File Storage</a>
                                     </div>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="https://www.redwinglabs.in/about"><i class="fas fa-address-card"></i> About Us</a>
+                                    <a class="nav-link" href="http://www.redwinglabs.in/about"><i class="fas fa-address-card"></i> About Us</a>
                                 </li>
                             </ul>
                             <ul class="navbar-nav ml-md-auto">
@@ -79,40 +78,28 @@
                 </div>
             </div>
         </div>
-        <br><br>
-        <div class="container">
-            <br><br>
-            <h2 style="text-align:center;">Details for New Drone</h2>
-            <br><br>
-            <div style="text-align:center;">
-            <form id="newdrone-form" action="/newdroneaction" method="POST">
-                <div class="form-group row">
-                    <label for="droneName" class="col-sm-2 col-form-label">Drone Name</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" required name="droneName" id="droneName"/>
+        <div class="container-fluid">
+            <form action="/batchinventoryaction" method="POST" enctype='multipart/form-data'>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <label for="droneModel" class="col-sm-2 col-form-label">Drone Model</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" required name='droneModel' id='droneModel'/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for='motorCount' class="col-sm-2 col-form-label">Motor Count</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" required name='motorCount' id='motorCount'/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for='batteryType' class="col-sm-2 col-form-label">Battery Type</label>
-                    <div class="col-sm-10">
-                        <input type='text' class="form-control" required name='batteryType' id='batteryType'/>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01" name='file'>
+                        <label class="custom-file-label" for="inputGroupFile01">Choose File</label>
                     </div>
                 </div>
                 <div class="form-group" style="text-align:center;">
-                    <input type="submit" class="btn btn-primary" value="Submit"/>
+                    <br><br>
+                    <input type="submit" value="Upload" class="btn btn-default"/>
                 </div>
+            </form>
         </div>
+    <script>
+        $("#inputGroupFile01").on ('change',function () {
+            var filename = $(this).val();
+            filename = filename.replace ("C:\\fakepath\\", "");
+            $(this).next ('.custom-file-label').html (filename);
+        });
     </body>
 </html>
