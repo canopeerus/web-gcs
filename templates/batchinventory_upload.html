@@ -14,7 +14,7 @@
 
         <!--Load bootstrap css-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
-
+        <link rel="stylesheet" href="/static/style/batch.css">
         <!--Load page specific CSS-->
         <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
@@ -78,7 +78,11 @@
                 </div>
             </div>
         </div>
-        <div class="container-fluid">
+        <br><br>
+        <div class="container">
+            <br>
+            <h2 style="text-align:center;">CSV Upload for batch inventory addition</h2>
+            <br><br>
             <form action="/batchinventoryaction" method="POST" enctype='multipart/form-data'>
                 <div class="input-group">
                     <div class="input-group-prepend">
@@ -92,6 +96,10 @@
                 <div class="form-group" style="text-align:center;">
                     <br><br>
                     <input type="submit" value="Upload" class="btn btn-default"/>
+                </div>
+
+                <div class="form-group" style="text-align:center;">
+                    <h4>Only CSV files are acceptable. With comma separated column values correctly</h4>
                 </div>
             </form>
         </div>

@@ -81,6 +81,9 @@
         </div>
         <br><br>
         <div class="container">
+            <br><br>
+            <h2 style="text-align:center;">Add new Inventory Item</h2>
+            <br>
             <form id="newinventory-form" action='/newinventoryaction' method='POST'>
                 <div class="form-group">
                     <label for='itemType'>Type</label>
@@ -93,7 +96,7 @@
                     </select>
                     <br>
                     <input type="text" class="form-control" name='newitemType' 
-                     id='itemType'/>
+                     id='itemType' disabled placeholder='New Type'/>
                 </div>
                 <div class="form-group">
                     <label for='item'>Item</label>
@@ -105,7 +108,7 @@
                         {% endfor %}
                     </select>
                     <br>
-                    <input type="text" class="form-control" required name='item' id='item' disabled/>
+                    <input type="text" class="form-control" required name='item' id='item' disabled placeholder='New Item'/>
                 </div>
                 <div class="form-group">
                     <label for='storageType'>Storage Type</label>
@@ -117,7 +120,7 @@
                         {% endfor %}
                     </select>
                     <br>
-                    <input type="text" class="form-control" disabled name='storageType' id='storageType'/>
+                    <input type="text" class="form-control" disabled name='storageType' id='storageType' placeholder = 'New Storage Type'/>
                 </div>
                 <div class="form-group">
                     <label for='itemType'>Item Type</label>
@@ -137,15 +140,15 @@
                         {% endfor %}
                     </select>
                     <br>
-                    <input type="text" class="form-control" disabled name='newUom' id='newUom'/>
+                    <input type="text" class="form-control" disabled name='newUom' id='newUom' placeholder="New Unit of Measurement"/>
                 </div>
                 <div class="form-group">
                     <label for='stock'>Stock</label>
-                    <input type="text" name="stock" required/>
+                    <input type="text" class="form-control" name="stock" required/>
                 </div>
                 <div class="form-group">
                     <label for='value'>Value</label>
-                    <input type="text" name='value' required/>
+                    <input type="text" class="form-control" name='value' required/>
                 </div>
 
                 <div class="form-group" style="text-align:center;">

@@ -1,9 +1,10 @@
-.container {
-    width: 850px;
-    height: 1200px;
-    position:relative;
-    margin:auto;
-    box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
+  .container {
+  width: 850px;
+  height: 450px;
+  position: relative;
+  /*margin: 0 auto;*/
+  margin: auto;
+  box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
   -moz-box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
   -webkit-box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
   -o-box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
@@ -12,6 +13,6 @@
   border-radius:15px;
 }
 
-body { 
-	background:#49f2c8;
+body {
+    background:#49f2c8;
 }
