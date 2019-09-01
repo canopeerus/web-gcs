@@ -8,6 +8,7 @@ Dependencies : flask, psycopg2 + postgresql,geocoer,flask_sqlalchemy
 ------------------------------------------------------------------------------------------------------
 '''
 
+from collections import Counter
 from flask import Flask,render_template,redirect,session,abort,request,flash,url_for,send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -40,6 +41,8 @@ POSTGRES = {
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
 app.config['WTF_CSRF_ENABLED'] = True
 app.config ['MONGODB_URI'] = 'mongodb://localhost:27017/'
+app.config ["ACCEPTABLE_COLUMNS"] = ['type','item','storage_type','item_type','weight',
+        'uom','stock','value']
 
 db.app = app
 db.init_app (app)
@@ -91,7 +94,7 @@ GCS USER PROFILE ACTIONS
 @app.route ("/gcslogin")
 def gcs_login ():
     if not session.get ('gcs_logged_in'):
-        return render_template ("gcs_login.html")
+        return render_template ("fmsgeneric/gcs_login.html")
 
 # GCS Login form action route, accepts only POST requests
 @app.route ("/gcsloginform",methods=['POST'])
@@ -100,7 +103,7 @@ def gcs_login_action ():
     pwval = request.form['password']
     qresult = GCSUser.query.filter_by (username=usernameval).first()
     if qresult is None:
-        return render_template ("gcs_login.html",result="error")
+        return render_template ("fmsgeneric/gcs_login.html",result="error")
     qpassword = qresult.password
     qsalt = qresult.salt
     if verify_password (qpassword,pwval,qsalt):
@@ -109,7 +112,7 @@ def gcs_login_action ():
         session.modified = True
         return redirect("/gcsportal",code=302)
     else:
-        return render_template ("gcs_login.html", result="error")
+        return render_template ("fmsgeneric/gcs_login.html", result="error")
 
 # show user profile and account settings
 @app.route ("/gcsuserprofile",methods=['POST','GET'])
@@ -120,7 +123,7 @@ def show_userprofile():
             updated = 1
         user = session['gcs_user']
         qresult = GCSUser.query.filter_by(username=user).first()
-        return render_template ("gcsprofile.html",username = qresult.username, firstname = qresult.firstname, lastname = qresult.lastname,email_id = qresult.email_id,updated = updated)
+        return render_template ("fmsgeneric/gcsprofile.html",username = qresult.username, firstname = qresult.firstname, lastname = qresult.lastname,email_id = qresult.email_id,updated = updated)
 
     else:
         return redirect ("/gcslogin",code=302)
@@ -136,7 +139,7 @@ def gcs_logout ():
 # GCS Sign up page route
 @app.route ("/gcssignup",methods=['POST','GET'])
 def gcs_signup ():
-    return render_template ("gcs_signup.html")
+    return render_template ("fmsgeneric/gcs_signup.html")
 
 # GCS Sign up page form action route
 @app.route ("/gcssignupform",methods=['POST'])
@@ -152,7 +155,7 @@ def gcs_signup_action ():
         db.session.commit ()
         return redirect ("/gcslogin",code=302)
     else:
-        return render_template ("gcs_signup.html",result = "error")
+        return render_template ("fmsgeneric/gcs_signup.html",result = "error")
 
 # POST route for editing GCS profile
 @app.route ("/gcsprofileedit",methods=['POST'])
@@ -196,9 +199,9 @@ def change_password ():
         print ("ERRRRROOOORRR")
     if 'gcs_logged_in' in session and session['gcs_logged_in']:
         if err:
-            return render_template ("changepassword.html",result="error")
+            return render_template ("fmsgeneric/changepassword.html",result="error")
         else:
-            return render_template ("changepassword.html")
+            return render_template ("fmsgeneric/changepassword.html")
     else:
         return redirect ("/gcslogin",code=302)
 
@@ -231,7 +234,7 @@ def show_drones():
     if 'gcs_user' in session:
         drones = Drone.query.all ()
         count = len(drones)
-        return render_template ("drone-monitor.html", drones = drones, count = count)
+        return render_template ("drone/index.html", drones = drones, count = count)
     else:
         return redirect ("/gcslogin", code=302)
 
@@ -239,7 +242,7 @@ def show_drones():
 @app.route ("/newdrone")
 def new_drone ():
     if 'gcs_user' in session:
-        return render_template ("newdrone.html")
+        return render_template ("drone/newdrone.html")
     else:
         return redirect ('/gcslogin',code=302)
 
@@ -289,7 +292,7 @@ def individual_drone ():
             strerr = 'deleteerror'
         else:
             strerr = 'noerror'
-        return render_template ("droneview.html",drone = drone_instance,jobs = jobslist,count = count,error = strerr)
+        return render_template ("drone/droneview.html",drone = drone_instance,jobs = jobslist,count = count,error = strerr)
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -325,7 +328,7 @@ def main_inventory ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         payloads = Payload.query.all ()
         count = len (payloads)
-        return render_template ("inventory.html",inventory = payloads,count = count)
+        return render_template ("inventory/index.html",inventory = payloads,count = count)
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -349,7 +352,7 @@ def new_inventory ():
                 items.append (p.item)
             if p.uom in uoms:
                 uoms.append (p.uom)
-        return render_template ('newinventory.html',types = types,items = items,
+        return render_template ('inventory/newinventory.html',types = types,items = items,
                 storage_types = storage_types,uoms = uoms)
     else:
         return redirect ('/gcslogin',code = 302)
@@ -404,7 +407,7 @@ def inventoryformaction ():
 @app.route ('/batchinventoryupload',methods=['GET'])
 def batchupload_page ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
-        return render_template ('batchinventory_upload.html')
+        return render_template ('inventory/batchinventory_upload.html')
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -427,13 +430,18 @@ def batchinventory_action ():
                 outpath = os.path.join (app.config['UPLOAD_FOLDER'],filename)
                 inputfile.save (outpath)
                 df = pd.read_table (outpath,sep=',')
-                for index,row in df.iterrows():
-                    inventory_item = Payload (row['type'],row['item'],row['storage_type'],
+                read_columns = list (df.columns.values)
+                if Counter (read_columns) == Counter (app.config['ACCEPTABLE_COLUMNS']):
+                    for index,row in df.iterrows():
+                        inventory_item = Payload (row['type'],row['item'],row['storage_type'],
                             row['item_type'],int(row['weight']),row['uom'],
                             int(row['stock']),float(row['value']))
-                    db.session.add (inventory_item)
-                db.session.commit ()
-                os.remove (outpath)
+                        db.session.add (inventory_item)
+                
+                    db.session.commit ()
+                    os.remove (outpath)
+                else:
+                    return "The uploaded csv file is of invalid format"
                 return redirect ('/inventory',code = 302)
             else:
                 return "Invalid file format"
@@ -554,7 +562,7 @@ def show_jobs ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         jobs = Job.query.all()
         count = len(jobs)
-        return render_template ("jobs.html", deployments = jobs, length = count)
+        return render_template ("jobs/jobs.html", deployments = jobs, length = count)
     else:
         return redirect ('/gcslogin',code = 302)
             
@@ -567,7 +575,7 @@ def new_job ():
         for x in drones:
             droneslist.append ([x.drone_name,x.id])
         payloads = Payload.query.all ()
-        return render_template ('newjob.html',drones = drones,payloads = payloads)
+        return render_template ('jobs/newjob.html',drones = drones,payloads = payloads)
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -629,9 +637,9 @@ def filterjobs ():
 
         jobmatch = Job.query.filter (Job.date < enddatetime,Job.date >= begindatetime).all()
         if jobmatch is not None:
-            return render_template ('jobs.html',deployments = jobmatch)
+            return render_template ('jobs/jobs.html',deployments = jobmatch)
         else:
-            return render_template ('jobs.html',error = 'matcherror')
+            return render_template ('jobs/jobs.html',error = 'matcherror')
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -668,9 +676,9 @@ def auth_otp ():
             if onetime_password == '0000':
                 return redirect ('/godeployment?job='+jobid,code = 307)
             else:
-                return render_template ('jobotp.html',errorstr = "matcherror")
+                return render_template ('jobs/jobotp.html',errorstr = "matcherror")
         else:
-            return render_template ('jobotp.html',errorstr = 'generror')
+            return render_template ('jobs/jobotp.html',errorstr = 'generror')
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -685,7 +693,7 @@ def initiate_deployment ():
             if job_instance is not None:
                 drone_instance = Drone.query.filter_by (id = job_instance.id).first()
                 payload_instance = Payload.query.filter_by (id = job_instance.payload_id).first()
-                return render_template ('jobview.html',job = job_instance,
+                return render_template ('jobs/jobview.html',job = job_instance,
                         drone = drone_instance, payload = payload_instance)
             else:
                 return "<h3> Something went wrong</h3>"
