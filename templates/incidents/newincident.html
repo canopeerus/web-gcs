@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>Incident Tracker Home</title>
+        <title>Incident Ticket Creation</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
 
         <!--Load page specific CSS-->
-        <link rel="stylesheet" href="{{ url_for('static',filename='style/incidents.css') }}"/>
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/newticket.css') }}"/>
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     </head>
@@ -38,7 +38,7 @@
                                     <a class="nav-link" href="/map"><i class="fas fa-map-marker-alt"></i> Map</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="#"><i class="fas fa-exclamation-circle"></i> Incidents</a>
+                                    <a class="nav-link" href="/incidents"><i class="fas fa-exclamation-circle"></i> Incidents</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href='/jobtracker'><i class="fas fa-business-time"></i> Job Tracker</a>
@@ -78,58 +78,50 @@
                 </div>
             </div>
         </div>
-        <br>
-        <h2 style="text-align:center;">
-            Incident Tracker Home
-        </h2>
-        <br>
-        <div class="container-fluid">
-
-            <div id="no-msg" style="text-align:center;display:none;">
-                <br><br>
-                <h2>No incident tickets recorded yet!</h2>
+        <br><br>
+        <div class="container">
+            <br><br>
+            <h2 style="text-align:center;">New Incident Ticket</h2>
+            <br><br>
+            <div style="text-align:center;">
+                <form id="newticket-form" action='/newincidentaction' method="POST">
+                    <div class="form-group row">
+                        <label for='title' class="col-sm-2 col-form-label">Title</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" required name='title'/>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for='description' class="col-sm-2 col-form-label">Description</label>
+                        <div class="col-sm-10">
+                            <textarea rows="4" class="form-control" required name='description'></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for='drone' class="col-sm-2 col-form-label">Drone</label>
+                        <div class="col-sm-10">
+                            <select required class="form-control" id="drone_select" name="drone_select">
+                                {% for item in drones %}
+                                <option value="{{ item.id }}">{{ item.drone_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for='priority' class="col-sm-2 col-form-label">Priority</label>
+                        <div class="col-sm-10">
+                            <select required class="form-control" id="priority_sel" name="priority_sel">
+                                {% for item in priority_list %}
+                                <option value="{{ item }}">{{ item }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="text-align:center;">
+                        <input type='submit' class='btn btn-primary' value='Create new Ticket'>
+                    </div>
+                </form>
             </div>
-            <table class="table table-hover" id="incident_table">
-                <thead id="thead" style="display:none;">
-                    <tr>
-                        <th class="padded">Drone</th>
-                        <th class="padded">Title</th>
-                        <th class="padded">Ticket Creator</th>
-                        <th class="padded">Date/Time Created</th>
-                        <th class="padded">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in incidents %}
-                    <tr class="clickable-row" id="{{ row.id }}">
-                        <td class="padded">{{ row.drone_relatedName }}</td>
-                        <td class="padded">{{ row.title }}</td>
-                        <td class="padded">{{ row.user_issuedName }}</td>
-                        <td class="padded">{{ row.date_created.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
-                        <td class="padded"> {{ row.status }}</th>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
-        <div class="container" style="text-align:center;">
-            <a href="/newincidentreport" class="btn btn-primary">Create new Incident Ticket</a>
-        </div>
-
-    <script>
-        $(document).ready (function () {
-            var length = parseInt ("{{ length }}");
-            if ( length == 0 ) {
-                $("#no-msg").css ("display","block");
-            }
-            else {
-                $('#thead').css ('display','table-header-group');
-            }
-
-            $("#incident_table").find ('tr.clickable-row').click (function () {
-                window.location.href = '/incidentview?id='+($(this).attr ('id'));
-            });
-        });
-    </script>
     </body>
 </html>

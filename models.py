@@ -136,20 +136,56 @@ class LogFile (db.Model):
     __tablename__ = 'logfiles'
     id = db.Column (db.Integer,primary_key = True)
 
+class IncidentModAction (db.Model):
+    __tablename__ = 'incidentmodactions'
+    id = db.Column (db.Integer,primary_key = True)
+    incident_id = db.Column (db.Integer,db.ForeignKey ('incidents.id'))
+    user_id = db.Column (db.Integer,db.ForeignKey ('gcsusers.id'))
+    m_type = db.Column (db.String())
+    incident_pre_status = db.Column (db.String())
+    incident_post_status = db.Column (db.String())
+    date_timestamp = db.Column (db.DateTime)
+
+
+    def __init__ (self,m_type,user_id,incident_id):
+        self.m_type = m_type
+        self.user_id = user_id
+        self.incident_id = incident_id
+
+        if self.m_type == 'Resolution':
+            incident_post_status = 'Resolved'
+        elif self.m_type == 'Creation':
+            incident_pre_status = 'NA'
+            incident_post_status = 'Queued'
+
+        date_timestamp = datetime.now()
+
+
+            
+        
 class Incident (db.Model):
     __tablename__ = 'incidents'
     id = db.Column (db.Integer,primary_key = True)
+    title = db.Column (db.String())
     description = db.Column (db.String())
     user_issuedId = db.Column (db.Integer,db.ForeignKey ('gcsusers.id'))
+    user_issuedName = db.Column (db.String())
     drone_relatedId = db.Column (db.Integer,db.ForeignKey('drones.id'))
+    drone_relatedName = db.Column (db.String())
     status = db.Column (db.String())
+    date_created = db.Column (db.DateTime)
+    priority = db.Column (db.String())
 
-    def __init__ (self,description,user_issued,drone_related):
+    def __init__ (self,title,description,user_issued,username,drone_relatedId,drone_relatedName,priority):
+        self.title = title
         self.description = description
         self.user_issuedId = user_issued
-        self.drone_relatedId = drone_related
+        self.user_issuedName = username
+        self.drone_relatedId = drone_relatedId
+        self.drone_relatedName = drone_relatedName
         self.status = 'Pending Action'
-
+        self.date_created = datetime.now()
+        self.priority = priority
 class CustomerUser (db.Model):
     __tablename__ = 'customers'
     id = db.Column (db.Integer,primary_key = True)

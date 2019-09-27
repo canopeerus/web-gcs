@@ -14,12 +14,15 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os,uuid,visualise,shutil,time,geocoder
 from authutils import verify_password,hash_password
-from models import db,GCSUser,Drone,Job,Payload
+from models import db,GCSUser,Drone,Job,Payload,Incident
 from pymongo import MongoClient
 import pandas as pd
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])
 ALLOWED_BATCH_INVENTORY_TYPES  = ALLOWED_LOGS_EXTENSIONS
+
+status_list = ['Pending Action','Resolved']
+priority_list = ['Low','Medium','High']
 
 app = Flask (__name__)
 app.config['DEBUG'] = True
@@ -123,7 +126,10 @@ def show_userprofile():
             updated = 1
         user = session['gcs_user']
         qresult = GCSUser.query.filter_by(username=user).first()
-        return render_template ("fmsgeneric/gcsprofile.html",username = qresult.username, firstname = qresult.firstname, lastname = qresult.lastname,email_id = qresult.email_id,updated = updated)
+        return render_template ("fmsgeneric/gcsprofile.html",
+                username = qresult.username, firstname = qresult.firstname,
+                lastname = qresult.lastname,email_id = qresult.email_id,
+                updated = updated)
 
     else:
         return redirect ("/gcslogin",code=302)
@@ -740,10 +746,91 @@ INCIDENT TRACKER
 @app.route ('/incidents')
 def incident_landing ():
     if 'gcs_user' in session and session['gcs_logged_in']:
-        return render_template ('incidents/index.html')
+        incidents = Incident.query.all ()
+        length = len (incidents)
+        return render_template ('incidents/index.html',incidents = incidents,length = length)
     else:
         return redirect ('/gcslogin',code = 302)
 
+
+@app.route ('/newincidentreport')
+def new_incident ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        drones = Drone.query.all ()
+        return render_template ('incidents/newincident.html',drones = drones,priority_list = priority_list)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+@app.route ('/newincidentaction',methods=["POST"])
+def new_incident_action ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        incident_title = request.form.get ('title')
+        incident_title = incident_title.strip ()
+
+        description = request.form.get ('description').strip()
+        description = description.strip ()
+        username_val = session ['gcs_user']
+        drone_sel_id = int(request.form.get ('drone_select'))
+        username_id = GCSUser.query.filter_by (username = username_val).first().id
+        drone_sel_name = Drone.query.filter_by (id = drone_sel_id).first ().drone_name
+
+        priority_sel = request.form.get ('priority_sel')
+        incident = Incident (incident_title,description,username_id,username_val,
+                drone_sel_id,drone_sel_name,priority_sel)
+        db.session.add (incident)
+        db.session.commit ()
+        return redirect ('/incidents',code = 302)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+@app.route ('/incidentview')
+def view_incidents ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        if 'id' in request.args:
+            incident_id = int (request.args.get ('id'))
+            incident_instance = Incident.query.filter_by (id = incident_id).first ()
+            
+            drones = Drone.query.all ()
+            if incident_instance is None:
+                return "<h2>FATAL ERROR</h2>"
+            else:
+                return render_template ('incidents/view.html',incident = incident_instance,drones = drones,status_list = status_list,
+                        priority_list = priority_list)
+        else:
+            return redirect ('/incidents',code = 302)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+
+@app.route ('/newincidentupdate',methods=['POST'])
+def update_incidents ():
+    if request.method == "POST":
+        if 'gcs_user' in session and session['gcs_logged_in']:
+            inc_id = int (request.form.get ('i_id'))
+            inc_instance = Incident.query.filter_by (id = inc_id).first ()
+            n_desc = request.form.get ('description')
+            n_desc = n_desc.strip ()
+            inc_instance.description = n_desc
+           
+            n_title = request.form.get ('title')
+            n_title = n_title.strip ()
+            inc_instance.title = n_title
+
+            n_drone_sel = int (request.form.get ('drone_select'))
+            n_drone_name = Drone.query.filter_by (id = n_drone_sel).first().drone_name
+            inc_instance.drone_relatedId = n_drone_sel
+            inc_instance.drone_relatedName = n_drone_name
+            
+            n_status_sel = request.form.get ('status_select')
+            inc_instance.status = n_status_sel
+
+            db.session.commit ()
+
+            return redirect ('/incidents',code = 302)
+        else:
+            return redirect ('/gcslogin',code = 302)
+    else:
+        return redirect ('/incidents',code = 302)
 
 '''
 -----------------------------------------------------------------

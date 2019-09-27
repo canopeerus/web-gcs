@@ -1,0 +1,18 @@
+.container {
+  width: 1000px;
+  height: 520px;
+  position: relative;
+  /*margin: 0 auto;*/
+  margin: auto;
+  box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
+  -o-box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
+  -ms-box-shadow: 0px 10px 9.9px 0.1px rgba(0, 0, 0, 0.1);
+  background: #fff; 
+  border-radius:15px;
+}
+
+body {
+    background:#49f2c8;
+}
