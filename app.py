@@ -9,14 +9,15 @@ Dependencies : flask, psycopg2 + postgresql,geocoer,flask_sqlalchemy
 '''
 
 from collections import Counter
-from flask import Flask,render_template,redirect,session,abort,request,flash,url_for,send_from_directory
+from flask import Flask,render_template,redirect,session,abort,request,flash,url_for,send_from_directory,send_file
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os,uuid,visualise,shutil,time,geocoder
 from authutils import verify_password,hash_password
-from models import db,GCSUser,Drone,Job,Payload,Incident
-from pymongo import MongoClient
+from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile
+from flask_pymongo import PyMongo
 import pandas as pd
+
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])
 ALLOWED_BATCH_INVENTORY_TYPES  = ALLOWED_LOGS_EXTENSIONS
@@ -43,17 +44,21 @@ POSTGRES = {
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
 app.config['WTF_CSRF_ENABLED'] = True
-app.config ['MONGODB_URI'] = 'mongodb://localhost:27017/'
+app.config ['MONGO_URI'] = 'mongodb://localhost:27017/redwingdb'
 app.config ["ACCEPTABLE_COLUMNS"] = ['type','item','storage_type','item_type','weight',
         'uom','stock','value']
 
 db.app = app
 db.init_app (app)
 
+mongo = PyMongo (app)
+mongo.init_app (app)
+
+logfile_collection = mongo.db.logfiles
+
 db.create_all ()
 db.session.commit ()
 
-#mongo_client  = MongoClient (app.config['MONGODB_URI'])
 
 '''
 ---------------------------------------------------
@@ -62,7 +67,7 @@ IMAGE UPLOAD LOADING FOR PLOTS AND VISUALIZATIONS
 '''
 @app.route ('/image/<path:filename>')
 def download_file (filename):
-	return send_from_directory (app.config["UPLOAD_FOLDER"],filename, as_attachment=True)
+	return send_from_directory (app.config["UPLOAD_FOLDER"],filename)
 
 def allowed_file (filename):
     return '.' in filename and \
@@ -321,6 +326,79 @@ def terminate_drone ():
 
 
 
+'''
+---------------------------------------
+LOG FILE STORAGE DATABASE
+---------------------------------------
+'''
+@app.route ('/logfilestorage')
+def logfilestorage ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        files = LogFile.query.all ()
+        length = len(files)
+        return render_template ('LogStorage/index.html',files = files,length = length)
+
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+@app.route ('/newlogupload')
+def newfile ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        drones = Drone.query.all ()
+        return render_template ('LogStorage/newfile.html',drones = drones)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+@app.route ('/newfileaction',methods=['POST'])
+def newfileaction ():
+    if request.method == 'POST':
+        if 'gcs_user' in session and session ['gcs_logged_in']:
+            if not 'file' in request.files:
+                return 'error:no file'
+            inputfile = request.files.get ('file')
+            drone_id = int(request.form.get ('drone_select'))
+            drone_name = Drone.query.filter_by (id = drone_id).first ().drone_name
+            if drone_name is None:
+                return "error!!!!"
+            
+            if allowed_file (inputfile.filename):
+                username = session ['gcs_user']
+                user_id = GCSUser.query.filter_by (username = username).first ().id
+
+                log_instance = LogFile (inputfile.filename,user_id,username,
+                        drone_id,drone_name)
+                
+
+                mongo.save_file (inputfile.filename,inputfile,base = 'logfiles')
+                db.session.add (log_instance)
+                db.session.commit ()
+
+                return redirect ('/logfilestore',code = 302)
+                
+            else:
+                return "Invalid file format"
+        else:
+            return redirect ('/gcslogin',code = 302)
+        return "done"
+    else:
+        return redirect ('/gcsportal',code = 302)
+
+@app.route ('/file/<filename>')
+def file (filename):
+    return mongo.send_file (filename,base = 'logfiles')
+
+@app.route ('/logdownload')
+def download_logfile ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        if 'id' not in request.args:
+            return "ERROR"
+        fileId = int (request.args.get ('id'))
+        file_instance = LogFile.query.filter_by (id = fileId).first ()
+        fname = file_instance.filename
+        return redirect ('/file/'+fname,code = 302)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
 
 
 '''
@@ -534,7 +612,7 @@ def visualize_logs ():
         return redirect ('/gcsportal',code = 302)
 
 
-@app.route ('/logfilestorage')
+@app.route ('/logfileupload')
 def log_file_storage ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         drones = Drone.query.all ()

@@ -135,6 +135,21 @@ class Job (db.Model):
 class LogFile (db.Model):
     __tablename__ = 'logfiles'
     id = db.Column (db.Integer,primary_key = True)
+    filename = db.Column (db.String(),unique = True)
+    upload_user_id = db.Column (db.Integer,db.ForeignKey ('gcsusers.id'))
+    upload_username = db.Column (db.String())
+    upload_timestamp = db.Column (db.DateTime)
+    drone_related_id = db.Column (db.Integer,db.ForeignKey ('drones.id'))
+    drone_related_name = db.Column (db.String())
+
+    def __init__ (self,filename,upload_user_id,upload_username,drone_id,
+            drone_name):
+        self.filename = filename
+        self.upload_user_id = upload_user_id
+        self.upload_username = upload_username
+        self.upload_timestamp = datetime.now()
+        self.drone_related_id = drone_id
+        self.drone_related_name = drone_name
 
 class IncidentModAction (db.Model):
     __tablename__ = 'incidentmodactions'
