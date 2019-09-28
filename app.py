@@ -373,7 +373,7 @@ def newfileaction ():
                 db.session.add (log_instance)
                 db.session.commit ()
 
-                return redirect ('/logfilestore',code = 302)
+                return redirect ('/logfilestorage',code = 302)
                 
             else:
                 return "Invalid file format"
