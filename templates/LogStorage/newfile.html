@@ -106,7 +106,11 @@
                     </div>
                     <br><br>
                     <div class="form-group" style="text-align:center;">
-                        <input type="submit" class="btn btn-primary" value="Upload"/>
+                        <input id='upload-btn' type="submit" class="btn btn-primary" value="Upload"/>
+                    </div>
+                    <br><br>
+                    <div class="form-group" style="text-align:center;">
+                        <h4>Only .CSV files supported. Maximum file size : 16MB</h4>
                     </div>
                 </form>
         </div>
@@ -115,6 +119,17 @@
             var fileName = $(this).val ();
             fileName = fileName.replace ("C:\\fakepath\\","");
             $(this).next ('.custom-file-label').html (fileName);
+
+            var filesize = this.files[0].size;
+            if ( filesize >= 1000000 ) {
+                $('.filesize_msg').css ('visibility','visible');
+                $('#upload-btn').prop ('disabled',true);
+            }
+            else
+            {
+                $('.filesize_msg').css ('visibility','hidden');
+                $('#upload-btn').prop ('disabled',false);
+            }
         });
     </script>
     </body>

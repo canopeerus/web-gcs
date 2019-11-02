@@ -97,6 +97,7 @@
                         <th class='padded'>Drone</th>
                         <th class="padded">Uploaded By</th>
                         <th class="padded">Uploaded on</th>
+                        <th class="padded">File Size</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -106,6 +107,7 @@
                         <td class='padded'>{{ row.drone_related_name }}</td>
                         <td class="padded">{{ row.upload_username }}</td>
                         <td class="padded">{{ row.upload_timestamp }}</td>
+                        <td class="padded">{{ row.filesize }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -365,8 +365,10 @@ def newfileaction ():
                 username = session ['gcs_user']
                 user_id = GCSUser.query.filter_by (username = username).first ().id
 
+                blob = inputfile.read ()
+                fsize = len (blob)
                 log_instance = LogFile (inputfile.filename,user_id,username,
-                        drone_id,drone_name)
+                        drone_id,drone_name,fsize)
                 
 
                 mongo.save_file (inputfile.filename,inputfile,base = 'logfiles')
