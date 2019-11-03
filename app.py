@@ -18,6 +18,7 @@ from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile
 from flask_pymongo import PyMongo
 import pandas as pd
 
+DOC_FOLDER = '/var/www/html/web-gcs/docs/build/'
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])
 ALLOWED_BATCH_INVENTORY_TYPES  = ALLOWED_LOGS_EXTENSIONS
@@ -32,8 +33,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 if os.environ.get('ENV') == 'prod':
     app.config['UPLOAD_FOLDER'] = "uploads/"
+    app.config['DOC_FOLDER'] = "docs/build/"
 else:
     app.config['UPLOAD_FOLDER'] = UPLOADS_FOLDER
+    app.config["DOC_FOLDER"] = DOC_FOLDER
 
 POSTGRES = {
         'user': 'postgres',
@@ -911,6 +914,20 @@ def update_incidents ():
             return redirect ('/gcslogin',code = 302)
     else:
         return redirect ('/incidents',code = 302)
+
+
+'''
+-----------------------------------------------------------------
+DOCUMENTATION/SPHINX
+-----------------------------------------------------------------
+'''
+@app.route ('/docs',defaults={'filename':'index.html'})
+@app.route ('/doc/<path:filename>')
+def doc (filename):
+    return send_from_directory (
+            app.config["DOC_FOLDER"],
+            filename
+            )
 
 '''
 -----------------------------------------------------------------
