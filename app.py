@@ -748,7 +748,7 @@ def jobview ():
                 job_instance = Job.query.filter_by (id = jobid).first ()
                 if job_instance is not None:
                     if job_instance.is_pending ():
-                        return render_template ('jobview.html',jobid = job_instance.id)
+                        return render_template ('jobs/jobview.html',jobid = job_instance.id)
                     else:
                         return "<h2>Work In Progress</h2>"
                 else:
