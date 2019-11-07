@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 ------------------------------------------------------------------------------------------------------
-Main GCS application source code for Redwing Aerospace Laboratories
+Main GCS applicationlication source code for Redwing Aerospace Laboratories
 @author : Aditya Visvanathan
 @version : 0.1.0
 Dependencies : flask, psycopg2 + postgresql,geocoer,flask_sqlalchemy
@@ -25,21 +25,21 @@ ALLOWED_BATCH_INVENTORY_TYPES  = ALLOWED_LOGS_EXTENSIONS
 status_list = ['Pending Action','Resolved']
 priority_list = ['Low','Medium','High']
 
-app = Flask (__name__)
-app.config['DEBUG'] = True
-app.config['SECRET_KEY'] = b'\xad]\xb8\xcf\x85\xe0\x0cp\xecf\x8ez\x86\x9d\x16%\xa5F\x08\x9c\xb6\x11\xc2\x86'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+application = Flask (__name__)
+application.config['DEBUG'] = True
+application.config['SECRET_KEY'] = b'\xad]\xb8\xcf\x85\xe0\x0cp\xecf\x8ez\x86\x9d\x16%\xa5F\x08\x9c\xb6\x11\xc2\x86'
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 if os.environ.get('ENV') == 'prod':
-    app.config['UPLOAD_FOLDER'] = "uploads/"
-    app.config['ENV'] = 'development'
-    app.config['DEBUG'] = True
-    app.config['TESTING'] = True
+    application.config['UPLOAD_FOLDER'] = "uploads/"
+    application.config['ENV'] = 'development'
+    application.config['DEBUG'] = True
+    application.config['TESTING'] = True
 else:
-    app.config['UPLOAD_FOLDER'] = UPLOADS_FOLDER
-    app.config['ENV'] = 'production'
-    app.config['DEBUG'] = False
-    app.config['TESTING'] = False
+    application.config['UPLOAD_FOLDER'] = UPLOADS_FOLDER
+    application.config['ENV'] = 'production'
+    application.config['DEBUG'] = False
+    application.config['TESTING'] = False
 
 POSTGRES = {
         'user': 'postgres',
@@ -48,17 +48,17 @@ POSTGRES = {
         'host':'localhost',
 }
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
-app.config['WTF_CSRF_ENABLED'] = True
-app.config ['MONGO_URI'] = 'mongodb://localhost:27017/redwingdb'
-app.config ["ACCEPTABLE_COLUMNS"] = ['type','item','storage_type','item_type','weight',
+application.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
+application.config['WTF_CSRF_ENABLED'] = True
+application.config ['MONGO_URI'] = 'mongodb://localhost:27017/redwingdb'
+application.config ["ACCEPTABLE_COLUMNS"] = ['type','item','storage_type','item_type','weight',
         'uom','stock','value']
 
-db.app = app
-db.init_app (app)
+db.app = application
+db.init_app (application)
 
-mongo = PyMongo (app)
-mongo.init_app (app)
+mongo = PyMongo (application)
+mongo.init_app (application)
 
 logfile_collection = mongo.db.logfiles
 
@@ -71,9 +71,9 @@ db.session.commit ()
 IMAGE UPLOAD LOADING FOR PLOTS AND VISUALIZATIONS
 ---------------------------------------------------
 '''
-@app.route ('/image/<path:filename>')
+@application.route ('/image/<path:filename>')
 def download_file (filename):
-	return send_from_directory (app.config["UPLOAD_FOLDER"],filename)
+	return send_from_directory (application.config["UPLOAD_FOLDER"],filename)
 
 def allowed_file (filename):
     return '.' in filename and \
@@ -86,13 +86,13 @@ def allowed_file (filename):
 LANDING PAGE
 ---------------------------------------------
 '''
-@app.route ('/')
+@application.route ('/')
 def homepage ():
     return render_template("index.html")
     
   
 # Main GCS Page route, redirects to 'gcslogin' if not logged in
-@app.route ("/gcsportal",methods=['GET','POST'])
+@application.route ("/gcsportal",methods=['GET','POST'])
 def gcs_home():
     if 'gcs_user' in session and session['gcs_logged_in']:
         return render_template('gcshome.html')
@@ -106,13 +106,13 @@ GCS USER PROFILE ACTIONS
 ----------------------------------
 '''
 # GCS Login page route
-@app.route ("/gcslogin")
+@application.route ("/gcslogin")
 def gcs_login ():
     if not session.get ('gcs_logged_in'):
         return render_template ("fmsgeneric/gcs_login.html")
 
 # GCS Login form action route, accepts only POST requests
-@app.route ("/gcsloginform",methods=['POST'])
+@application.route ("/gcsloginform",methods=['POST'])
 def gcs_login_action ():
     usernameval = request.form['username']
     pwval = request.form['password']
@@ -130,7 +130,7 @@ def gcs_login_action ():
         return render_template ("fmsgeneric/gcs_login.html", result="error")
 
 # show user profile and account settings
-@app.route ("/gcsuserprofile",methods=['POST','GET'])
+@application.route ("/gcsuserprofile",methods=['POST','GET'])
 def show_userprofile():
     if 'gcs_user' in session and session['gcs_logged_in']:
         updated = 0
@@ -147,7 +147,7 @@ def show_userprofile():
         return redirect ("/gcslogin",code=302)
 
 # Log out route
-@app.route ("/gcslogout",methods=['POST','GET'])
+@application.route ("/gcslogout",methods=['POST','GET'])
 def gcs_logout ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         del session['gcs_user']
@@ -155,12 +155,12 @@ def gcs_logout ():
     return redirect ("/", code=302)
 
 # GCS Sign up page route
-@app.route ("/gcssignup",methods=['POST','GET'])
+@application.route ("/gcssignup",methods=['POST','GET'])
 def gcs_signup ():
     return render_template ("fmsgeneric/gcs_signup.html")
 
 # GCS Sign up page form action route
-@app.route ("/gcssignupform",methods=['POST'])
+@application.route ("/gcssignupform",methods=['POST'])
 def gcs_signup_action ():
     salt = uuid.uuid4().hex
     pwd_hash = hash_password (request.form['password'],salt)
@@ -176,7 +176,7 @@ def gcs_signup_action ():
         return render_template ("fmsgeneric/gcs_signup.html",result = "error")
 
 # POST route for editing GCS profile
-@app.route ("/gcsprofileedit",methods=['POST'])
+@application.route ("/gcsprofileedit",methods=['POST'])
 def gcs_profile_edit ():
     if 'gcs_user' not in session:
         print ("Not in session wtf!")
@@ -209,7 +209,7 @@ def gcs_profile_edit ():
     return redirect ("/gcsuserprofile?updated",code=302)
 
 # Route for password change input form
-@app.route ("/updatepassword")
+@application.route ("/updatepassword")
 def change_password ():
     err = False
     if 'error' in request.args:
@@ -224,7 +224,7 @@ def change_password ():
         return redirect ("/gcslogin",code=302)
 
 # Form action route for /updatepassword
-@app.route ("/updatepassword_action",methods=['POST'])
+@application.route ("/updatepassword_action",methods=['POST'])
 def update_password_action ():
     if 'gcs_user' in session:
         gcsuser = GCSUser.query.filter_by (username = session['gcs_user']).first()
@@ -247,7 +247,7 @@ DRONE ACTION ROUTES
 -------------------------------
 '''
 # Route for drone monitor list screen
-@app.route ("/dronemonitor")
+@application.route ("/dronemonitor")
 def show_drones():
     if 'gcs_user' in session:
         drones = Drone.query.all ()
@@ -257,7 +257,7 @@ def show_drones():
         return redirect ("/gcslogin", code=302)
 
 # Route for adding new drone
-@app.route ("/newdrone")
+@application.route ("/newdrone")
 def new_drone ():
     if 'gcs_user' in session:
         return render_template ("drone/newdrone.html")
@@ -265,7 +265,7 @@ def new_drone ():
         return redirect ('/gcslogin',code=302)
 
 # New drone input form action route
-@app.route ("/newdroneaction",methods=['POST'])
+@application.route ("/newdroneaction",methods=['POST'])
 def add_new_drone():
     if 'gcs_user' in session:
         drone = Drone (drone_name = request.form['droneName'],
@@ -280,7 +280,7 @@ def add_new_drone():
 
 
 # View particular drone
-@app.route ("/droneview")
+@application.route ("/droneview")
 def individual_drone ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         
@@ -302,7 +302,7 @@ def individual_drone ():
             print (id_array)
             for iden in id_array:
                 job = Job.query.filter_by (id = iden).first()
-                jobslist.append (job)
+                jobslist.applicationend (job)
         
         count = len(jobslist)
         
@@ -315,7 +315,7 @@ def individual_drone ():
         return redirect ('/gcslogin',code = 302)
 
 # Disable drone
-@app.route ("/disabledrone")
+@application.route ("/disabledrone")
 def terminate_drone ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         
@@ -338,7 +338,7 @@ def terminate_drone ():
 LOG FILE STORAGE DATABASE
 ---------------------------------------
 '''
-@app.route ('/logfilestorage')
+@application.route ('/logfilestorage')
 def logfilestorage ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         files = LogFile.query.all ()
@@ -348,7 +348,7 @@ def logfilestorage ():
     else:
         return redirect ('/gcslogin',code = 302)
 
-@app.route ('/newlogupload')
+@application.route ('/newlogupload')
 def newfile ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         drones = Drone.query.all ()
@@ -356,7 +356,7 @@ def newfile ():
     else:
         return redirect ('/gcslogin',code = 302)
 
-@app.route ('/newfileaction',methods=['POST'])
+@application.route ('/newfileaction',methods=['POST'])
 def newfileaction ():
     if request.method == 'POST':
         if 'gcs_user' in session and session ['gcs_logged_in']:
@@ -392,11 +392,11 @@ def newfileaction ():
     else:
         return redirect ('/gcsportal',code = 302)
 
-@app.route ('/file/<filename>')
+@application.route ('/file/<filename>')
 def file (filename):
     return mongo.send_file (filename,base = 'logfiles')
 
-@app.route ('/logdownload')
+@application.route ('/logdownload')
 def download_logfile ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         if 'id' not in request.args:
@@ -416,7 +416,7 @@ INVENTORY
 --------------------------------
 '''
 # Inventory
-@app.route ('/inventory')
+@application.route ('/inventory')
 def main_inventory ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         payloads = Payload.query.all ()
@@ -425,10 +425,10 @@ def main_inventory ():
     else:
         return redirect ('/gcslogin',code = 302)
 
-#@app.route ('/inventoryitem')
+#@application.route ('/inventoryitem')
 #def edit_inventory_item (methods=['GET']):
 
-@app.route ('/addinventory')
+@application.route ('/addinventory')
 def new_inventory ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         payloads = Payload.query.all ()
@@ -438,20 +438,20 @@ def new_inventory ():
         uoms = []
         for p in payloads:
             if p.type_str in types:
-                types.append (p.type_str)
+                types.applicationend (p.type_str)
             if p.storage_type in storage_types:
-                storage_types.append (p.storage_type)
+                storage_types.applicationend (p.storage_type)
             if p.item in items:
-                items.append (p.item)
+                items.applicationend (p.item)
             if p.uom in uoms:
-                uoms.append (p.uom)
+                uoms.applicationend (p.uom)
         return render_template ('inventory/newinventory.html',types = types,items = items,
                 storage_types = storage_types,uoms = uoms)
     else:
         return redirect ('/gcslogin',code = 302)
 
 
-@app.route ('/newinventoryaction',methods=['POST'])
+@application.route ('/newinventoryaction',methods=['POST'])
 def inventoryformaction ():
     if request.method == 'POST':
         if 'gcs_user' in session and session ['gcs_logged_in']:
@@ -497,7 +497,7 @@ def inventoryformaction ():
     else:
         return redirect ('/gcsportal',code = 302)
    
-@app.route ('/batchinventoryupload',methods=['GET'])
+@application.route ('/batchinventoryupload',methods=['GET'])
 def batchupload_page ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         return render_template ('inventory/batchinventory_upload.html')
@@ -509,7 +509,7 @@ def csv_allowed_file (filename):
     return '.' in filename and  \
             filename.rsplit ('.',1)[1].lower() in ALLOWED_BATCH_INVENTORY_TYPES
 
-@app.route ('/batchinventoryaction',methods=['POST'])
+@application.route ('/batchinventoryaction',methods=['POST'])
 def batchinventory_action ():
     if request.method == 'POST':
         if 'gcs_user' in session and session ['gcs_logged_in']:
@@ -520,11 +520,11 @@ def batchinventory_action ():
                 return "The fuck"
             if csv_allowed_file (inputfile.filename):
                 filename = inputfile.filename
-                outpath = os.path.join (app.config['UPLOAD_FOLDER'],filename)
+                outpath = os.path.join (application.config['UPLOAD_FOLDER'],filename)
                 inputfile.save (outpath)
                 df = pd.read_table (outpath,sep=',')
                 read_columns = list (df.columns.values)
-                if Counter (read_columns) == Counter (app.config['ACCEPTABLE_COLUMNS']):
+                if Counter (read_columns) == Counter (application.config['ACCEPTABLE_COLUMNS']):
                     for index,row in df.iterrows():
                         inventory_item = Payload (row['type'],row['item'],row['storage_type'],
                             row['item_type'],int(row['weight']),row['uom'],
@@ -545,7 +545,7 @@ def batchinventory_action ():
 
 
 
-@app.route ('/inventoryitem',methods=['GET'])
+@application.route ('/inventoryitem',methods=['GET'])
 def inventoryitemdisplay ():
     return "<h1 style='text-align:center;'>Inventory edit is being worked on. Unavailable at the moment</h1>"
     '''
@@ -571,7 +571,7 @@ MAP
 -----------------------------------
 '''
 # Map action
-@app.route ('/map')
+@application.route ('/map')
 def show_map ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         jobslist = Job.query.all ()
@@ -586,14 +586,14 @@ LOG FILE VISUALIZATION
 ------------------------------------------
 '''
 # Visualisations/plot from arjun
-@app.route ('/logplotter')
+@application.route ('/logplotter')
 def visualize_logs_input ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         return render_template ('visualize_input.html',parameters = visualise.params_list)
     else:
         return redirect ('/gcslogin',code = 302)
 
-@app.route ('/visualizefile',methods=['GET','POST'])
+@application.route ('/visualizefile',methods=['GET','POST'])
 def visualize_logs ():
     if request.method == 'POST':
         if 'gcs_user' in session and session['gcs_logged_in']:
@@ -603,8 +603,8 @@ def visualize_logs ():
             if allowed_file (inputfile.filename):
                 filename = inputfile.filename
                 s_param = request.form.get ('para_select')
-                outpath = os.path.join (app.config['UPLOAD_FOLDER'],filename)
-                imgpath = os.path.join (app.config['UPLOAD_FOLDER'],'plot.png')
+                outpath = os.path.join (application.config['UPLOAD_FOLDER'],filename)
+                imgpath = os.path.join (application.config['UPLOAD_FOLDER'],'plot.png')
                 inputfile.save (outpath)
                 ret_val = visualise.rvisualize (outpath,imgpath,param = s_param)
                 if ret_val == 0:
@@ -621,7 +621,7 @@ def visualize_logs ():
         return redirect ('/gcsportal',code = 302)
 
 
-@app.route ('/logfileupload')
+@application.route ('/logfileupload')
 def log_file_storage ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         drones = Drone.query.all ()
@@ -636,7 +636,7 @@ NPNT AUTHENTICATION
 --------------------------------------
 '''
 # NPNT tool page
-@app.route ('/npntauthentication')
+@application.route ('/npntauthentication')
 def npntauthroute ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         return render_template ('npntpage.html')
@@ -650,7 +650,7 @@ JOBS/DEPLOYMENT RELATED ACTIONS
 ---------------------------------------
 '''
 # Deployment/job tracker
-@app.route ("/jobtracker")
+@application.route ("/jobtracker")
 def show_jobs ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         jobs = Job.query.all()
@@ -660,20 +660,17 @@ def show_jobs ():
         return redirect ('/gcslogin',code = 302)
             
 # Form page for adding new job
-@app.route ("/newdeployment")
+@application.route ("/newdeployment")
 def new_job ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         drones = Drone.query.all()
-        droneslist = []
-        for x in drones:
-            droneslist.append ([x.drone_name,x.id])
         payloads = Payload.query.all ()
         return render_template ('jobs/newjob.html',drones = drones,payloads = payloads)
     else:
         return redirect ('/gcslogin',code = 302)
 
 # Form action route for adding new job/deployment
-@app.route ('/newjobform',methods=['POST'])
+@application.route ('/newjobform',methods=['POST'])
 def new_job_formaction ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         date_sel = request.form.get ('date')
@@ -718,7 +715,7 @@ def new_job_formaction ():
 
 
 # Form action for filters for job search
-@app.route ('/filterjobs',methods=['POST'])
+@application.route ('/filterjobs',methods=['POST'])
 def filterjobs ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         begindatetimestr = request.form.get ('begindate') + ' ' + request.form.get ('begintime')
@@ -737,7 +734,7 @@ def filterjobs ():
         return redirect ('/gcslogin',code = 302)
 
 # particular Job details view
-@app.route ('/jobview')
+@application.route ('/jobview')
 def jobview ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         if 'job' in request.args:
@@ -760,7 +757,7 @@ def jobview ():
         return redirect ('/gcslogin',code = 302)
 
 # OTP form action route
-@app.route ('/jobotpauth',methods=['POST'])
+@application.route ('/jobotpauth',methods=['POST'])
 def auth_otp ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         if 'otp' in request.form and 'jobid' in request.form:
@@ -777,7 +774,7 @@ def auth_otp ():
 
 
 # Deployment initiate path
-@app.route ('/initiatedeployment',methods=['POST'])
+@application.route ('/initiatedeployment',methods=['POST'])
 def initiate_deployment ():
     if request.method == 'POST':
         if 'gcs_user' in session and session['gcs_logged_in']:
@@ -796,7 +793,7 @@ def initiate_deployment ():
         return "<h2>Error,Only post requests allowed!</h2>"
 
 
-@app.route ('/godeployment')
+@application.route ('/godeployment')
 def go_deployment ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         jobid = int (request.args.get ('job'))
@@ -804,14 +801,14 @@ def go_deployment ():
         if job_instance is not None:
             drone_instance = Drone.query.filter_by (id = job_instance.id).first ()
             payload_instance = Payload.query.filter_by (id = job_instance.payload_id).first()
-            return render_template ('flytgcs_web/app.html',job = job_instance)
+            return render_template ('flytgcs_web/application.html',job = job_instance)
         else:
             return "<h3>Something went wrong</h3>"
     else:
         return redirect ('/gcslogin',code = 302)
 
 
-@app.route ('/jobcontrol')
+@application.route ('/jobcontrol')
 def jobtakeoff ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         jobid = int(request.args.get ('job'))
@@ -830,7 +827,7 @@ def jobtakeoff ():
 INCIDENT TRACKER
 ----------------------------------------------------------------
 '''
-@app.route ('/incidents')
+@application.route ('/incidents')
 def incident_landing ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         incidents = Incident.query.all ()
@@ -840,7 +837,7 @@ def incident_landing ():
         return redirect ('/gcslogin',code = 302)
 
 
-@app.route ('/newincidentreport')
+@application.route ('/newincidentreport')
 def new_incident ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         drones = Drone.query.all ()
@@ -848,7 +845,7 @@ def new_incident ():
     else:
         return redirect ('/gcslogin',code = 302)
 
-@app.route ('/newincidentaction',methods=["POST"])
+@application.route ('/newincidentaction',methods=["POST"])
 def new_incident_action ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         incident_title = request.form.get ('title')
@@ -870,7 +867,7 @@ def new_incident_action ():
     else:
         return redirect ('/gcslogin',code = 302)
 
-@app.route ('/incidentview')
+@application.route ('/incidentview')
 def view_incidents ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         if 'id' in request.args:
@@ -889,7 +886,7 @@ def view_incidents ():
         return redirect ('/gcslogin',code = 302)
 
 
-@app.route ('/newincidentupdate',methods=['POST'])
+@application.route ('/newincidentupdate',methods=['POST'])
 def update_incidents ():
     if request.method == "POST":
         if 'gcs_user' in session and session['gcs_logged_in']:
@@ -925,7 +922,7 @@ def update_incidents ():
 ERROR HANDLER/SPECIAL FUNCTIONS
 -----------------------------------------------------------------
 '''
-@app.errorhandler (404)
+@application.errorhandler (404)
 def page_not_found (e):
     return render_template ('404.html',code=404)
 
@@ -942,7 +939,7 @@ CUSTOMER ACTIONS
 CUSTOMER LANDING PAGE
 ---------------------------------------------------------------
 '''
-@app.route ('/customerportal')
+@application.route ('/customerportal')
 def customer_landing ():
     return render_template ('customerhome.html')
 
@@ -953,7 +950,7 @@ RESTful API
 '''
 
 # Test GET route to test API
-@app.route ("/api/v1/test")
+@application.route ("/api/v1/test")
 def test_api ():
     msg = ''
     if 'message' in request.args:
@@ -966,4 +963,4 @@ def test_api ():
 
         
 if __name__ == "__main__":
-    app.run (debug = True)
+    application.run (debug = True)
