@@ -1,10 +1,16 @@
 th {
     text-transform:uppercase;
     font-weight:bold;
-    background-color:#cacccf;
+    background-color:#020138;
+    color:#fff5f5
 }
 
 .status {
     font-size:15px;
     font-weight:bold;
+}
+
+.padded {
+    padding:5px 5px 5px 5px;
+    text-align:center;
 }

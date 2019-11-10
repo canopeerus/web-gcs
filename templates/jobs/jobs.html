@@ -76,7 +76,7 @@ body { margin: 0; padding: 0; }
                                     </div>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href='https://redwing-aerospace-laboratories.github.io/redwing-aerospace-laboratories.github.io/'><i class="fas fa-book"></i>Documentation</a>
+                                    <a class="nav-link" href='https://redwing-aerospace-laboratories.github.io/redwing-aerospace-laboratories.github.io/'><i class="fas fa-book"></i> Documentation</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="https://www.redwinglabs.in/about"><i class="fas fa-address-card"></i> About Us</a>
@@ -190,14 +190,14 @@ body { margin: 0; padding: 0; }
                 }
                 $(".status").each (function () {
                     console.log ("LOOP");
-                    var status = $(this).html().trim();;
+                    var status = $(this).html().trim().toLowerCase();
                     console.log (status);
-                    if ( status == 'PENDING APPROVAL' ) {
+                    if ( status == 'pending approval' ) {
                         console.log ("Approval");
                         $(this).css ("background-color","yellow");
                         $(this).css ("color","black");
                     } 
-                    else if ( status == 'SCHEDULED') {
+                    else if ( status == 'scheduled') {
                         $(this).css ("background-color","blue");
                         $(this).css ("color","white");
                     }

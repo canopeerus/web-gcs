@@ -33,7 +33,9 @@ div.shadowborder {
 
 #thead {
     font-size:1.1em;
-    background-color:#d6d2d2;
+    font-weight:bold;
+    background-color:#020138;
+    color:#fff5f5;
 }
 
 .status {
@@ -42,8 +44,3 @@ div.shadowborder {
     text-transform:uppercase;
 }
 
-th {
-    font-weight:bold;
-    background-color:#cacccf;
-}
-}

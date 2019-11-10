@@ -60,7 +60,7 @@
                                     </div>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href='https://redwing-aerospace-laboratories.github.io/redwing-aerospace-laboratories.github.io/'><i class="fas fa-book"></i>Documentation</a>
+                                    <a class="nav-link" href='https://redwing-aerospace-laboratories.github.io/redwing-aerospace-laboratories.github.io/'><i class="fas fa-book"></i> Documentation</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="https://www.redwinglabs.in/about"><i class="fas fa-address-card"></i> About Us</a>
@@ -81,7 +81,7 @@
                 </div>
             </div>
         </div>
-
+    <div class="container-fluid">
         <div id="no-msg" style="display:none;">
             <br><br><br>
             <h3 style="text-align:center;">
@@ -97,11 +97,11 @@
             <thead id='thead' style='display:none;'>
                 <tr>
                     <th></th>
-                    <th>Name</th>
-                    <th>Model</th>
-                    <th>Motor Count</th>
-                    <th>Battery Type</th>
-                    <th>Status</th>
+                    <th class="padded">Name</th>
+                    <th class="padded">Model</th>
+                    <th class="padded">Motor Count</th>
+                    <th class="padded">Battery Type</th>
+                    <th class="padded">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -110,11 +110,11 @@
                         <td>
                             <img src="{{ url_for('static',filename='images/drone.jpg') }}" height='50' width='50'/>
                         </td>
-                        <td>{{ row.drone_name }}</td>
-                        <td>{{ row.model }}</td>
-                        <td>{{ row.motor_count }}</td>
-                        <td>{{ row.battery_type }}</td>
-                        <td class="status">{{ row.status }}</td>
+                        <td class="padded">{{ row.drone_name }}</td>
+                        <td class="padded">{{ row.model }}</td>
+                        <td class="padded">{{ row.motor_count }}</td>
+                        <td class="padded">{{ row.battery_type }}</td>
+                        <td class="padded status">{{ row.status }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -123,7 +123,9 @@
         <div class="container" style="text-align:center;">
         <a href="/newdrone" class="btn btn-primary">Add new drone</a>
         </div>
+    </div>
     <script>
+    $(document).ready (function () {
         var count = parseInt("{{ count }}");
         $(document).ready (function() {
             if ( count == 0 ) {
@@ -138,7 +140,14 @@
             window.location.href = '/droneview?drone='+($(this).attr("id"));
             //alert ("You clicked " + ($(this).attr("id")));
         });
-
+        $(".status").each (function () {
+            var status = $(this).html().trim();
+            if ( status == 'Available' ) {
+                $(this).css ("background-color","green");
+                $(this).css ("color","#e3e3e3");
+            }
+        });
+    });
 
     </script>
     </body>

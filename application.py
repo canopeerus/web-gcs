@@ -45,10 +45,11 @@ POSTGRES = {
         'user': 'postgres',
         'pw': 'redwingpostgres',
         'db': 'redwingdb',
-        'host':'localhost',
+        'host':'redwingdb.c00t7mbjsni2.ap-south-1.rds.amazonaws.com',
+        'port':'5432',
 }
 
-application.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://%(user)s:%(pw)s@%(host)s/%(db)s' % POSTGRES
+application.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
 application.config['WTF_CSRF_ENABLED'] = True
 application.config ['MONGO_URI'] = 'mongodb://localhost:27017/redwingdb'
 application.config ["ACCEPTABLE_COLUMNS"] = ['type','item','storage_type','item_type','weight',
@@ -341,10 +342,12 @@ LOG FILE STORAGE DATABASE
 @application.route ('/logfilestorage')
 def logfilestorage ():
     if 'gcs_user' in session and session['gcs_logged_in']:
+        return  "<h2 style='text-align:center;'>This Feature is currently OFF</h2>"
+        '''
         files = LogFile.query.all ()
         length = len(files)
         return render_template ('LogStorage/index.html',files = files,length = length)
-
+        '''
     else:
         return redirect ('/gcslogin',code = 302)
 
