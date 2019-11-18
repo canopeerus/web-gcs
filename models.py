@@ -27,9 +27,24 @@ class GCSUser (db.Model):
     def __repr__ (self):
         return '<id {}>'.format (self.id)
 
+class Pilot (db.Model):
+    __tablename__ = 'pilots'
+    id =  db.Column (db.Integer,primary_key = True)
+    gcsuser_id = db.Column (db.Integer,db.ForeignKey ('gcsusers.id'))
+
+    def __init__ (self,gcsuser_id):
+        self.gcsuser_id = gcsuser_id
+
+class FlightModuleProvider (db.Model):
+    __tablename__ = 'flightmoduleproviders'
+    id = db.Column (db.Integer,primary_key = True)
+    fmp_name = db.Column (db.String())
+
+
 class Drone (db.Model):
     __tablename__ = 'drones'
     id = db.Column (db.Integer,primary_key = True)
+    unique_id_number = db.Column (db.String(),unique = True)
     drone_name = db.Column (db.String(), unique = True)
     model = db.Column (db.String())
     motor_count = db.Column (db.Integer)
