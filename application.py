@@ -280,6 +280,15 @@ def add_new_drone():
         return redirect ("/gcslogin",code = 302)
 
 
+# Edit details of a drone
+@application.route ('/editdrone')
+def edit_drone ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        drone_id = int (request.args.get ('drone'))
+        drone = Drone.query.filter_by (id = drone_id).first ()
+        return render_template ('drone/editdrone.html',drone = drone)
+    else:
+        return redirect ('/gcslogin',code = 302)
 # View particular drone
 @application.route ("/droneview")
 def individual_drone ():
