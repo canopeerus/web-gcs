@@ -31,15 +31,29 @@ class Pilot (db.Model):
     __tablename__ = 'pilots'
     id =  db.Column (db.Integer,primary_key = True)
     gcsuser_id = db.Column (db.Integer,db.ForeignKey ('gcsusers.id'))
-
+    pilot_fname = db.Column (db.String())
+    pilot_lname = db.Column (db.String())
+    pilot_gcsusername = db.Column (db.String())
+    uaop = db.Column (db.String())
+   
     def __init__ (self,gcsuser_id):
         self.gcsuser_id = gcsuser_id
+        gcsuser = GCSUser.query.filter_by (id = gcsuser_id).first()
+        self.pilot_fname = gcsuser.firstname
+        self.pilot_lname = gcsuser.lastname
+        self.pilot_gcsusername = gcsuser.username
+        self.uaop = 'TBD'
 
 class FlightModuleProvider (db.Model):
     __tablename__ = 'flightmoduleproviders'
     id = db.Column (db.Integer,primary_key = True)
     fmp_name = db.Column (db.String())
 
+class FlightModule (db.Model):
+    __tablename__ = 'flightmodules'
+    id = db.Column (db.Integer,primary_key = True)
+    fm_name = db.Column (db.String())
+    fm_provider_id = db.Column (db.Integer,db.ForeignKey ('flightmoduleproviders.id'))
 
 class Drone (db.Model):
     __tablename__ = 'drones'

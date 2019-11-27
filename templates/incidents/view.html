@@ -45,6 +45,10 @@
                                     <a class="nav-link" href='/jobtracker'><i class="fas fa-business-time"></i> Job Tracker</a>
                                 </li>
                                 <li class="nav-item">
+                                    <a class="nav-link" href='/pilotdb'><i class="fas fa-plane-departure"></i> Pilots</a>
+                                </li>
+                                
+                                <li class="nav-item">
                                     <a class="nav-link" href='/dronemonitor'><i class="fab fa-avianex"></i> Fleet Monitor</a>
                                 </li>
                                 <li class="nav-item">
@@ -84,9 +88,11 @@
         </div>
         <br><br>
         <div class="container">
-            <br><br>
-            <h2 style="text-align:center;">New Incident Ticket</h2>
-            <br><br>
+            <br>
+            <div class="page-header">
+                <h1>Incident ID: {{ incident.id }}</h1>
+            </div>
+            <br>
             <div style="text-align:center;">
                 <form id="newticket-form" action='/newincidentupdate' method="POST">
                     <input style="display:none;" name="i_id" value="{{ incident.id }}"/>

@@ -14,7 +14,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os,uuid,visualise,shutil,time,geocoder
 from authutils import verify_password,hash_password
-from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile
+from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot
 from flask_pymongo import PyMongo
 import pandas as pd
 
@@ -899,6 +899,41 @@ def update_incidents ():
     else:
         return redirect ('/incidents',code = 302)
 
+
+'''
+---------------------------------------------------------------
+PILOT
+--------------------------------------------------------------
+'''
+@application.route ('/pilotdb')
+def view_pilots ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        pilots = Pilot.query.all ()
+        count = len (pilots)
+        gcsusers = GCSUser.query.all ()
+        gcspair = []
+        for g in gcsusers:
+            gcspair.append ([g.id,g.username])
+        if request.args.get ('error'):
+            return render_template ('pilots/index.html',pilots = pilots,count = count,error=1,gcspair = gcspair)
+        else:
+            return render_template ('pilots/index.html',pilots = pilots,count = count,error=0, gcspair = gcspair)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+
+@application.route ('/newpilotform',methods=['POST'])
+def new_pilot_action ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        gcs_id = int (request.form.get('gcsuser_id'))
+        match_pilot = Pilot.query.filter_by ( gcsuser_id = gcs_id).first()
+        if match_pilot is not None:
+            return redirect ('/pilotdb?error')
+        else:
+            pilot = Pilot (gcs_id)
+            db.session.add (pilot)
+            db.session.commit ()
+            return redirect ('/pilotdb')
 
 '''
 -----------------------------------------------------------------

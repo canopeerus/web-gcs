@@ -1,6 +1,6 @@
 .container {
   width: 1000px;
-  height: 720px;
+  height: auto;
   position: relative;
   /*margin: 0 auto;*/
   margin: auto;

@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>Incident Ticket Creation</title>
+        <title>Registered Pilots</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -16,8 +16,9 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
 
         <!--Load page specific CSS-->
-        <link rel="stylesheet" href="{{ url_for('static',filename='style/newticket.css') }}"/>
         <link rel='stylesheet' href='/static/style/navbar-style.css'/>
+        <link rel="stylesheet" href='/static/style/pilottable.css'/>
+        <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     </head>
@@ -51,6 +52,7 @@
                                 <li class="nav-item">
                                     <a class="nav-link" href='/dronemonitor'><i class="fab fa-avianex"></i> Fleet Monitor</a>
                                 </li>
+                                
                                 <li class="nav-item">
                                     <a class="nav-link" href='/inventory'><i class="fas fa-boxes"></i> Inventory</a>
                                 </li>
@@ -86,50 +88,72 @@
                 </div>
             </div>
         </div>
-        <br><br>
-        <div class="container">
+        <div class="container-fluid">
             <br>
             <div class="page-header">
-                <h1>New Incident Ticket</h1>
+                <h1>Registered Pilots</h1>
+            </div>
+            <div id="no-msg" class="page-header" style="display:none;">
+                <br>
+                <h3>There are currently no registered pilots in database</h3>
             </div>
             <br>
-            <div style="text-align:center;">
-                <form id="newticket-form" action='/newincidentaction' method="POST" style="width:auto;">
-                    <div class="form-group">
-                        <div class="col-sm-10">
-                            <input type = 'text' required name='title' placeholder='Title'/>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-sm-10">
-                            <textarea rows="4" required name-'description' placeholder='Enter Description Here....'></textarea>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-sm-10">
-                            <select required id='drone_select' name='drone_select'>
-                                <option value="Drone" disabled selected>Select Drone</option>
-                                {% for item in drones %}
-                                <option value="{{ item.id }}">{{ item.drone_name }}</option>
+            <table id="pilottable" class="table table-hover">
+                <thead id='thead' style='display:none;'>
+                    <tr>
+                        <th class="padded">Pilot First Name</th>
+                        <th class="padded">Pilot Last Name</th>
+                        <th class="padded">FMS Username</th>
+                        <th class="padded">UAOP License</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in pilots %}
+                    <tr class="clickable-row" id="{{ row.id }}">
+                        <td class="padded">{{ row.pilot_fname }}</td>
+                        <td class="padded">{{ row.pilot_lname }}</td>
+                        <td class="padded">{{ row.pilot_gcsusername }}</td>
+                        <td class="padded">{{ row.uaop }}</td>
+                    </tr>
+                    {% endfor %}
+                    <form action='/newpilotform' method='POST'>
+                    <tr>
+                        <td class="padded"></td>
+                        <td class="padded"></td>
+                        <td class="padded">
+                            <select required class="form-control" id='gcsuser_select'
+                                             name = 'gcsuser_id'>
+                                <option selected disabled>Select FMS Username</option>
+                                {% for item in gcspair %}
+                                    <option value="{{ item[0] }}">{{ item[1] }}</option>
                                 {% endfor %}
                             </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-sm-10">
-                            <select required id="priority_sel" name="priority_sel">
-                                <option value="Priority" disabled selected>Select Priority</option>
-                                {% for item in priority_list %}
-                                <option value="{{ item }}">{{ item }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group" style="text-align:center;">
-                        <input type='submit' class='btn btn-primary' value='Create new Ticket'>
-                    </div>
-                </form>
-            </div>
+                        </td>
+                        <td class="padded">
+                            <input type="submit" class="btn btn-primary" value="Register"/>
+                        </td>
+                    </tr>
+                    </form>
+
+                </tbody>
+            </table>
         </div>
+    <script>
+        $(document).ready (function () {
+            var count = {{ count }};
+            $(document).ready (function () {
+                if ( count == 0 ) {
+                    $("#no-msg").css ('display','block');;
+                }
+                else {
+                    $("#thead").css ('display','table-header-group');
+                }
+            });
+
+            $('#dronetable').find ('tr.cliclable-row').click (function() {
+                window.location.href = '/pilotview?pilot='+($(this).attr('id'));
+            });
+        });
+    </script>            
     </body>
 </html>
