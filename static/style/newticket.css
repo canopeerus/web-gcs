@@ -1,6 +1,43 @@
+input, select, textarea {
+  width: 100%;
+  display: block;
+  border: none;
+  border-bottom: 2px solid #ebebeb;
+  padding: 5px 0;
+  color: #222;
+  margin-bottom: 31px;
+  font-family: 'SFNS Display'; }
+  input:focus, select:focus {
+    color: #222;
+    border-bottom: 2px solid #4966b1; }
+
+input, select, textarea {
+  outline: none;
+  appearance: unset !important;
+  -moz-appearance: unset !important;
+  -webkit-appearance: unset !important;
+  -o-appearance: unset !important;
+  -ms-appearance: unset !important; }
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+  appearance: none !important;
+  -moz-appearance: none !important;
+  -webkit-appearance: none !important;
+  -o-appearance: none !important;
+  -ms-appearance: none !important;
+  margin: 0; }
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -o-box-shadow: none !important;
+  -ms-box-shadow: none !important; }
+
 .container {
-  width: 1000px;
-  height: 550px;
+  width: 800px;
+  height: auto;
   position: relative;
   /*margin: 0 auto;*/
   margin: auto;

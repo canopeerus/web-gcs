@@ -2,3 +2,10 @@
     padding:5px 5px 5px 5px;
     text-align:center;
 }
+
+th { 
+    text-transform:uppercase;
+    font-weight:bold;
+    background-color:#020138;
+    color:#fff5f5;
+}

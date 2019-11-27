@@ -85,9 +85,11 @@
         </div>
         <br><br>
         <div class="container">
-            <br><br>
-            <h2 style="text-align:center;">{{ drone.drone_name }}</h2>
-            <br><br>
+            <br>
+            <div class="page-header">
+                <h1>{{ drone.drone_name }}</h1>
+            </div>
+            <br>
             <div style="text-align:center;">
             <form id="newdrone-form" action="/editdroneaction" method="POST">
                 <div class="form-group row">

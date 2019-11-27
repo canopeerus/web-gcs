@@ -96,8 +96,7 @@ def homepage ():
 @application.route ("/gcsportal",methods=['GET','POST'])
 def gcs_home():
     if 'gcs_user' in session and session['gcs_logged_in']:
-        return render_template('gcshome.html')
-        #return redirect ('/jobtracker',code = 302)
+        return redirect ('/jobtracker',code = 302)
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -111,6 +110,8 @@ GCS USER PROFILE ACTIONS
 def gcs_login ():
     if not session.get ('gcs_logged_in'):
         return render_template ("fmsgeneric/gcs_login.html")
+    else:
+        return redirect ('/gcsportal')
 
 # GCS Login form action route, accepts only POST requests
 @application.route ("/gcsloginform",methods=['POST'])
@@ -126,7 +127,7 @@ def gcs_login_action ():
         session['gcs_logged_in'] = True
         session['gcs_user'] = usernameval
         session.modified = True
-        return redirect("/gcsportal",code=302)
+        return redirect (request.referrer)
     else:
         return render_template ("fmsgeneric/gcs_login.html", result="error")
 
@@ -444,21 +445,7 @@ def main_inventory ():
 def new_inventory ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         payloads = Payload.query.all ()
-        types = []
-        storage_types = []
-        items = []
-        uoms = []
-        for p in payloads:
-            if p.type_str in types:
-                types.applicationend (p.type_str)
-            if p.storage_type in storage_types:
-                storage_types.applicationend (p.storage_type)
-            if p.item in items:
-                items.applicationend (p.item)
-            if p.uom in uoms:
-                uoms.applicationend (p.uom)
-        return render_template ('inventory/newinventory.html',types = types,items = items,
-                storage_types = storage_types,uoms = uoms)
+        return render_template ('inventory/newinventory.html')
     else:
         return redirect ('/gcslogin',code = 302)
 
@@ -467,32 +454,16 @@ def new_inventory ():
 def inventoryformaction ():
     if request.method == 'POST':
         if 'gcs_user' in session and session ['gcs_logged_in']:
-            type_sel = request.form ['type_select']
-            if type_sel == 'New Type':
-                type_str = request.form ['newitemType']
-            else:
-                type_str = type_sel
+            type_str = request.form ['type']
 
-            item_sel = request.form ['item_select']
-            if item_sel == 'New Item':
-                item = request.form['item']
-            else:
-                item = item_sel
+            item= request.form ['item']
 
-            storage_sel = request.form ['storage_type_select']
-            if storage_sel == 'New Storage Type':
-                storage_type = request.form['storageType']
-            else:
-                storage_type = storage_sel
+            storage_type = request.form ['storageType']
 
             item_type = request.form['itemType']
             item_weight = request.form['weight']
             
-            uom_sel = request.form ['uom_select']
-            if uom_sel == 'new_uom':
-                uom = request.form['newUom']
-            else:
-                uom = uom_sel
+            uom = request.form['uom']
 
             stock = request.form ['stock']
 
@@ -529,7 +500,7 @@ def batchinventory_action ():
                 return 'error:no file'
             inputfile = request.files.get ('file')
             if inputfile is None:
-                return "The fuck"
+                return "Error!"
             if csv_allowed_file (inputfile.filename):
                 filename = inputfile.filename
                 outpath = os.path.join (application.config['UPLOAD_FOLDER'],filename)

@@ -84,37 +84,37 @@
         </div>
         <br><br>
         <div class="container">
-            <br><br>
-            <h2 style="text-align:center;">New Incident Ticket</h2>
-            <br><br>
+            <br>
+            <div class="page-header">
+                <h1>New Incident Ticket</h1>
+            </div>
+            <br>
             <div style="text-align:center;">
-                <form id="newticket-form" action='/newincidentaction' method="POST">
-                    <div class="form-group row">
-                        <label for='title' class="col-sm-2 col-form-label">Title</label>
+                <form id="newticket-form" action='/newincidentaction' method="POST" style="width:auto;">
+                    <div class="form-group">
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" required name='title'/>
+                            <input type = 'text' required name='title' placeholder='Title'/>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label for='description' class="col-sm-2 col-form-label">Description</label>
+                    <div class="form-group">
                         <div class="col-sm-10">
-                            <textarea rows="4" class="form-control" required name='description'></textarea>
+                            <textarea rows="4" required name-'description' placeholder='Enter Description Here....'></textarea>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label for='drone' class="col-sm-2 col-form-label">Drone</label>
+                    <div class="form-group">
                         <div class="col-sm-10">
-                            <select required class="form-control" id="drone_select" name="drone_select">
+                            <select required id='drone_select' name='drone_select'>
+                                <option value="Drone" disabled selected>Select Drone</option>
                                 {% for item in drones %}
                                 <option value="{{ item.id }}">{{ item.drone_name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label for='priority' class="col-sm-2 col-form-label">Priority</label>
+                    <div class="form-group">
                         <div class="col-sm-10">
-                            <select required class="form-control" id="priority_sel" name="priority_sel">
+                            <select required id="priority_sel" name="priority_sel">
+                                <option value="Priority" disabled selected>Select Priority</option>
                                 {% for item in priority_list %}
                                 <option value="{{ item }}">{{ item }}</option>
                                 {% endfor %}

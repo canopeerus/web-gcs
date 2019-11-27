@@ -85,39 +85,49 @@
         </div>
         <br><br>
         <div class="container">
-            <br><br>
-            <h2 style="text-align:center;">Add new Drone to Fleet</h2>
-            <br><br>
+            <br>
+            <div class="page-header">
+                <h1>Register new Drone to Fleet</h2>
+            </div>
+            <br>
             <div style="text-align:center;">
             <form id="newdrone-form" action="/newdroneaction" method="POST">
                 <div class="form-group row">
-                    <label for="droneName" class="col-sm-2 col-form-label">Drone Name</label>
+                    <!--label for="droneName" class="col-sm-2 col-form-label">Drone Name</label-->
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" required name="droneName" id="droneName"/>
+                        <!--input type="text" <class="form-control" required name="droneName" id="droneName"-->
+                            <input type="text" required name="droneName" id="droneName" placeholder="Drone Name"/>
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="drone_uin" class="col-sm-2 col-form-label">Drone Unique Identification Number</label>
+                    <!--label for="drone_uin" class="col-sm-2 col-form-label">Drone Unique Identification Number</label-->
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" required name='droneuin' placeholder='U-000000'/>
+                            <input type="text" required name="droneuin" placeholder="Unique Identification Number"/>
+                            <!--input type="text" class="form-control" required name='droneuin' placeholder='U-000000'/-->
                         </div>
                 </div>
                 <div class="form-group row">
-                    <label for="droneModel" class="col-sm-2 col-form-label">Drone Model</label>
+                    <!--label for="droneModel" class="col-sm-2 col-form-label">Drone Model</label-->
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" required name='droneModel' id='droneModel'/>
+                        <input type="text" required name="droneModel" id="droneModel"
+                        placeholder="Drone Model"/>
+                        <!--input type="text" class="form-control" required name='droneModel' id='droneModel'/-->
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for='motorCount' class="col-sm-2 col-form-label">Motor Count</label>
+                    <!--label for='motorCount' class="col-sm-2 col-form-label">Motor Count</label-->
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" required name='motorCount' id='motorCount'/>
+                        <input type="number" required name='motorCount' id='motorCount'
+                        placeholder="Motor Count"/>
+                        <!--input type="text" class="form-control" required name='motorCount' id='motorCount'/-->
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for='batteryType' class="col-sm-2 col-form-label">Battery Type</label>
+                    <!--label for='batteryType' class="col-sm-2 col-form-label">Battery Type</label-->
                     <div class="col-sm-10">
-                        <input type='text' class="form-control" required name='batteryType' id='batteryType'/>
+                        <input type="text" required name="batteryType" id="batteryType"
+                        placeholder="Battery Type"/>
+                        <!--input type='text' class="form-control" required name='batteryType' id='batteryType'/-->
                     </div>
                 </div>
                 <div class="form-group" style="text-align:center;">

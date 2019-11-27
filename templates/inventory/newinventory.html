@@ -90,69 +90,29 @@
             <br>
             <form id="newinventory-form" action='/newinventoryaction' method='POST'>
                 <div class="form-group">
-                    <label for='itemType'>Type</label>
-                    <select required class="form-control" id="type_select" name="type_select">
-                        <option value=""></option>
-                        <option value="New Type">New Type</option>
-                        {% for item in types %}
-                            <option value="{{ item }}">{{ item }}</option>
-                        {% endfor %}
-                    </select>
-                    <br>
-                    <input type="text" class="form-control" name='newitemType' 
-                     id='itemType' disabled placeholder='New Type'/>
+                    <input type="text" name='type' required
+                     id='itemType' placeholder='Type'/>
                 </div>
                 <div class="form-group">
-                    <label for='item'>Item</label>
-                    <select required class="form-control" id='item_select' name='item_select'>
-                        <option value=""></option>
-                        <option value='New Item'>New Item</option>
-                        {% for item in items %}
-                            <option value="{{ item }}">{{ item }}</option>
-                        {% endfor %}
-                    </select>
-                    <br>
-                    <input type="text" class="form-control" required name='item' id='item' disabled placeholder='New Item'/>
+                    <input type="text" required name='item' id='item' required placeholder='Item'/>
                 </div>
                 <div class="form-group">
-                    <label for='storageType'>Storage Type</label>
-                    <select required class="form-control" id="storage_type_select" name="storage_type_select">
-                        <option value=""></option>
-                        <option value="New Storage Type">New Storage Type</option>
-                        {% for item in storage_types %}
-                            <option value="{{ item }}">{{ item }}</option>
-                        {% endfor %}
-                    </select>
-                    <br>
-                    <input type="text" class="form-control" disabled name='storageType' id='storageType' placeholder = 'New Storage Type'/>
+                    <input type="text" name='storageType' id='storageType' required placeholder = 'Storage Type'/>
                 </div>
                 <div class="form-group">
-                    <label for='itemType'>Item Type</label>
-                    <input type="text" class="form-control" required name='itemType' id='itemType'/>
+                    <input type="text" placeholder='Name' required name='itemType' id='itemType'/>
                 </div>
                 <div class="form-group">
-                    <label for='itemWeight'>Weight</label>
-                    <input type="text" class="form-control" required name='weight' id='weight'/>
+                    <input type="text" placeholder='Weight' required name='weight' id='weight'/>
                 </div>
                 <div class="form-group">
-                    <label for='uom'>Unit of Measurement</label>
-                    <select required class="form-control" id="uom_select" name="uom_select">
-                        <option value=""></option>
-                        <option value="new_uom">New Unit of measure</option>
-                        {% for item in uoms %}
-                            <option value="{{ item }}">{{ item }}</option>
-                        {% endfor %}
-                    </select>
-                    <br>
-                    <input type="text" class="form-control" disabled name='newUom' id='newUom' placeholder="New Unit of Measurement"/>
+                    <input type="text" name='uom' id='newUom' required placeholder="Unit of Measurement"/>
                 </div>
                 <div class="form-group">
-                    <label for='stock'>Stock</label>
-                    <input type="text" class="form-control" name="stock" required/>
+                    <input type="number" placeholder='Stock' name="stock" required/>
                 </div>
                 <div class="form-group">
-                    <label for='value'>Value</label>
-                    <input type="text" class="form-control" name='value' required/>
+                    <input type="text" placeholder='Value' name='value' required/>
                 </div>
 
                 <div class="form-group" style="text-align:center;">
@@ -163,52 +123,5 @@
                 </div>
             </form>
         </div>
-    <script>
-        $(document).ready (function () {
-            $("#type_select").on ('change',function () {
-                if ( $(this).val () == 'New Type' ) {
-                    $("#itemType").attr("disabled",false);
-                    $("#itemType").attr("required",true);
-                }
-                else {
-                    $("#itemType").attr ("disabled",true);
-                    $("#itemType").attr ("required",false);
-                }
-            });
-
-            $("#item_select").on ('change',function () {
-                if ( $(this).val () == 'New Item' ) {
-                    $("#item").attr ("disabled",false);
-                    $("#item").attr ("required",true);
-                }
-                else {
-                    $("#item").attr ("disabled",true);
-                    $("#item").attr ("required",false);
-                }
-            });
-
-            $("#storage_type_select").on ('change',function () {
-                if ( $(this).val() == 'New Storage Type' ) {
-                    $("#storageType").attr("disabled",false);
-                    $("#storageType").attr ("required",true);
-                }
-                else {
-                    $("#storageType").attr ("disabled",true);
-                    $("#storageType").attr ("required",false);
-                }
-            });
-
-            $("#uom_select").on ('change',function () {
-                if ( $(this).val() == 'new_uom' ) {
-                    $("#newUom").attr ("disabled",false);
-                    $("#newUom").attr ("required",true);
-                }
-                else {
-                    $("#newUom").attr ("disabled",true);
-                    $("#newUom").attr ("required",false);
-                }
-            });
-        });
-    </script>
     </body>
 </html>
