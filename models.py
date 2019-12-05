@@ -6,6 +6,40 @@ from queue import Queue
 
 db = SQLAlchemy ()
 
+class RegisteredFlightModuleProvider (db.Model):
+    __tablename__ = 'rfmproviders'
+    id = db.Column (db.Integer,primary_key = True)
+    rfmp_name = db.Column (db.String())
+    
+    def __init__ (self,rfmpname):
+        self.rfmp_name = rfmpname
+
+class RegisteredFlightModule (db.Model):
+    __tablename__ = 'rfmodules'
+    id = db.Column (db.Integer,primary_key = True)
+    rfm_name = db.Column (db.String())
+    rfm_unique_id = db.Column (db.String(),unique = True)
+    rfm_hardware_specs_str = db.Column (db.String())
+    rfm_provider_id = db.Column (db.Integer,db.ForeignKey ('rfmproviders.id'))
+    rfm_provider_name = db.Column (db.String())
+    rfm_compliance_level = db.Column (db.Integer)
+    rfm_fw_ver_hash = db.Column (db.String())
+    rfm_hw_uid = db.Column (db.String())
+
+    def __init__ (self,rfm_name,rfm_unique_id,rfm_hardware_specs,rfm_provider_id,
+            compliance_level,fw_ver_hash,hw_uid):
+        self.rfm_name = rfm_name
+        self.rfm_unique_id = rfm_unique_id
+        self.rfm_hardware_specs_str = rfm_hardware_specs
+        self.rfm_provider_id = rfm_provider_id
+
+        rfm_provider = RegisteredFlightModuleProvider.query.filter_by (id = 
+                rfm_provider_id).first()
+        self.rfm_provider_name = rfm_provider.rfmp_name
+        self.rfm_compliance_level = compliance_level
+        rfm_fw_ver_hash = fw_ver_hash
+        rfm_hw_uid = hw_uid
+
 class GCSUser (db.Model):
     __tablename__ = 'gcsusers'
     id = db.Column (db.Integer,primary_key = True)
@@ -44,16 +78,6 @@ class Pilot (db.Model):
         self.pilot_gcsusername = gcsuser.username
         self.uaop = 'TBD'
 
-class FlightModuleProvider (db.Model):
-    __tablename__ = 'flightmoduleproviders'
-    id = db.Column (db.Integer,primary_key = True)
-    fmp_name = db.Column (db.String())
-
-class FlightModule (db.Model):
-    __tablename__ = 'flightmodules'
-    id = db.Column (db.Integer,primary_key = True)
-    fm_name = db.Column (db.String())
-    fm_provider_id = db.Column (db.Integer,db.ForeignKey ('flightmoduleproviders.id'))
 
 class Drone (db.Model):
     __tablename__ = 'drones'
@@ -65,13 +89,19 @@ class Drone (db.Model):
     battery_type = db.Column (db.String())
     status  = db.Column (db.String())
     jobid_queue = db.Column (db.String())
+    r_flight_module_id = db.Column (db.Integer,db.ForeignKey ('rfmodules.id'))
+    rfm_name = db.Column (db.String())
 
-    def __init__ (self,drone_name,model,motor_count,battery_type):
+    def __init__ (self,drone_name,model,motor_count,battery_type,rfm_id):
         self.drone_name = drone_name
         self.model = model
         self.motor_count = motor_count
         self.battery_type = battery_type
         self.status = 'Available'
+        self.r_flight_module_id = rfm_id
+        rfm = RemoteFlightModule.query.filter_by (id = rfm_id).first()
+        self.rfm_name = rfm.rfm_name
+
 
     def assign_job (self,job_id):
         if self.jobid_queue is None:

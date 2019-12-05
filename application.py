@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/fsr/bin/env python3
 '''
 ------------------------------------------------------------------------------------------------------
 Main GCS applicationlication source code for Redwing Aerospace Laboratories
@@ -14,13 +14,14 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os,uuid,visualise,shutil,time,geocoder
 from authutils import verify_password,hash_password
-from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot
+from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot, RegisteredFlightModule,RegisteredFlightModuleProvider
 from flask_pymongo import PyMongo
 import pandas as pd
 
-UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'
-ALLOWED_LOGS_EXTENSIONS = set (['csv'])
-ALLOWED_BATCH_INVENTORY_TYPES  = ALLOWED_LOGS_EXTENSIONS
+
+UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'           # deprecated. No longer valid
+ALLOWED_LOGS_EXTENSIONS = set (['csv'])                     # Extensions set for log file upload
+ALLOWED_BATCH_INVENTORY_TYPES  = ALLOWED_LOGS_EXTENSIONS    # Batch Inventory Uploads also accept only CSV files
 
 status_list = ['Pending Action','Resolved']
 priority_list = ['Low','Medium','High']
@@ -30,6 +31,10 @@ application.config['DEBUG'] = True
 application.config['SECRET_KEY'] = b'\xad]\xb8\xcf\x85\xe0\x0cp\xecf\x8ez\x86\x9d\x16%\xa5F\x08\x9c\xb6\x11\xc2\x86'
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
+
+# If PROD available in ENVIRONMENT set mode to development
+# Else set mode to production
+# TODO:Set opposite ENV variables for mode selection
 if os.environ.get('ENV') == 'prod':
     application.config['UPLOAD_FOLDER'] = "uploads/"
     application.config['ENV'] = 'development'
@@ -41,6 +46,9 @@ else:
     application.config['DEBUG'] = False
     application.config['TESTING'] = False
 
+
+# POSTGRES values,credentials and connection
+# TODO:Set this in separate configuration file, not in source code
 POSTGRES = {
         'user': 'postgres',
         'pw': 'redwingpostgres',
@@ -51,10 +59,14 @@ POSTGRES = {
 
 application.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
 application.config['WTF_CSRF_ENABLED'] = True
+
+# MONGO URI(DISABLED)
 application.config ['MONGO_URI'] = 'mongodb://localhost:27017/redwingdb'
 application.config ["ACCEPTABLE_COLUMNS"] = ['type','item','storage_type','item_type','weight',
         'uom','stock','value']
 
+
+# Start application and database instances
 db.app = application
 db.init_app (application)
 
@@ -72,6 +84,9 @@ db.session.commit ()
 IMAGE UPLOAD LOADING FOR PLOTS AND VISUALIZATIONS
 ---------------------------------------------------
 '''
+
+# Load static image from server to html pages (for visualization tool)
+# TODO:Add more comments explaining this.
 @application.route ('/image/<path:filename>')
 def download_file (filename):
 	return send_from_directory (application.config["UPLOAD_FOLDER"],filename)
@@ -87,6 +102,8 @@ def allowed_file (filename):
 LANDING PAGE
 ---------------------------------------------
 '''
+
+# Main Landing Page for FMS
 @application.route ('/')
 def homepage ():
     return render_template("index.html")
@@ -95,6 +112,9 @@ def homepage ():
 # Main GCS Page route, redirects to 'gcslogin' if not logged in
 @application.route ("/gcsportal",methods=['GET','POST'])
 def gcs_home():
+
+    # Check if user is logged into session, if not redirect to login page
+    # Else redirect to FMS homepage
     if 'gcs_user' in session and session['gcs_logged_in']:
         return redirect ('/jobtracker',code = 302)
     else:
@@ -106,6 +126,7 @@ GCS USER PROFILE ACTIONS
 ----------------------------------
 '''
 # GCS Login page route
+#TODO: Redirect to referrer when automatically directed to login page after login
 @application.route ("/gcslogin")
 def gcs_login ():
     if not session.get ('gcs_logged_in'):
@@ -113,31 +134,46 @@ def gcs_login ():
     else:
         return redirect ('/gcsportal')
 
-# GCS Login form action route, accepts only POST requests
+# * GCS Login form action route, accepts only POST requests
+# * Accept password and username from login page and verify
+# salted password with database
 @application.route ("/gcsloginform",methods=['POST'])
 def gcs_login_action ():
+
+    # Fetch username and password from request form
     usernameval = request.form['username']
     pwval = request.form['password']
+
+    # Check if entered user matching username actually exists
+    # If not return error
     qresult = GCSUser.query.filter_by (username=usernameval).first()
     if qresult is None:
         return render_template ("fmsgeneric/gcs_login.html",result="error")
+
+    # If user matched, fetch salt and salted password from database
     qpassword = qresult.password
     qsalt = qresult.salt
+
+    # Verify salt with user-input password
     if verify_password (qpassword,pwval,qsalt):
         session['gcs_logged_in'] = True
         session['gcs_user'] = usernameval
         session.modified = True
-        return redirect (request.referrer)
+        return redirect ('/gcsportal',code = 302)
     else:
         return render_template ("fmsgeneric/gcs_login.html", result="error")
 
-# show user profile and account settings
+# * Show user profile and account settings
 @application.route ("/gcsuserprofile",methods=['POST','GET'])
 def show_userprofile():
     if 'gcs_user' in session and session['gcs_logged_in']:
         updated = 0
         if 'updated' in request.args:
             updated = 1
+
+        # * Set 'updated' = 1 if user has made changes to reload page with
+        # 'updated' message
+
         user = session['gcs_user']
         qresult = GCSUser.query.filter_by(username=user).first()
         return render_template ("fmsgeneric/gcsprofile.html",
@@ -151,9 +187,13 @@ def show_userprofile():
 # Log out route
 @application.route ("/gcslogout",methods=['POST','GET'])
 def gcs_logout ():
+    # If user is logged in , initiate session log out
+    # Delete 'gcs_user' and set 'gcs_logged_in' to False in session
     if 'gcs_user' in session and session ['gcs_logged_in']:
         del session['gcs_user']
         session['gcs_logged_in'] = False
+
+    # Else simply redirect to FMS Home
     return redirect ("/", code=302)
 
 # GCS Sign up page route
@@ -164,13 +204,29 @@ def gcs_signup ():
 # GCS Sign up page form action route
 @application.route ("/gcssignupform",methods=['POST'])
 def gcs_signup_action ():
+
+    # Generate salt using uuid and hex
     salt = uuid.uuid4().hex
-    pwd_hash = hash_password (request.form['password'],salt)
+
+    # Hash and salt password
+    pwd_hash = hash_password (request.form['password'].strip(),salt)
+
+    # * Check if username is already taken
+    # * If match, reload page with error message
+    # * Else, initiate signup
     match = GCSUser.query.filter_by (username = request.form['username']).first()
     if match is None:
-        gcsuser_instance = GCSUser (username = request.form['username'],password = pwd_hash,
-            salt = salt, firstname = request.form['firstname'], lastname = request.form['lastname'], 
-            email_id = request.form['email_id'])
+
+        # Sanitize input strings by removing trailing and leading spaces
+        username = request.form['username'].strip ()
+        firstname = request.form['firstname'].strip ()
+        lastname = request.form['lastname'].strip ()
+        email_id = request.form['email_id'].strip ()
+
+        # Create new GCS User and add to database
+        gcsuser_instance = GCSUser (username = username,password = pwd_hash,
+            salt = salt, firstname = firstname, lastname = lastname, 
+            email_id = email_id)
         db.session.add (gcsuser_instance)
         db.session.commit ()
         return redirect ("/gcslogin",code=302)
@@ -180,44 +236,56 @@ def gcs_signup_action ():
 # POST route for editing GCS profile
 @application.route ("/gcsprofileedit",methods=['POST'])
 def gcs_profile_edit ():
-    if 'gcs_user' not in session:
-        print ("Not in session wtf!")
-        return redirect ("/gcslogin",code=302)
-    user = session['gcs_user']
-    user_instance = GCSUser.query.filter_by (username = user).first()
-    print (request.args)
-    if 'firstname_update' in request.form:
-        print ("firstname found")
-        n_fname = request.form['firstname_update']
-        user_instance.firstname = n_fname
-    else:
-        print ("no firstname")
+
+    # If request is POST, proceed
+    if request.method == 'POST': 
+
+        # Check if user is logged in session
+        if 'gcs_user' in session['gcs_logged_in']:
+
+            # Iteratively check each field for update and make changes to 
+            # user instance manually
+
+            user = session['gcs_user']
+            user_instance = GCSUser.query.filter_by (username = user).first()
+            print (request.args)
+            if 'firstname_update' in request.form:
+                print ("firstname found")
+                n_fname = request.form['firstname_update']
+                user_instance.firstname = n_fname
+            else:
+                print ("no firstname")
     
-    if 'lastname_update' in request.form:
-        print ("lastname found")
-        n_lname = request.form['lastname_update']
-        user_instance.lastname = n_lname
-    else:
-        print ("no lastname")
+            if 'lastname_update' in request.form:
+                print ("lastname found")
+                n_lname = request.form['lastname_update']
+                user_instance.lastname = n_lname
+            else:
+                print ("no lastname")
 
-    if 'email_update' in request.form:
-        print ("email found")
-        n_email = request.form['email_update']
-        user_instance.email_id = n_email
+            if 'email_update' in request.form:
+                print ("email found")
+                n_email = request.form['email_update']
+                user_instance.email_id = n_email
+            else:
+                print ("no email")
+                
+            # Commit changes to database and redirect to profile page
+            # With 'updated' flag
+            
+            db.session.commit()
+            return redirect ("/gcsuserprofile?updated",code=302)
     else:
-        print ("no email")
+        return redirect ('/gcslogin',code = 302)
 
-    db.session.commit()
-    return redirect ("/gcsuserprofile?updated",code=302)
 
 # Route for password change input form
 @application.route ("/updatepassword")
 def change_password ():
-    err = False
-    if 'error' in request.args:
-        err = True
-        print ("ERRRRROOOORRR")
-    if 'gcs_logged_in' in session and session['gcs_logged_in']:
+    if 'gcs_logged_in' in session and session ['gcs_logged_in']:
+        err = False
+        if 'error' in request.args:
+            err = True
         if err:
             return render_template ("fmsgeneric/changepassword.html",result="error")
         else:
@@ -225,20 +293,22 @@ def change_password ():
     else:
         return redirect ("/gcslogin",code=302)
 
-# Form action route for /updatepassword
+# Form action route for /updatepasswordi
+# If user entered password matches salt in database, update hash
 @application.route ("/updatepassword_action",methods=['POST'])
 def update_password_action ():
-    if 'gcs_user' in session:
-        gcsuser = GCSUser.query.filter_by (username = session['gcs_user']).first()
-        gsalt = gcsuser.salt
-        oldpas = hash_password (request.form['old_password'],gsalt)
-        if oldpas == gcsuser.password:
-            newpas = hash_password (request.form['password'],gsalt)
-            gcsuser.password = newpas
-            db.session.commit()
-            return redirect ("/gcsuserprofile",code=302)
-        else:
-            return redirect ("/updatepassword?error",code=302)
+    if request.method == 'POST':
+        if 'gcs_user' in session and session['gcs_logged_in']:
+            gcsuser = GCSUser.query.filter_by (username = session['gcs_user']).first()
+            gsalt = gcsuser.salt
+            oldpas = hash_password (request.form['old_password'],gsalt)
+            if oldpas == gcsuser.password:
+                newpas = hash_password (request.form['password'],gsalt)
+                gcsuser.password = newpas
+                db.session.commit()
+                return redirect ("/gcsuserprofile",code=302)
+            else:
+                return redirect ("/updatepassword?error",code=302)
     else:
         return redirect ("/gcslogin",code=302)
 
@@ -286,10 +356,19 @@ def add_new_drone():
 def edit_drone ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         drone_id = int (request.args.get ('drone'))
+        rfms = RegisteredFlightModule.query.all ()
         drone = Drone.query.filter_by (id = drone_id).first ()
-        return render_template ('drone/editdrone.html',drone = drone)
+        return render_template ('drone/editdrone.html',drone = drone,rfms = rfms)
     else:
         return redirect ('/gcslogin',code = 302)
+
+@application.route ('/editdroneaction')
+def edroneaction ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        return "WIP"
+    else:
+        return redirect ('/gcslogin',code = 302)
+        
 # View particular drone
 @application.route ("/droneview")
 def individual_drone ():
@@ -934,6 +1013,70 @@ def new_pilot_action ():
             db.session.add (pilot)
             db.session.commit ()
             return redirect ('/pilotdb')
+
+'''
+----------------------------------------------------------------
+REGISTERED FLIGHT MODULE
+----------------------------------------------------------------
+'''
+@application.route ('/registeredfm')
+def rfm_index ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        rfms = RegisteredFlightModule.query.all ()
+        count = len (rfms)
+        return render_template ('rfm/index.html',rfms = rfms,count = count)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+@application.route ('/newrfm')
+def newrfm ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        rfmps = RegisteredFlightModuleProvider.query.all ()
+        return render_template ('rfm/newrfm.html',rfmps = rfmps)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+@application.route ('/newrfmaction',methods=['POST'])
+def rfmaction ():
+    if 'gcs_user' in session and session['gcs_logged_in']:
+        rfmname = request.form.get ('rfmname')
+        rfmuid = request.form.get ('rfmuid')
+        hardwarespecs = request.form.get ('hardwarespecs')
+        clevel = int (request.form.get ('clevel'))
+        fwhash = request.form.get ('fwhash')
+        hwuid = request.form.get ('hwuid')
+        rfmp_id = int (request.form.get('rfmp_select'))
+        rfm = RegisteredFlightModule (rfmname,rfmuid,hardwarespecs,rfmp_id,
+                clevel,fwhash,hwuid)
+        db.session.add (rfm)
+        db.session.commit ()
+        return redirect ('/registeredfm',code = 302)
+
+'''
+-------------------------------------------------------------------
+REGISTERED FLIGHT MODULE PROVIDER
+-------------------------------------------------------------------
+'''
+@application.route ('/registeredfmprovider')
+def rfmp_index ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        rfmps = RegisteredFlightModuleProvider.query.all ()
+        count = len (rfmps)
+        return render_template ('rfmp/index.html',count = count,rfmps = rfmps)
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+@application.route ('/newrfmpaction',methods=['POST'])
+def newrfmpaction ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        rfmpname = request.form.get ('rfmpname')
+        rfmp = RegisteredFlightModuleProvider (rfmpname)
+        db.session.add (rfmp)
+        db.session.commit ()
+        return redirect ('/registerdfmprovider')
+    else:
+        return redirect ('/gcslogin',code = 302)
+
 
 '''
 -----------------------------------------------------------------

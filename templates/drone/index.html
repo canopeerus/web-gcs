@@ -108,6 +108,7 @@
                     <th class="padded">Model</th>
                     <th class="padded">Motor Count</th>
                     <th class="padded">Battery Type</th>
+                    <th class="padded">Remote Flight Module</th>
                     <th class="padded">Edit</th>
                     <th class="padded">Status</th>
                 </tr>
@@ -123,6 +124,7 @@
                         <td class="padded">{{ row.model }}</td>
                         <td class="padded">{{ row.motor_count }}</td>
                         <td class="padded">{{ row.battery_type }}</td>
+                        <td class="padded">{{ row.rfm_name }}</td>
                         <td class="padded"><a href='/editdrone?drone={{ row.id }}'><i class="fas fa-edit"></i></a></td>
                         <td class="padded status">{{ row.status }}</td>
                     </tr>

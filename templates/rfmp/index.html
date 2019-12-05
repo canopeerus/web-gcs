@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>{{ drone.drone_name }}</title>
+        <title>Registered Flight Modules</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -16,14 +16,14 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
 
         <!--Load page specific CSS-->
-        <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
-        <link rel="stylesheet" href="/static/style/editdrone.css">
-        <link rel='stylesheet' href='/static/style/navbar-style.css'/>
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/dmonitor.css') }}"/-->
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
+
+        <link rel="stylesheet" href="static/style/navbar-style.css"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     </head>
     <body>
-            <div class="container-fluid">
+        <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
                     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -34,7 +34,7 @@
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="navbar-nav">
                                 <li class="nav-item active">
-                                    <a class="nav-link" href="#"><i class="fas fa-home"></i> Home<span class="sr-only">(current)</span></a>
+                                    <a class="nav-link" href="/gcsportal"><i class="fas fa-home"></i> Home<span class="sr-only">(current)</span></a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/map"><i class="fas fa-map-marker-alt"></i> Map</a>
@@ -50,19 +50,19 @@
                                 </li>
                                 
                                 <li class="nav-item">
-                                    <a class="nav-link" href='/dronemonitor'><i class="fab fa-avianex"></i> Fleet Monitor</a>
+                                    <a class="nav-link" href='#'><i class="fab fa-avianex"></i> Fleet Monitor</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href='/inventory'><i class="fas fa-boxes"></i> Inventory</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href='/npntauthentication'><i class="fas fa-key"></i> NPNT Authentication</a>
+                                    <a class="nav-link" href="/npntauthentication"><i class="fas fa-key"></i> NPNT Authentication</a>
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLinkx" data-toggle="dropdown"><i class="fas fa-tools"></i> Tools</a>
                                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkx">
                                         <a class="dropdown-item" href="/logplotter">Log File Parse/Plot</a>
-                                        <a class="dropdown-item" href='/logfilestorage'>Log File Storage</a>
+                                        <a class="dropdown-item" href="/logfilestorage">Log File Storage</a>
                                     </div>
                                 </li>
                                 <li class="nav-item">
@@ -87,57 +87,67 @@
                 </div>
             </div>
         </div>
-        <br><br>
-        <div class="container">
-            <br>
-            <div class="page-header">
-                <h1>{{ drone.drone_name }}</h1>
-            </div>
-            <br>
-            <div style="text-align:center;">
-            <form id="newdrone-form" action="/editdroneaction" method="POST">
-                <div class="form-group row">
-                    <label for="drone_uin" class="col-sm-2 col-form-label">Unique Identification Number</label>
-                    <div class="col-sm-10">
-                        <input type="drone_uin" class="form-control" required name="droneuin" id="droneuin" value="{{ drone.unique_id_number }}"/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="droneName" class="col-sm-2 col-form-label">Drone Name</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" required name="droneName" id="droneName" value="{{ drone.drone_name }}"/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="droneModel" class="col-sm-2 col-form-label">Drone Model</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" required name='droneModel' id='droneModel' value="{{ drone.model }}"/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for='motorCount' class="col-sm-2 col-form-label">Motor Count</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" required name='motorCount' id='motorCount' value="{{ drone.motor_count }}"/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for='batteryType' class="col-sm-2 col-form-label">Battery Type</label>
-                    <div class="col-sm-10">
-                        <input type='text' class="form-control" required name='batteryType' id='batteryType' value="{{ drone.battery_type }}"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-2 col-form-label">Registered Flight Module</label>
-                    <div class="col-sm-10">
-                    <select required name="rfmselect">
-                        {% for item in rfms %}
-                        <option value="{{ item.id }}">{{ rfm.rfm_name }}</option>
-                    </select>
-                    </div>
-                </div>
-                <div class="form-group" style="text-align:center;">
-                    <input type="submit" class="btn btn-primary" value="Submit"/>
-                </div>
+    <div class="container-fluid">
+        <br>
+        <div class="page-header">
+            <h1>Fleet Monitor</h1>
         </div>
+        <br>
+        <div id="no-msg" style="display:none;" class="page-header">
+            <h3>
+                There are currently no Registered Flight Module Providers in database.
+            </h3>
+        </div>
+        <br>
+        <table id='dronetable' class="table table-hover">
+            <thead id='thead' style='display:none;'>
+                <tr>
+                    <th class="padded">Serial No</th>
+                    <th class="padded">Registered FM Provider Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rfmps %}
+                    <tr class="clickable-row" id="{{ row.id }}">
+                        <td class="padded">{{ row.id }}</td>
+                        <td class="padded">{{ row.rfmp_name }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+                     
+        <div class="container" style="text-align:center;">
+            <form action='/newrfmpaction' method='POST'>
+                <input type='text' class='form-control' name='rfmpname' placeholder='new RFMP Name' width='50px'/>
+                <br>
+                <input type='submit' class="btn btn-primary" value='Add new RFMP'/>
+        </div>
+    </div>
+    <script>
+    $(document).ready (function () {
+        var count = parseInt("{{ count }}");
+        $(document).ready (function() {
+            if ( count == 0 ) {
+                $("#no-msg").css("display","block");
+            }
+            else {
+                $("#thead").css("display","table-header-group");
+            }
+        });
+       /* 
+        $("#dronetable").find ('tr.clickable-row').click ( function() {
+            window.location.href = '/droneview?drone='+($(this).attr("id"));
+            //alert ("You clicked " + ($(this).attr("id")));
+        });
+        $(".status").each (function () {
+            var status = $(this).html().trim();
+            if ( status == 'Available' ) {
+                $(this).css ("background-color","green");
+                $(this).css ("color","#e3e3e3");
+            }
+        });*/
+    });
+
+    </script>
     </body>
 </html>

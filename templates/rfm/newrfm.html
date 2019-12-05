@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>{{ drone.drone_name }}</title>
+        <title>Add New RFM</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -17,7 +17,7 @@
 
         <!--Load page specific CSS-->
         <!--link rel="stylesheet" href="{{ url_for('static',filename='style/gcshome.css') }}"/-->
-        <link rel="stylesheet" href="/static/style/editdrone.css">
+        <link rel="stylesheet" href="/static/style/newdrone.css">
         <link rel='stylesheet' href='/static/style/navbar-style.css'/>
         <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
@@ -91,50 +91,55 @@
         <div class="container">
             <br>
             <div class="page-header">
-                <h1>{{ drone.drone_name }}</h1>
+                <h1>Register new Drone to Fleet</h2>
             </div>
             <br>
             <div style="text-align:center;">
-            <form id="newdrone-form" action="/editdroneaction" method="POST">
-                <div class="form-group row">
-                    <label for="drone_uin" class="col-sm-2 col-form-label">Unique Identification Number</label>
+            <form id="newdrone-form" action="/newrfmaction" method="POST">
+                <div class="form-group">
                     <div class="col-sm-10">
-                        <input type="drone_uin" class="form-control" required name="droneuin" id="droneuin" value="{{ drone.unique_id_number }}"/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="droneName" class="col-sm-2 col-form-label">Drone Name</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" required name="droneName" id="droneName" value="{{ drone.drone_name }}"/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="droneModel" class="col-sm-2 col-form-label">Drone Model</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" required name='droneModel' id='droneModel' value="{{ drone.model }}"/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for='motorCount' class="col-sm-2 col-form-label">Motor Count</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" required name='motorCount' id='motorCount' value="{{ drone.motor_count }}"/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for='batteryType' class="col-sm-2 col-form-label">Battery Type</label>
-                    <div class="col-sm-10">
-                        <input type='text' class="form-control" required name='batteryType' id='batteryType' value="{{ drone.battery_type }}"/>
+                            <input type="text" required name="rfmname" id="droneName" placeholder="RFM Name"/>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 col-form-label">Registered Flight Module</label>
+                        <div class="col-sm-10">
+                            <input type="text" required name="rfmuid" placeholder="RFM Unique Identifier"/>
+                        </div>
+                </div>
+                <div class="form-group">
                     <div class="col-sm-10">
-                    <select required name="rfmselect">
-                        {% for item in rfms %}
-                        <option value="{{ item.id }}">{{ rfm.rfm_name }}</option>
-                    </select>
+                        <input type="text" required name="hardwarespecs" id="droneModel"
+                        placeholder="Hardware Specifications"/>
                     </div>
                 </div>
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <input type="number" required name='clevel' id='motorCount'
+                        placeholder="Compliance Level"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <input type="text" required name="fwhash" id="batteryType"
+                        placeholder="Firmware Version Hash"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <input type="text" required name='hwuid' placeholder='Hardware Unique Identifier'/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <select required id="rfm_select" name="rfmp_select">
+                            <option selected disabled>Select RFM Provider</option>
+                            {% for item in rfmps %}
+                            <option value="{{ item.id }}">{{ item.rfmp_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group" style="text-align:center;">
                     <input type="submit" class="btn btn-primary" value="Submit"/>
                 </div>

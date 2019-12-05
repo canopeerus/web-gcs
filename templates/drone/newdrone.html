@@ -103,14 +103,14 @@
                             <input type="text" required name="droneName" id="droneName" placeholder="Drone Name"/>
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group">
                     <!--label for="drone_uin" class="col-sm-2 col-form-label">Drone Unique Identification Number</label-->
                         <div class="col-sm-10">
                             <input type="text" required name="droneuin" placeholder="Unique Identification Number"/>
                             <!--input type="text" class="form-control" required name='droneuin' placeholder='U-000000'/-->
                         </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group">
                     <!--label for="droneModel" class="col-sm-2 col-form-label">Drone Model</label-->
                     <div class="col-sm-10">
                         <input type="text" required name="droneModel" id="droneModel"
@@ -118,7 +118,7 @@
                         <!--input type="text" class="form-control" required name='droneModel' id='droneModel'/-->
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group">
                     <!--label for='motorCount' class="col-sm-2 col-form-label">Motor Count</label-->
                     <div class="col-sm-10">
                         <input type="number" required name='motorCount' id='motorCount'
@@ -126,7 +126,7 @@
                         <!--input type="text" class="form-control" required name='motorCount' id='motorCount'/-->
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group">
                     <!--label for='batteryType' class="col-sm-2 col-form-label">Battery Type</label-->
                     <div class="col-sm-10">
                         <input type="text" required name="batteryType" id="batteryType"
@@ -134,6 +134,17 @@
                         <!--input type='text' class="form-control" required name='batteryType' id='batteryType'/-->
                     </div>
                 </div>
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <select required id="rfm_select" name="rfm_select">
+                            <option selected disabled>Select RFM</option>
+                            {% for item in rfm %}
+                            <option value="{{ item.id }}">{{ rfm.rfm_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group" style="text-align:center;">
                     <input type="submit" class="btn btn-primary" value="Submit"/>
                 </div>
