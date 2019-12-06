@@ -3,7 +3,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from queue import Queue
-
+from sqlalchemy.dialects.postgresql import ARRAY
+import geocoder
 db = SQLAlchemy ()
 
 class RegisteredFlightModuleProvider (db.Model):
@@ -153,43 +154,78 @@ class Payload (db.Model):
 class Job (db.Model):
     __tablename__ = 'jobs'
     id = db.Column (db.Integer,primary_key = True)
-    date = db.Column (db.DateTime)
+    startDate = db.Column (db.DateTime)
+    endDate = db.Column (db.DateTime)
     drone_id = db.Column (db.Integer, db.ForeignKey ('drones.id'))
     status = db.Column (db.String())
-    location_origin_lat = db.Column (db.String())
-    location_origin_long = db.Column (db.String())
-    location_dest_lat = db.Column (db.String())
-    location_dest_long = db.Column (db.String())
-    location_dest_string = db.Column (db.String())
-    location_origin_string = db.Column (db.String())
+    geofence_lat = db.Column (ARRAY (db.Float))
+    geofence_long = db.Column (ARRAY (db.Float))
+    
     payload_id = db.Column (db.Integer, db.ForeignKey ('payloads.id'))
     payload_count = db.Column (db.Integer)
     payload_weight = db.Column (db.Integer)
+    max_altitude_level_ft = db.Column (db.Float)
+    deployment_purpose = db.Column (db.String())
 
-    def __init__ (self, date, drone_id, location_origin_lat,
-            location_origin_long, location_dest_lat, location_dest_long,
-            location_dest_string,payload_id,payload_stock,location_origin_string):
-        self.date = date
+    location_origin_lat = db.Column (db.Float)
+    location_origin_lon = db.Column (db.Float)
+    location_dest_lat = db.Column (db.Float)
+    location_dest_lon = db.Column (db.Float)
+
+    location_origin_str = db.Column (db.String())
+    location_dest_str = db.Column (db.String())
+
+    def __init__ (self, sdate, edate, drone_id, geofence_lat,
+            geofence_long, payload_id,payload_stock, max_alt,
+            origin_lat,origin_lon,dest_lat,dest_lon):
+        self.startDate = sdate
+        self.endDate = edate
         self.drone_id = drone_id
-        self.location_origin_lat = location_origin_lat
-        self.location_origin_long = location_origin_long
-        self.location_dest_lat = location_dest_lat
-        self.location_dest_long = location_dest_long
         self.payload_id = payload_id
-        self.location_dest_string = location_dest_string
-        self.location_origin_string = location_origin_string
         self.status = "PENDING APPROVAL"
         self.payload_count = payload_stock
-        
+       
+        self.geofence_lat = geofence_lat
+        self.geofence_long = geofence_long
+
         payload = Payload.query.filter_by (id = payload_id).first ()
         payload.stock -= self.payload_count
         db.session.commit ()
 
         self.payload_weight = payload.weight * payload_stock
-        self.location_origin_string = location_origin_string
+        self.max_altitude_level_ft = max_alt
+        self.deployment_purpose = 'TEST'
+
+        self.location_origin_lat = origin_lat
+        self.location_origin_lon = origin_lon
+        self.location_dest_lat = dest_lat
+        self.location_dest_lon = dest_lon
+
+        latlng = [float (origin_lat),float (origin_lon)]
+        g = geocoder.mapbox (latlng,method='reverse',key='pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw')
+        if g.json is None:
+            self.location_origin_str = "Unknown Location"
+        else:
+            self.location_origin_str = g.json['address']
+
+        latlng = [float (dest_lat),float (dest_lon)]
+        g = geocoder.mapbox (latlng,method='reverse',key='pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw')
+        if g.json is None:
+            self.location_dest_str = "Unknown Location"
+        else:
+            self.location_dest_str = g.json['address']
 
     def is_pending (self):
         return self.status == 'PENDING APPROVAL'
+
+    def get_assigned_drone (self):
+        drone_ins = Drone.query.filter_by (id = self.drone_id).first()
+        return drone_ins
+
+    def get_assigned_payload (self):
+        payload = Payload.query.filter_by (id = self.payload_id).first ()
+        return payload
+
 
 class LogFile (db.Model):
     __tablename__ = 'logfiles'

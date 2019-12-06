@@ -102,27 +102,31 @@
                     <tbody>
                         <tr>
                             <td class="marked">Drone Assigned</td>
-                            <td>{{ drone.drone_name }}</td>
+                            <td>{{ drone_name }}</td>
                         </tr>
                         <tr>
                             <td class="marked">Payload Type</td>
-                            <td>{{ payload.name }}</td>
+                            <td>{{ payload_name }}</td>
                         </tr>
                         <tr>
                             <td class="marked">Payload Net Weight(grams)</td>
                             <td>{{ job.payload_weight }}</td>
                         </tr>
                         <tr>
-                            <td class="marked">Scheduled Time</td>
-                            <td>{{ job.date }}</td>
+                            <td class="marked">Scheduled Start Time</td>
+                            <td>{{ job.startDate }}</td>
+                        </tr>
+                        <tr>
+                            <td class="marked">Scheduled End Time</td>
+                            <td>{{ job.endDate }}</td>
                         </tr>
                         <tr>
                             <td class="marked">Origin Location</td>
-                            <td>{{ job.location_origin_string }}</td>
+                            <td>{{ job.location_origin_str }}</td>
                         </tr>
                         <tr>
                             <td class="marked">Destination Location</td>
-                            <td>{{ job.location_dest_string }}</td>
+                            <td>{{ job.location_dest_str }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -138,7 +142,7 @@
          const AIRMAP_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHxKZ1FseEV6aDNhWFh2TENvZU1Za1JUeXFiZDJhIiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxHeGFZNTVxdFo4ZUE3Q1hBUEV3a2NuZ2RNTVEiLCJvcmdhbml6YXRpb25faWQiOiJkZXZlbG9wZXJ8S1ltUUd5WGZSd1o5MkxIZ2VaeG9SU0FHUkdQMyIsImlhdCI6MTU1OTI5MTAwNn0.f5BBtwQwuCNuiqDSQD3rQdNOfilmRzpcFYoDqXDYlTs'
                 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw'
                 var lat = {{ job.location_origin_lat }};
-                var lon = {{ job.location_origin_long }};
+                var lon = {{ job.location_origin_lon }};
                 //if (AIRMAP_API_KEY && MAPBOX_ACCESS_TOKEN) {
                     mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
                     var map = new mapboxgl.Map({

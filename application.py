@@ -12,7 +12,7 @@ from collections import Counter
 from flask import Flask,render_template,redirect,session,abort,request,flash,url_for,send_from_directory,send_file
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import os,uuid,visualise,shutil,time,geocoder
+import os,uuid,visualise,shutil,time,geocoder,json
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot, RegisteredFlightModule,RegisteredFlightModuleProvider
 from flask_pymongo import PyMongo
@@ -735,34 +735,36 @@ def new_job ():
 @application.route ('/newjobform',methods=['POST'])
 def new_job_formaction ():
     if 'gcs_user' in session and session['gcs_logged_in']:
-        date_sel = request.form.get ('date')
-        time_sel = request.form.get ('time')
-        datetime_sel = datetime.strptime (date_sel + ' ' + time_sel, '%Y-%m-%d %I:%M %p')
+        sdate_sel = request.form.get ('startdate')
+        stime_sel = request.form.get ('starttime')
+        edate_sel = request.form.get ('enddate')
+        etime_sel = request.form.get ('endtime')
+        sdatetime_sel = datetime.strptime (sdate_sel + ' ' + stime_sel, '%Y-%m-%d %I:%M %p')
+        edatetime_sel = datetime.strptime (edate_sel + ' ' + etime_sel, '%Y-%m-%d %I:%M %p')
         drone_id = int(str (request.form.get ('drone_select')))
-        location_origin_lat_sel = request.form.get ('origin-lat')
-        location_origin_lon_sel = request.form.get ('origin-long')
-        location_dest_lat_sel = request.form.get ('dest-lat')
-        location_dest_lon_sel = request.form.get ('dest-long')
+
+
         payload_id = request.form.get ('payload_select')
-        latlng = [float (location_dest_lat_sel),float (location_dest_lon_sel)]
+        max_alt_ft = float (request.form.get ('max_alt'))
+        
+        geofence_lat_str = request.form.get ('geofence_lat').split (',')
+        geofence_lon_str = request.form.get ('geofence_lon').split (',')
+
+        geofence_lat = list (map (float,geofence_lat_str))
+        geofence_long = list (map (float,geofence_lon_str))
+
+
         count = int (request.form.get ('count'))
+       
+        origin_lon = float (request.form.get ('origin_lon'));
+        origin_lat = float (request.form.get ('origin_lat'));
+        dest_lon = float (request.form.get ('dest_lon'));
+        dest_lat = float (request.form.get ('dest_lat'));
+
         
-        g = geocoder.mapbox (latlng,method='reverse',key='pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw')
-        if g.json is None:
-            location_str_dest = "Unknown Location"
-        else:
-            location_str_dest = g.json['address']
-        
-        latlng = [float (location_origin_lat_sel),float(location_origin_lon_sel)]
-        g = geocoder.mapbox (latlng,method='reverse',key='pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw')
-        if g.json is None:
-            location_str_origin = "Unknown Location"
-        else:
-            location_str_origin = g.json['address']
-        
-        job_instance = Job (datetime_sel,drone_id,location_origin_lat_sel,
-                location_origin_lon_sel,location_dest_lat_sel,location_dest_lon_sel,
-                location_str_dest,int (payload_id),count,location_str_origin)
+        job_instance = Job (sdatetime_sel,edatetime_sel,drone_id,geofence_lat,
+                geofence_long,int (payload_id),count,max_alt_ft,
+                origin_lat,origin_lon,dest_lat,dest_lon)
 
         db.session.add (job_instance)
         db.session.commit ()
@@ -807,8 +809,10 @@ def jobview ():
                 jobid = int (jobid_str)
                 job_instance = Job.query.filter_by (id = jobid).first ()
                 if job_instance is not None:
+                    drone_instance = job_instance.get_assigned_drone ()
+                    payload = job_instance.get_assigned_payload ()
                     if job_instance.is_pending ():
-                        return render_template ('jobs/jobview.html',jobid = job_instance.id)
+                        return render_template ('jobs/jobview.html',drone_name = drone_instance.drone_name,payload_name = payload.item,job = job_instance)
                     else:
                         return "<h2>Work In Progress</h2>"
                 else:
@@ -818,6 +822,7 @@ def jobview ():
     else:
         return redirect ('/gcslogin',code = 302)
 
+'''
 # OTP form action route
 @application.route ('/jobotpauth',methods=['POST'])
 def auth_otp ():
@@ -854,22 +859,41 @@ def initiate_deployment ():
     else:
         return "<h2>Error,Only post requests allowed!</h2>"
 
-
+'''
 @application.route ('/godeployment')
 def go_deployment ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         jobid = int (request.args.get ('job'))
         job_instance = Job.query.filter_by (id = jobid).first()
         if job_instance is not None:
-            drone_instance = Drone.query.filter_by (id = job_instance.id).first ()
-            payload_instance = Payload.query.filter_by (id = job_instance.payload_id).first()
-            return render_template ('flytgcs_web/application.html',job = job_instance)
+            drone_instance = job_instance.get_assigned_drone ()
+            payload_instance = job_instance.get_assigned_payload ()
+
+            perm_request = dict()
+            perm_request['pilotBusinessIdentifier'] = '1234'
+            perm_request['flyArea'] = list()
+            
+            for lon,lat in zip (job_instance.geofence_lat,job_instance.geofence_long):
+                    coords = dict()
+                    coords['latitude'] = lat
+                    coords['longitude'] = lon
+                    perm_request['flyArea'].append (coords)
+            
+            perm_request['droneId'] = str (drone_instance.id)
+            perm_request['payloadWeightInKg'] = float (job_instance.payload_weight/1000)
+            perm_request['payloadDetails'] = payload_instance.item
+            perm_request['flightPurpose'] = job_instance.deployment_purpose
+            perm_request['startDateTime'] = str(job_instance.startDate)
+            perm_request['endDateTime'] = str (job_instance.endDate)
+
+            return json.dumps (perm_request)
+
         else:
             return "<h3>Something went wrong</h3>"
     else:
         return redirect ('/gcslogin',code = 302)
 
-
+'''
 @application.route ('/jobcontrol')
 def jobtakeoff ():
     if 'gcs_user' in session and session['gcs_logged_in']:
@@ -883,8 +907,6 @@ def jobtakeoff ():
     else:
         return redirect ('/gcslogin',code = 302)
 
-
-'''
 ----------------------------------------------------------------
 INCIDENT TRACKER
 ----------------------------------------------------------------

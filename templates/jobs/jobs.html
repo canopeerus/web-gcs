@@ -152,7 +152,8 @@ body { margin: 0; padding: 0; }
             <table class="table table-hover" id="jobtable">
                 <thead id="thead" style="display:none;">
                     <tr>
-                        <th class="padded">DATE</th>
+                        <th class="padded">START DATE</th>
+                        <th class="padded">END DATE</th>
                         <th class="padded">ORIGIN</th>
                         <th class="padded">DESTINATION</th>
                         <th class="padded">PAYLOAD NET WT(GRAMS)</th>
@@ -162,9 +163,10 @@ body { margin: 0; padding: 0; }
                 <tbody>
                     {% for row in deployments %}
                     <tr class="clickable-row" id="{{ row.id }}">
-                        <td class="padded">{{ row.date.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
-                        <td class="padded">{{ row.location_origin_string }}</td>
-                        <td class="padded">{{ row.location_dest_string }}</td>
+                        <td class="padded">{{ row.startDate.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td class="padded">{{ row.endDate.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td class="padded">{{ row.location_origin_str }}</td>
+                        <td class="padded">{{ row.location_dest_str }}</td>
                         <td class="padded">{{ row.payload_weight }}</td>
                         <td class="padded status">
                                 {{ row.status }}
