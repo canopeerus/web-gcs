@@ -4,7 +4,6 @@
 Main GCS applicationlication source code for Redwing Aerospace Laboratories
 @author : Aditya Visvanathan
 @version : 0.1.0
-Dependencies : flask, psycopg2 + postgresql,geocoer,flask_sqlalchemy
 ------------------------------------------------------------------------------------------------------
 '''
 
@@ -17,7 +16,7 @@ from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot, RegisteredFlightModule,RegisteredFlightModuleProvider
 from flask_pymongo import PyMongo
 import pandas as pd
-
+import JobTracker
 
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'           # deprecated. No longer valid
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])                     # Extensions set for log file upload
@@ -713,70 +712,19 @@ JOBS/DEPLOYMENT RELATED ACTIONS
 '''
 # Deployment/job tracker
 @application.route ("/jobtracker")
-def show_jobs ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        jobs = Job.query.all()
-        count = len(jobs)
-        return render_template ("jobs/jobs.html", deployments = jobs, length = count)
-    else:
-        return redirect ('/gcslogin',code = 302)
-            
+def showJobs ():
+    return JobTracker.listAllJobs (session,request)
+
+
 # Form page for adding new job
 @application.route ("/newdeployment")
-def new_job ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        drones = Drone.query.all()
-        payloads = Payload.query.all ()
-        return render_template ('jobs/newjob.html',drones = drones,payloads = payloads)
-    else:
-        return redirect ('/gcslogin',code = 302)
+def newJobPage ():
+    return JobTracker.scheduleNewJobPage (session,request)
 
 # Form action route for adding new job/deployment
 @application.route ('/newjobform',methods=['POST'])
-def new_job_formaction ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        sdate_sel = request.form.get ('startdate')
-        stime_sel = request.form.get ('starttime')
-        edate_sel = request.form.get ('enddate')
-        etime_sel = request.form.get ('endtime')
-        sdatetime_sel = datetime.strptime (sdate_sel + ' ' + stime_sel, '%Y-%m-%d %I:%M %p')
-        edatetime_sel = datetime.strptime (edate_sel + ' ' + etime_sel, '%Y-%m-%d %I:%M %p')
-        drone_id = int(str (request.form.get ('drone_select')))
-
-
-        payload_id = request.form.get ('payload_select')
-        max_alt_ft = float (request.form.get ('max_alt'))
-        
-        geofence_lat_str = request.form.get ('geofence_lat').split (',')
-        geofence_lon_str = request.form.get ('geofence_lon').split (',')
-
-        geofence_lat = list (map (float,geofence_lat_str))
-        geofence_long = list (map (float,geofence_lon_str))
-
-
-        count = int (request.form.get ('count'))
-       
-        origin_lon = float (request.form.get ('origin_lon'));
-        origin_lat = float (request.form.get ('origin_lat'));
-        dest_lon = float (request.form.get ('dest_lon'));
-        dest_lat = float (request.form.get ('dest_lat'));
-
-        
-        job_instance = Job (sdatetime_sel,edatetime_sel,drone_id,geofence_lat,
-                geofence_long,int (payload_id),count,max_alt_ft,
-                origin_lat,origin_lon,dest_lat,dest_lon)
-
-        db.session.add (job_instance)
-        db.session.commit ()
-
-        drone_sel = Drone.query.filter_by(id = drone_id).first ()
-        drone_sel.assign_job (job_instance.id)
-        db.session.commit ()
-       
-        return redirect ('/jobtracker',code = 302)
-    else:
-        return redirect ('/gcslogin',code = 302)
-
+def newJobAction ():
+    return JobTracker.scheduleNewJobAction (session,request,db)
 
 # Form action for filters for job search
 @application.route ('/filterjobs',methods=['POST'])
@@ -800,113 +748,14 @@ def filterjobs ():
 # particular Job details view
 @application.route ('/jobview')
 def jobview ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        if 'job' in request.args:
-            jobid_str = request.args.get ('job')
-            if jobid_str == 'undefined' or jobid_str is None:
-                return "<h2 style='text-align:center;'>The request was not understood</h2>"
-            else:
-                jobid = int (jobid_str)
-                job_instance = Job.query.filter_by (id = jobid).first ()
-                if job_instance is not None:
-                    drone_instance = job_instance.get_assigned_drone ()
-                    payload = job_instance.get_assigned_payload ()
-                    if job_instance.is_pending ():
-                        return render_template ('jobs/jobview.html',drone_name = drone_instance.drone_name,payload_name = payload.item,job = job_instance)
-                    else:
-                        return "<h2>Work In Progress</h2>"
-                else:
-                    return redirect ('/jobtracker',code = 302)
-        else:
-            return "<h2 style='text-align:center;'>ERROR,Something went wrong</h2>"
-    else:
-        return redirect ('/gcslogin',code = 302)
-
-'''
-# OTP form action route
-@application.route ('/jobotpauth',methods=['POST'])
-def auth_otp ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        if 'otp' in request.form and 'jobid' in request.form:
-            onetime_password = request.form.get ('otp')
-            jobid = request.form.get ('jobid')
-            if onetime_password == '0000':
-                return redirect ('/godeployment?job='+jobid,code = 307)
-            else:
-                return render_template ('jobs/jobotp.html',errorstr = "matcherror")
-        else:
-            return render_template ('jobs/jobotp.html',errorstr = 'generror')
-    else:
-        return redirect ('/gcslogin',code = 302)
+    return JobTracker.jobViewPage (session,request)
 
 
-# Deployment initiate path
-@application.route ('/initiatedeployment',methods=['POST'])
-def initiate_deployment ():
-    if request.method == 'POST':
-        if 'gcs_user' in session and session['gcs_logged_in']:
-            jobid = int(request.args.get ('job'))
-            job_instance = Job.query.filter_by (id = jobid).first ()
-            if job_instance is not None:
-                drone_instance = Drone.query.filter_by (id = job_instance.id).first()
-                payload_instance = Payload.query.filter_by (id = job_instance.payload_id).first()
-                return render_template ('jobs/jobview.html',job = job_instance,
-                        drone = drone_instance, payload = payload_instance)
-            else:
-                return "<h3> Something went wrong</h3>"
-        else:
-            return redirect ('/gcslogin',code = 302)
-    else:
-        return "<h2>Error,Only post requests allowed!</h2>"
-
-'''
 @application.route ('/godeployment')
-def go_deployment ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        jobid = int (request.args.get ('job'))
-        job_instance = Job.query.filter_by (id = jobid).first()
-        if job_instance is not None:
-            drone_instance = job_instance.get_assigned_drone ()
-            payload_instance = job_instance.get_assigned_payload ()
-
-            perm_request = dict()
-            perm_request['pilotBusinessIdentifier'] = '1234'
-            perm_request['flyArea'] = list()
-            
-            for lon,lat in zip (job_instance.geofence_lat,job_instance.geofence_long):
-                    coords = dict()
-                    coords['latitude'] = lat
-                    coords['longitude'] = lon
-                    perm_request['flyArea'].append (coords)
-            
-            perm_request['droneId'] = str (drone_instance.id)
-            perm_request['payloadWeightInKg'] = float (job_instance.payload_weight/1000)
-            perm_request['payloadDetails'] = payload_instance.item
-            perm_request['flightPurpose'] = job_instance.deployment_purpose
-            perm_request['startDateTime'] = str(job_instance.startDate)
-            perm_request['endDateTime'] = str (job_instance.endDate)
-
-            return json.dumps (perm_request)
-
-        else:
-            return "<h3>Something went wrong</h3>"
-    else:
-        return redirect ('/gcslogin',code = 302)
+def goDeployment ():
+    return JobTracker.goDeployment (session,request)
 
 '''
-@application.route ('/jobcontrol')
-def jobtakeoff ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        jobid = int(request.args.get ('job'))
-        job_instance = Job.query.filter_by (id = jobid).first()
-        if job_instance is not None:
-            drone_instance = Drone.query.filter_by (id = job_instance.id).first ()
-            return render_template ('flytgcs_web/flightcontrol.html',drone = drone_instance)
-        else:
-            return "<h3>Something went wrong</h3>"
-    else:
-        return redirect ('/gcslogin',code = 302)
-
 ----------------------------------------------------------------
 INCIDENT TRACKER
 ----------------------------------------------------------------

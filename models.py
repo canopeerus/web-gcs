@@ -214,6 +214,9 @@ class Job (db.Model):
             self.location_dest_str = "Unknown Location"
         else:
             self.location_dest_str = g.json['address']
+        drone_sel = Drone.query.filter_by (id = self.drone_id).first ()
+        drone_sel.assign_job (self.id)
+
 
     def is_pending (self):
         return self.status == 'PENDING APPROVAL'
