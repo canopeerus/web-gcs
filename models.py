@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from queue import Queue
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm.attributes import flag_modified
 import geocoder
 db = SQLAlchemy ()
 
@@ -89,7 +90,7 @@ class Drone (db.Model):
     motor_count = db.Column (db.Integer)
     battery_type = db.Column (db.String())
     status  = db.Column (db.String())
-    jobid_queue = db.Column (db.String())
+    jobid_queue = db.Column (ARRAY (db.Integer))
     r_flight_module_id = db.Column (db.Integer,db.ForeignKey ('rfmodules.id'))
     rfm_name = db.Column (db.String())
 
@@ -100,15 +101,24 @@ class Drone (db.Model):
         self.battery_type = battery_type
         self.status = 'Available'
         self.r_flight_module_id = rfm_id
-        rfm = RemoteFlightModule.query.filter_by (id = rfm_id).first()
+        rfm = RegisteredFlightModule.query.filter_by (id = rfm_id).first()
         self.rfm_name = rfm.rfm_name
 
 
     def assign_job (self,job_id):
+        if job_id is None:
+            print ("WHYYYY")
+        print (job_id)
         if self.jobid_queue is None:
-            self.jobid_queue = str(job_id)
+            newlist = list()
+            newlist.append (job_id)
+            self.jobid_queue = newlist
+            flag_modified (self,'jobid_queue')
         else:
-            self.jobid_queue += "-"+str(job_id)
+            newlist = list(self.jobid_queue)
+            newlist.append (job_id)
+            self.jobid_queue = newlist
+            flag_modified (self,'jobid_queue')
         self.status = "Jobs in Queue"
     
     def disable (self):
@@ -122,10 +132,7 @@ class Drone (db.Model):
         return not self.jobid_queue is None
 
     def job_queue_int (self):
-        str_arr = self.jobid_queue.split ('-')
-        for i in range (len (str_arr)):
-            str_arr[i] = int (str_arr[i])
-        return str_arr
+        return self.jobid_queue
 
     
 class Payload (db.Model):
@@ -216,6 +223,7 @@ class Job (db.Model):
             self.location_dest_str = g.json['address']
         drone_sel = Drone.query.filter_by (id = self.drone_id).first ()
         drone_sel.assign_job (self.id)
+        db.session.commit ()
 
 
     def is_pending (self):

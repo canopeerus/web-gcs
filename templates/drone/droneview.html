@@ -105,18 +105,22 @@
             <table class="table table-hover">
                 <thead id="thead" style="display:none;">
                     <tr>
-                        <th class="padded">Date/Time</th>
+                        <th class="padded">START DATE</th>
+                        <th class="padded">END DATE</th>
                         <th class="padded">Origin</th>
                         <th class="padded">Destination</th>
+                        <th class="padded">Payload Net Wt(grams)</th>
                         <th class="padded">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in jobs %}
                         <tr class="clickable-row" id="{{ row.id }}">
-                            <td class="padded">{{ row.date }}</td>
-                            <td class="padded">{{ row.location_origin_string }}</td>
-                            <td class="padded">{{ row.location_dest_string }}</td>
+                            <td class="padded">{{ row.startDate.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
+                            <td class="padded">{{ row.endDate.strftime ("%Y-%m-%d %H:%M:%S") }}</td>
+                            <td class="padded">{{ row.location_origin_str }}</td>
+                            <td class="padded">{{ row.location_dest_str }}</td>
+                            <td class="padded">{{ row.payload_weight }}</td>
                             <td class="padded status">{{ row.status }}</td>
                         </tr>
                     {% endfor %}

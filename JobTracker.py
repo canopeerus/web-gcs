@@ -9,11 +9,15 @@ import FMSGeneric as fmg,datetime
 import MiscHelper,json
 from flask import render_template,redirect,url_for,send_from_directory
 
-def listAllJobs (session,request):
+def listAllJobs (session,request,flag):
     if fmg.isValidSession (session):
         jobs = Job.query.all ()
-        return render_template ('jobs/jobs.html',deployments = jobs,
-                count = len (jobs))
+        if flag == 'npnt':
+            template_str = 'npnt/index.html'
+        else:
+            template_str = 'jobs/jobs.html'
+        return render_template (template_str,deployments = jobs,
+                length = len (jobs))
     else:
         return redirect ("/gcslogin",code = 302)
 
@@ -36,16 +40,20 @@ def scheduleNewJobAction (session,request,db):
         edatetime_sel = MiscHelper.dateTimeMerge (edate_sel,etime_sel)
         drone_id = int (str (request.form.get ('drone_select')))
         payload_id = int(request.form.get ('payload_select'))
+        count = int (request.form.get ('count'))
         max_alt_ft = float (request.form.get ('max_alt'))
         geofence_lat = MiscHelper.getCoordsFloatList (
                 request.form.get ('geofence_lat'))
-        goefence_lon = MiscHelper.getCoordsFloatList (
+        geofence_lon = MiscHelper.getCoordsFloatList (
                 request.form.get ('geofence_lon'))
+
+        origin_lon = float (request.form.get ('origin_lon'))
+        origin_lat = float (request.form.get ('origin_lat'))
         dest_lon = float (request.form.get ('dest_lon'))
         dest_lat = float (request.form.get ('dest_lat'))
 
         job_instance = Job (sdatetime_sel,edatetime_sel,drone_id,geofence_lat,
-                geofence_long,int (payload_id), count, max_alt_ft,
+                geofence_lon,int (payload_id), count, max_alt_ft,
                 origin_lat,origin_lon,dest_lat,dest_lon)
 
         db.session.add (job_instance)

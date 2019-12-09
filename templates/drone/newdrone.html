@@ -138,8 +138,8 @@
                     <div class="col-sm-10">
                         <select required id="rfm_select" name="rfm_select">
                             <option selected disabled>Select RFM</option>
-                            {% for item in rfm %}
-                            <option value="{{ item.id }}">{{ rfm.rfm_name }}</option>
+                            {% for item in rfms %}
+                            <option value="{{ item.id }}">{{ item.rfm_name }}</option>
                             {% endfor %}
                         </select>
                     </div>

@@ -16,7 +16,7 @@ from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot, RegisteredFlightModule,RegisteredFlightModuleProvider
 from flask_pymongo import PyMongo
 import pandas as pd
-import JobTracker
+import JobTracker,DroneMonitor
 import urllib
 
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'           # deprecated. No longer valid
@@ -321,106 +321,36 @@ DRONE ACTION ROUTES
 # Route for drone monitor list screen
 @application.route ("/dronemonitor")
 def show_drones():
-    if 'gcs_user' in session:
-        drones = Drone.query.all ()
-        count = len(drones)
-        return render_template ("drone/index.html", drones = drones, count = count)
-    else:
-        return redirect ("/gcslogin", code=302)
+    return DroneMonitor.listAllDrones (session,request)
 
 # Route for adding new drone
 @application.route ("/newdrone")
 def new_drone ():
-    if 'gcs_user' in session:
-        return render_template ("drone/newdrone.html")
-    else:
-        return redirect ('/gcslogin',code=302)
+    return DroneMonitor.newDronePage (session,request)
 
 # New drone input form action route
 @application.route ("/newdroneaction",methods=['POST'])
 def add_new_drone():
-    if 'gcs_user' in session:
-        drone = Drone (drone_name = request.form['droneName'],
-            model = request.form['droneModel'],
-            motor_count = request.form['motorCount'],
-            battery_type = request.form['batteryType'])
-        db.session.add (drone)
-        db.session.commit()
-        return redirect ('/dronemonitor',code=302)
-    else:
-        return redirect ("/gcslogin",code = 302)
-
+    return DroneMonitor.newDroneAction (session,request,db)
 
 # Edit details of a drone
 @application.route ('/editdrone')
 def edit_drone ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        drone_id = int (request.args.get ('drone'))
-        rfms = RegisteredFlightModule.query.all ()
-        drone = Drone.query.filter_by (id = drone_id).first ()
-        return render_template ('drone/editdrone.html',drone = drone,rfms = rfms)
-    else:
-        return redirect ('/gcslogin',code = 302)
+    return DroneMonitor.editDronePage (session,request)
 
 @application.route ('/editdroneaction')
 def edroneaction ():
-    if 'gcs_user' in session and session ['gcs_logged_in']:
-        return "WIP"
-    else:
-        return redirect ('/gcslogin',code = 302)
-        
+    return DroneMonitor.editDroneAction (session,request,db)
+
 # View particular drone
 @application.route ("/droneview")
 def individual_drone ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        
-        if 'drone' not in request.args:
-            return "<h2>The given request was not understood correctly</h2>"
-       
-        drone_arg = request.args.get ('drone')
-        if drone_arg == 'undefined' or drone_arg is None:
-            return "<h2> The given request was not understood correctly</h2>"
-        
-        r_drone_id = int (drone_arg)
-        drone_instance = Drone.query.filter_by (id = int(r_drone_id)).first()
-        if drone_instance is None:
-            return "<h2 style='text-align:center;'>Unable to process this request</h2>"
-        jobslist = []
-        
-        if drone_instance.has_jobs_scheduled ():
-            id_array = drone_instance.job_queue_int ()
-            print (id_array)
-            for iden in id_array:
-                job = Job.query.filter_by (id = iden).first()
-                jobslist.applicationend (job)
-        
-        count = len(jobslist)
-        
-        if 'error' in request.args:
-            strerr = 'deleteerror'
-        else:
-            strerr = 'noerror'
-        return render_template ("drone/droneview.html",drone = drone_instance,jobs = jobslist,count = count,error = strerr)
-    else:
-        return redirect ('/gcslogin',code = 302)
+    return DroneMonitor.viewSpecificDrone (session,request)
 
 # Disable drone
 @application.route ("/disabledrone")
 def terminate_drone ():
-    if 'gcs_user' in session and session ['gcs_logged_in']:
-        
-        if 'drone' not in request.args:
-            return "<h2>The given request was not understood correctly</h2>"
-        r_drone_id = int(request.args.get ('drone'))
-        drone = Drone.query.filter_by (id = r_drone_id).first ()
-        if drone.disable ():
-            return redirect ('/dronemonitor',code = 302)
-        else:
-            return redirect ('/droneview?error&drone='
-                    +str(r_drone_id),code = 302)
-    else:
-        return redirect ('/gcslogin',code = 302)
-
+    return DroneMonitor.terminateDrone (session,request)
 
 
 '''
@@ -761,7 +691,7 @@ JOBS/DEPLOYMENT RELATED ACTIONS
 # Deployment/job tracker
 @application.route ("/jobtracker")
 def showJobs ():
-    return JobTracker.listAllJobs (session,request)
+    return JobTracker.listAllJobs (session,request,flag = 'job')
 
 
 # Form page for adding new job
