@@ -447,7 +447,10 @@ def send_request ():
         jsondata = jsondata.encode ('utf-8')
         req.add_header ('Content-Type','application/json;charset = utf-8')
         req.add_header ('Content-Length',len (jsondata))
-        resp = urllib.request.urlopen (req,jsondata)
+        try:
+            resp = urllib.request.urlopen (req,jsondata)
+        except urllib.error.HTTPError as e:
+            return str (e.__dict__)
         charset = resp.info ().get_content_charset ()
         content = req.read ().decode (charset)
         return content
