@@ -16,15 +16,13 @@ from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot, RegisteredFlightModule,RegisteredFlightModuleProvider
 from flask_pymongo import PyMongo
 import pandas as pd
-import JobTracker,DroneMonitor
+import IncidentTracker,JobTracker,DroneMonitor,InventoryMgmt,FMSGeneric as fmg
 import urllib
 
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'           # deprecated. No longer valid
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])                     # Extensions set for log file upload
 ALLOWED_BATCH_INVENTORY_TYPES  = ALLOWED_LOGS_EXTENSIONS    # Batch Inventory Uploads also accept only CSV files
 
-status_list = ['Pending Action','Resolved']
-priority_list = ['Low','Medium','High']
 
 application = Flask (__name__)
 application.config['DEBUG'] = True
@@ -112,14 +110,7 @@ def homepage ():
 # Main GCS Page route, redirects to 'gcslogin' if not logged in
 @application.route ("/gcsportal",methods=['GET','POST'])
 def gcs_home():
-
-    # Check if user is logged into session, if not redirect to login page
-    # Else redirect to FMS homepage
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        return redirect ('/jobtracker',code = 302)
-    else:
-        return redirect ('/gcslogin',code = 302)
-
+    return fmg.gcsHome (session,request)
 '''
 ----------------------------------
 GCS USER PROFILE ACTIONS
@@ -129,189 +120,52 @@ GCS USER PROFILE ACTIONS
 #TODO: Redirect to referrer when automatically directed to login page after login
 @application.route ("/gcslogin")
 def gcs_login ():
-    if not session.get ('gcs_logged_in'):
-        return render_template ("fmsgeneric/gcs_login.html")
-    else:
-        return redirect ('/gcsportal')
+    return fmg.gcsLoginPage (session,request)
 
 # * GCS Login form action route, accepts only POST requests
 # * Accept password and username from login page and verify
 # salted password with database
 @application.route ("/gcsloginform",methods=['POST'])
 def gcs_login_action ():
-
-    # Fetch username and password from request form
-    usernameval = request.form['username']
-    pwval = request.form['password']
-
-    # Check if entered user matching username actually exists
-    # If not return error
-    qresult = GCSUser.query.filter_by (username=usernameval).first()
-    if qresult is None:
-        return render_template ("fmsgeneric/gcs_login.html",result="error")
-
-    # If user matched, fetch salt and salted password from database
-    qpassword = qresult.password
-    qsalt = qresult.salt
-
-    # Verify salt with user-input password
-    if verify_password (qpassword,pwval,qsalt):
-        session['gcs_logged_in'] = True
-        session['gcs_user'] = usernameval
-        session.modified = True
-        return redirect ('/gcsportal',code = 302)
-    else:
-        return render_template ("fmsgeneric/gcs_login.html", result="error")
+    return fmg.gcsLoginAction (session,request)
 
 # * Show user profile and account settings
 @application.route ("/gcsuserprofile",methods=['POST','GET'])
 def show_userprofile():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        updated = 0
-        if 'updated' in request.args:
-            updated = 1
-
-        # * Set 'updated' = 1 if user has made changes to reload page with
-        # 'updated' message
-
-        user = session['gcs_user']
-        qresult = GCSUser.query.filter_by(username=user).first()
-        return render_template ("fmsgeneric/gcsprofile.html",
-                username = qresult.username, firstname = qresult.firstname,
-                lastname = qresult.lastname,email_id = qresult.email_id,
-                updated = updated)
-
-    else:
-        return redirect ("/gcslogin",code=302)
+    return fmg.showUserProfile (session,request)
 
 # Log out route
 @application.route ("/gcslogout",methods=['POST','GET'])
 def gcs_logout ():
-    # If user is logged in , initiate session log out
-    # Delete 'gcs_user' and set 'gcs_logged_in' to False in session
-    if 'gcs_user' in session and session ['gcs_logged_in']:
-        del session['gcs_user']
-        session['gcs_logged_in'] = False
-
-    # Else simply redirect to FMS Home
-    return redirect ("/", code=302)
+    return fmg.gcsLogout (session,request)
 
 # GCS Sign up page route
 @application.route ("/gcssignup",methods=['POST','GET'])
 def gcs_signup ():
-    return render_template ("fmsgeneric/gcs_signup.html")
+    return fmg.gcsSignupPage (session,request)
 
 # GCS Sign up page form action route
 @application.route ("/gcssignupform",methods=['POST'])
 def gcs_signup_action ():
-
-    # Generate salt using uuid and hex
-    salt = uuid.uuid4().hex
-
-    # Hash and salt password
-    pwd_hash = hash_password (request.form['password'].strip(),salt)
-
-    # * Check if username is already taken
-    # * If match, reload page with error message
-    # * Else, initiate signup
-    match = GCSUser.query.filter_by (username = request.form['username']).first()
-    if match is None:
-
-        # Sanitize input strings by removing trailing and leading spaces
-        username = request.form['username'].strip ()
-        firstname = request.form['firstname'].strip ()
-        lastname = request.form['lastname'].strip ()
-        email_id = request.form['email_id'].strip ()
-
-        # Create new GCS User and add to database
-        gcsuser_instance = GCSUser (username = username,password = pwd_hash,
-            salt = salt, firstname = firstname, lastname = lastname, 
-            email_id = email_id)
-        db.session.add (gcsuser_instance)
-        db.session.commit ()
-        return redirect ("/gcslogin",code=302)
-    else:
-        return render_template ("fmsgeneric/gcs_signup.html",result = "error")
-
+    return fmg.gcsSignupAction (session,request,db)
+    
 # POST route for editing GCS profile
 @application.route ("/gcsprofileedit",methods=['POST'])
 def gcs_profile_edit ():
+    return fmg.profileEditAction (session,request,db)
 
-    # If request is POST, proceed
-    if request.method == 'POST': 
-
-        # Check if user is logged in session
-        if 'gcs_user' in session['gcs_logged_in']:
-
-            # Iteratively check each field for update and make changes to 
-            # user instance manually
-
-            user = session['gcs_user']
-            user_instance = GCSUser.query.filter_by (username = user).first()
-            print (request.args)
-            if 'firstname_update' in request.form:
-                print ("firstname found")
-                n_fname = request.form['firstname_update']
-                user_instance.firstname = n_fname
-            else:
-                print ("no firstname")
-    
-            if 'lastname_update' in request.form:
-                print ("lastname found")
-                n_lname = request.form['lastname_update']
-                user_instance.lastname = n_lname
-            else:
-                print ("no lastname")
-
-            if 'email_update' in request.form:
-                print ("email found")
-                n_email = request.form['email_update']
-                user_instance.email_id = n_email
-            else:
-                print ("no email")
-                
-            # Commit changes to database and redirect to profile page
-            # With 'updated' flag
-            
-            db.session.commit()
-            return redirect ("/gcsuserprofile?updated",code=302)
-    else:
-        return redirect ('/gcslogin',code = 302)
 
 
 # Route for password change input form
 @application.route ("/updatepassword")
 def change_password ():
-    if 'gcs_logged_in' in session and session ['gcs_logged_in']:
-        err = False
-        if 'error' in request.args:
-            err = True
-        if err:
-            return render_template ("fmsgeneric/changepassword.html",result="error")
-        else:
-            return render_template ("fmsgeneric/changepassword.html")
-    else:
-        return redirect ("/gcslogin",code=302)
+    return fmg.gcsUserUpdatePasswordPage (session,request)
 
 # Form action route for /updatepasswordi
 # If user entered password matches salt in database, update hash
 @application.route ("/updatepassword_action",methods=['POST'])
 def update_password_action ():
-    if request.method == 'POST':
-        if 'gcs_user' in session and session['gcs_logged_in']:
-            gcsuser = GCSUser.query.filter_by (username = session['gcs_user']).first()
-            gsalt = gcsuser.salt
-            oldpas = hash_password (request.form['old_password'],gsalt)
-            if oldpas == gcsuser.password:
-                newpas = hash_password (request.form['password'],gsalt)
-                gcsuser.password = newpas
-                db.session.commit()
-                return redirect ("/gcsuserprofile",code=302)
-            else:
-                return redirect ("/updatepassword?error",code=302)
-    else:
-        return redirect ("/gcslogin",code=302)
-
+    return fmg.gcsUserUpdatePasswordAction (session,request,db)
 
 '''
 -------------------------------
@@ -440,62 +294,19 @@ INVENTORY
 # Inventory
 @application.route ('/inventory')
 def main_inventory ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        payloads = Payload.query.all ()
-        count = len (payloads)
-        return render_template ("inventory/index.html",inventory = payloads,count = count)
-    else:
-        return redirect ('/gcslogin',code = 302)
-
-#@application.route ('/inventoryitem')
-#def edit_inventory_item (methods=['GET']):
+    return InventoryMgmt.listAllInventory (session,request)
 
 @application.route ('/addinventory')
 def new_inventory ():
-    if 'gcs_user' in session and session ['gcs_logged_in']:
-        payloads = Payload.query.all ()
-        return render_template ('inventory/newinventory.html')
-    else:
-        return redirect ('/gcslogin',code = 302)
-
-
+    return InventoryMgmt.newInventoryPage (session,request)
+        
 @application.route ('/newinventoryaction',methods=['POST'])
 def inventoryformaction ():
-    if request.method == 'POST':
-        if 'gcs_user' in session and session ['gcs_logged_in']:
-            type_str = request.form ['type']
+    return  InventoryMgmt.newInventoryAction (session,request,db)
 
-            item= request.form ['item']
-
-            storage_type = request.form ['storageType']
-
-            item_type = request.form['itemType']
-            item_weight = request.form['weight']
-            
-            uom = request.form['uom']
-
-            stock = request.form ['stock']
-
-            value = request.form['value']
-
-            payload = Payload (type_str,item,storage_type,item_type,item_weight,uom,
-                    stock,value)
-
-            db.session.add (payload)
-            db.session.commit ()
-            return redirect ('/inventory',code = 302)
-        else:
-            return redirect ('/gcslogin',code = 302)
-    else:
-        return redirect ('/gcsportal',code = 302)
-   
 @application.route ('/batchinventoryupload',methods=['GET'])
 def batchupload_page ():
-    if 'gcs_user' in session and session ['gcs_logged_in']:
-        return render_template ('inventory/batchinventory_upload.html')
-    else:
-        return redirect ('/gcslogin',code = 302)
-
+    return InventoryMgmt.batchInventoryUploadPage (session,request)
 
 def csv_allowed_file (filename):
     return '.' in filename and  \
@@ -539,24 +350,7 @@ def batchinventory_action ():
 
 @application.route ('/inventoryitem',methods=['GET'])
 def inventoryitemdisplay ():
-    return "<h1 style='text-align:center;'>Inventory edit is being worked on. Unavailable at the moment</h1>"
-    '''
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        if 'item' in request.args:
-            itemId = request.args['item']
-            itemId = int (itemId)
-            payload = Payload.query.filter_by (id = itemId).first ()
-            if payload is None:
-                return "Item not Found"
-            else:
-                return render_template ('editinventory.html',name = payload.name,
-                    weight = payload.weight,stock = payload.stock)
-        else:
-            return redirect ('/gcsportal',code = 302)
-    else:
-        return redirect ('/gcslogin',code = 302)
-    '''
-
+    return InventoryMgmt.inventoryEditPage (session,request)
 '''
 -----------------------------------
 MAP
@@ -740,93 +534,23 @@ INCIDENT TRACKER
 '''
 @application.route ('/incidents')
 def incident_landing ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        incidents = Incident.query.all ()
-        length = len (incidents)
-        return render_template ('incidents/index.html',incidents = incidents,length = length)
-    else:
-        return redirect ('/gcslogin',code = 302)
-
+    return IncidentTracker.listAllIncidents (session,request)
 
 @application.route ('/newincidentreport')
 def new_incident ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        drones = Drone.query.all ()
-        return render_template ('incidents/newincident.html',drones = drones,priority_list = priority_list)
-    else:
-        return redirect ('/gcslogin',code = 302)
+    return IncidentTracker.newIncidentPage (session,request)
 
 @application.route ('/newincidentaction',methods=["POST"])
 def new_incident_action ():
-    if 'gcs_user' in session and session ['gcs_logged_in']:
-        incident_title = request.form.get ('title')
-        incident_title = incident_title.strip ()
-
-        description = request.form.get ('description').strip()
-        description = description.strip ()
-        username_val = session ['gcs_user']
-        drone_sel_id = int(request.form.get ('drone_select'))
-        username_id = GCSUser.query.filter_by (username = username_val).first().id
-        drone_sel_name = Drone.query.filter_by (id = drone_sel_id).first ().drone_name
-
-        priority_sel = request.form.get ('priority_sel')
-        incident = Incident (incident_title,description,username_id,username_val,
-                drone_sel_id,drone_sel_name,priority_sel)
-        db.session.add (incident)
-        db.session.commit ()
-        return redirect ('/incidents',code = 302)
-    else:
-        return redirect ('/gcslogin',code = 302)
+    return IncidentTracker.newIncidentAction (session,request,db)
 
 @application.route ('/incidentview')
 def view_incidents ():
-    if 'gcs_user' in session and session ['gcs_logged_in']:
-        if 'id' in request.args:
-            incident_id = int (request.args.get ('id'))
-            incident_instance = Incident.query.filter_by (id = incident_id).first ()
-            
-            drones = Drone.query.all ()
-            if incident_instance is None:
-                return "<h2>FATAL ERROR</h2>"
-            else:
-                return render_template ('incidents/view.html',incident = incident_instance,drones = drones,status_list = status_list,
-                        priority_list = priority_list)
-        else:
-            return redirect ('/incidents',code = 302)
-    else:
-        return redirect ('/gcslogin',code = 302)
-
+    return IncidentTracker.viewIncidentPage (session,request)
 
 @application.route ('/newincidentupdate',methods=['POST'])
 def update_incidents ():
-    if request.method == "POST":
-        if 'gcs_user' in session and session['gcs_logged_in']:
-            inc_id = int (request.form.get ('i_id'))
-            inc_instance = Incident.query.filter_by (id = inc_id).first ()
-            n_desc = request.form.get ('description')
-            n_desc = n_desc.strip ()
-            inc_instance.description = n_desc
-           
-            n_title = request.form.get ('title')
-            n_title = n_title.strip ()
-            inc_instance.title = n_title
-
-            n_drone_sel = int (request.form.get ('drone_select'))
-            n_drone_name = Drone.query.filter_by (id = n_drone_sel).first().drone_name
-            inc_instance.drone_relatedId = n_drone_sel
-            inc_instance.drone_relatedName = n_drone_name
-            
-            n_status_sel = request.form.get ('status_select')
-            inc_instance.status = n_status_sel
-
-            db.session.commit ()
-
-            return redirect ('/incidents',code = 302)
-        else:
-            return redirect ('/gcslogin',code = 302)
-    else:
-        return redirect ('/incidents',code = 302)
-
+    return IncidentTracker.updateIncidentAction (session,request,db)
 
 '''
 ---------------------------------------------------------------
