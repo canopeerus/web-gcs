@@ -1,4 +1,4 @@
-#!/fsr/bin/env python3
+
 '''
 ------------------------------------------------------------------------------------------------------
 Main GCS applicationlication source code for Redwing Aerospace Laboratories
@@ -17,6 +17,7 @@ from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot, Register
 from flask_pymongo import PyMongo
 import pandas as pd
 import JobTracker
+import urllib
 
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'           # deprecated. No longer valid
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])                     # Extensions set for log file upload
@@ -699,8 +700,55 @@ NPNT AUTHENTICATION
 # NPNT tool page
 @application.route ('/npntauthentication')
 def npntauthroute ():
+    return JobTracker.listAllJobs (session,request,flag='npnt')
+
+@application.route ('/jobviewnpnt')
+def jobviewnpnt ():
+    if 'gcs_user' in session and session ['gcs_logged_in']:
+        if 'job' in request.args:
+            jobid_str = request.args.get ('job')
+            if jobid_str == 'undefined' or jobid_str is None:
+                return "<h2>Request not understood</h2>"
+            else:
+                jobid = int (jobid_str)
+                job_instance = Job.query.filter_by (id = jobid).first ()
+                if job_instance is not None:
+                    drone = job_instance.get_assigned_drone ()
+                    payload = job_instance.get_assigned_payload ()
+                    if job_instance.is_pending ():
+                        return render_template ('npnt/jobview.html',drone_name = 
+                                drone.drone_name,payload_name = payload.item,
+                                job = job_instance)
+                    else:
+                        return "<h2>Work in progress</h2>"
+                else:
+                    return redirect ('/jobtracker',code = 302)
+        else:
+            return "<h2>ERROR</h2>"
+    else:
+        return redirect ('/gcslogin',code = 302)
+
+@application.route ('/gonpnt')
+def gonpnt ():
+    jobid = int (request.args.get ('job'))
+    json_dict = JobTracker.goDeploymentDict (session,request)
+    return render_template ('npnt/permrequest.html',json = 
+            json.dumps (json_dict,indent = 4),jobid = jobid)
+
+@application.route ('/sendrequest')
+def send_request ():
     if 'gcs_user' in session and session['gcs_logged_in']:
-        return render_template ('npntpage.html')
+        jobid = int (request.args.get ('job'))
+        json_dict = JobTracker.goDeploymentDict (session,request)
+        jsondata = json.dumps (json_dict)
+        req = urllib.request.Request ('https://digitalsky.dgca.gov.in/api/applicationForm/flyDronePermissionApplication')
+        jsondata = jsondata.encode ('utf-8')
+        req.add_header ('Content-Type','application/json;charset = utf-8')
+        req.add_header ('Content-Length',len (jsondata))
+        resp = urllib.request.urlopen (req,jsondata)
+        charset = resp.info ().get_content_charset ()
+        content = req.read ().decode (charset)
+        return content
     else:
         return redirect ('/gcslogin',code = 302)
 

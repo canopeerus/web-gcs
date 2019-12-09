@@ -80,7 +80,7 @@ def jobViewPage (session,request):
     else:
         return redirect ('/gcslogin',code = 302)
 
-def goDeployment (session,request):
+def goDeploymentDict (session,request):
     if fmg.isValidSession (session):
         jobid = int (request.args.get ('job'))
         job_instance = Job.query.filter_by (id = jobid).first()
@@ -104,8 +104,11 @@ def goDeployment (session,request):
             perm_request['startDateTime'] = str(job_instance.startDate)
             perm_request['endDateTime'] = str (job_instance.endDate)
 
-            return json.dumps (perm_request,indent = 4)
+            return perm_request
         else:
             return "<h3>Something went wrong</h3>"
     else:
         return redirect ('/gcslogin',code = 302)
+
+def goDeployment (session,request):
+    return json.dumps (goDeploymentDict (session,request),indent = 4)
