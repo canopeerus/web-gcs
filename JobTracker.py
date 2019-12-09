@@ -104,9 +104,8 @@ def goDeployment (session,request):
             perm_request['startDateTime'] = str(job_instance.startDate)
             perm_request['endDateTime'] = str (job_instance.endDate)
 
-            return json.dumps (perm_request)
+            return json.dumps (perm_request,indent = 4)
         else:
             return "<h3>Something went wrong</h3>"
     else:
         return redirect ('/gcslogin',code = 302)
-
