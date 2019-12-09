@@ -63,7 +63,7 @@ def scheduleNewJobAction (session,request,db):
     else:
         return redirect ('/gcslogin',code = 302)
 
-def jobViewPage (session,request):
+def jobViewPage (session,request,flag = 'job'):
     if fmg.isValidSession (session):
         if 'job' in request.args:
             jobid_str = request.args.get ('job')
@@ -76,7 +76,11 @@ def jobViewPage (session,request):
                     drone_instance = job_instance.get_assigned_drone ()
                     payload = job_instance.get_assigned_payload ()
                     if job_instance.is_pending ():
-                        return render_template ('jobs/jobview.html',drone_name = 
+                        if flag == 'npnt':
+                            template_str = 'npnt/jobview.html'
+                        else:
+                            template_str = 'jobs/jobview.html'
+                        return render_template (template_str,drone_name = 
                                 drone_instance.drone_name,payload_name = payload.item,
                                 job = job_instance)
                     else:

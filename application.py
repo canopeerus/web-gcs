@@ -60,8 +60,8 @@ application.config['WTF_CSRF_ENABLED'] = True
 
 # MONGO URI(DISABLED)
 application.config ['MONGO_URI'] = 'mongodb://localhost:27017/redwingdb'
-application.config ["ACCEPTABLE_COLUMNS"] = ['type','item','storage_type','item_type','weight',
-        'uom','stock','value']
+application.config ["ACCEPTABLE_COLUMNS"] = ['type','item','storage_type','item_type',
+        'weight','uom','stock','value']
 
 
 # Start application and database instances
@@ -428,29 +428,7 @@ def npntauthroute ():
 
 @application.route ('/jobviewnpnt')
 def jobviewnpnt ():
-    if 'gcs_user' in session and session ['gcs_logged_in']:
-        if 'job' in request.args:
-            jobid_str = request.args.get ('job')
-            if jobid_str == 'undefined' or jobid_str is None:
-                return "<h2>Request not understood</h2>"
-            else:
-                jobid = int (jobid_str)
-                job_instance = Job.query.filter_by (id = jobid).first ()
-                if job_instance is not None:
-                    drone = job_instance.get_assigned_drone ()
-                    payload = job_instance.get_assigned_payload ()
-                    if job_instance.is_pending ():
-                        return render_template ('npnt/jobview.html',drone_name = 
-                                drone.drone_name,payload_name = payload.item,
-                                job = job_instance)
-                    else:
-                        return "<h2>Work in progress</h2>"
-                else:
-                    return redirect ('/jobtracker',code = 302)
-        else:
-            return "<h2>ERROR</h2>"
-    else:
-        return redirect ('/gcslogin',code = 302)
+    return JobTracker.jobViewPage (session,request,flag = 'npnt')
 
 @application.route ('/gonpnt')
 def gonpnt ():
