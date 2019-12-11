@@ -12,7 +12,8 @@ def listAllIncidents (session,request):
         return render_template ('incidents/index.html',incidents = incidents,
                 length = len (incidents))
     else:
-        return redirect ('/gcslogin')
+        session ['src_url'] = '/incidents'
+        return redirect ('/gcslogin?redirect')
 
 def newIncidentPage (session,request):
     if fmg.isValidSession (session):
@@ -20,7 +21,8 @@ def newIncidentPage (session,request):
         return render_template ('incidents/newincident.html',drones = drones,
                 priority_list = priority_list)
     else:
-        return redirect ('/gcslogin')
+        session ['src_url'] = '/newincidentreport'
+        return redirect ('/gcslogin?redirect')
 
 def newIncidentAction (session,request,db):
     if fmg.isValidSession (session) and request.method == 'POST':
@@ -54,7 +56,8 @@ def viewIncidentPage (session,request):
         else:
             return redirect ('/incidents')
     else:
-        return redirect ('/gcslogin')
+        session ['src_url'] = '/incidentview'
+        return redirect ('/gcslogin?redirect')
 
 def updateIncidentAction (session,request,db):
     if fmg.isValidSession (session) and request.method == 'POST':

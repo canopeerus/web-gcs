@@ -7,7 +7,11 @@ def isValidSession (session) -> bool:
 
 def gcsLoginPage (session,request):
     if not isValidSession (session):
-        return render_template ('fmsgeneric/gcs_login.html')
+        if 'redirect' in request.args:
+            redirect = 1
+        else:
+            redirect = 0
+        return render_template ('fmsgeneric/gcs_login.html',redirect = str(redirect))
     else:
         return redirect ('/gcsportal',code = 302)
 
@@ -28,7 +32,11 @@ def gcsLoginAction (session,request):
         session ['gcs_logged_in'] = True
         session ['gcs_user'] = usernameval
         session.modified = True
-        return redirect ('/gcsportal',code = 302)
+        print (request.form.get ('redirect'))
+        if request.form.get ('redirect') == '1':
+            return redirect (session ['src_url'])
+        else:
+            return redirect ('/gcsportal')
     else:
         return render_template ('fmsgeneric/gcs_login,html',result = 'error')
 
@@ -45,7 +53,8 @@ def showUserProfile (session,request):
                 lastname = qresult.lastname, email_id = qresult.email_id,
                 updated = updated)
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_url'] = '/gcsuserprofile'
+        return redirect ('/gcslogin?redirect',code = 302)
 
 def profileEditAction (session,request,db):
     if isValidSession (session) and request.method == 'POST':
@@ -77,7 +86,8 @@ def gcsUserUpdatePasswordPage (session,request):
         else:
             return render_template ('fmsgeneric/changepassword.html')
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_url'] = '/updatepassword'
+        return redirect ('/gcslogin?redirect')
 
 def gcsUserUpdatePasswordAction (session,request,db):
     if isValidSession (session) and request.method == 'POST':
@@ -98,6 +108,7 @@ def gcsUserUpdatePasswordAction (session,request,db):
 def gcsLogout (session,request):
     if isValidSession (session):
         del session ['gcs_user']
+        del session ['src_url']
         session ['gcs_logged_in'] = False
 
     return redirect ('/',code = 302)
@@ -121,9 +132,13 @@ def gcsSignupAction (session,request,db):
                     email_id)
             db.session.add (gcsuser_instance)
             db.session.commit ()
+        return redirect ('/gcsportal')
+    else:
+        return redirect ('/gcslogin')
 
 def gcsHome (session,request):
     if isValidSession (session):
         return redirect ('/jobtracker',code = 302)
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['url_src'] = '/gcsportal'
+        return redirect ('/gcslogin?redirect',code = 302)

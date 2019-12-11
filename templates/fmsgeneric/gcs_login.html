@@ -47,11 +47,16 @@
         <script type="text/javascript">
         $(document).ready ( function () {
             var result = "{{ result }}";
-            console.log (result);
             if ( result == "error" ) {
                 $("#error").css('visibility','visible');
             }
+
         });
+        
+        $('#signup-form').submit ( function () {
+            $(this).append ('<input type="hidden" name="redirect" value="{{ redirect }}"/>');
+        });
+
     
     </script>
     </body>

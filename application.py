@@ -16,7 +16,7 @@ from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot, RegisteredFlightModule,RegisteredFlightModuleProvider
 from flask_pymongo import PyMongo
 import pandas as pd
-import IncidentTracker,JobTracker,DroneMonitor,InventoryMgmt,FMSGeneric as fmg
+import LogStorage,IncidentTracker,JobTracker,DroneMonitor,InventoryMgmt,FMSGeneric as fmg
 import urllib
 
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'           # deprecated. No longer valid
@@ -107,8 +107,8 @@ def homepage ():
     return render_template("index.html")
     
   
-# Main GCS Page route, redirects to 'gcslogin' if not logged in
-@application.route ("/gcsportal",methods=['GET','POST'])
+# Main GCS Page route, redirects to 'gcslogin?redirect' if not logged in
+@application.route ("/gcsportal")
 def gcs_home():
     return fmg.gcsHome (session,request)
 '''
@@ -214,59 +214,15 @@ LOG FILE STORAGE DATABASE
 '''
 @application.route ('/logfilestorage')
 def logfilestorage ():
-    if 'gcs_user' in session and session['gcs_logged_in']:
-        return  "<h2 style='text-align:center;'>This Feature is currently OFF</h2>"
-        '''
-        files = LogFile.query.all ()
-        length = len(files)
-        return render_template ('LogStorage/index.html',files = files,length = length)
-        '''
-    else:
-        return redirect ('/gcslogin',code = 302)
+    return LogStorage.logFileStoragePage (session,request)
 
 @application.route ('/newlogupload')
 def newfile ():
-    if 'gcs_user' in session and session ['gcs_logged_in']:
-        drones = Drone.query.all ()
-        return render_template ('LogStorage/newfile.html',drones = drones)
-    else:
-        return redirect ('/gcslogin',code = 302)
+    return LogStorage.newFilePage (session,request)
 
 @application.route ('/newfileaction',methods=['POST'])
 def newfileaction ():
-    if request.method == 'POST':
-        if 'gcs_user' in session and session ['gcs_logged_in']:
-            if not 'file' in request.files:
-                return 'error:no file'
-            inputfile = request.files.get ('file')
-            drone_id = int(request.form.get ('drone_select'))
-            drone_name = Drone.query.filter_by (id = drone_id).first ().drone_name
-            if drone_name is None:
-                return "error!!!!"
-            
-            if allowed_file (inputfile.filename):
-                username = session ['gcs_user']
-                user_id = GCSUser.query.filter_by (username = username).first ().id
-
-                blob = inputfile.read ()
-                fsize = len (blob)
-                log_instance = LogFile (inputfile.filename,user_id,username,
-                        drone_id,drone_name,fsize)
-                
-
-                mongo.save_file (inputfile.filename,inputfile,base = 'logfiles')
-                db.session.add (log_instance)
-                db.session.commit ()
-
-                return redirect ('/logfilestorage',code = 302)
-                
-            else:
-                return "Invalid file format"
-        else:
-            return redirect ('/gcslogin',code = 302)
-        return "done"
-    else:
-        return redirect ('/gcsportal',code = 302)
+    return LogStorage.newFileAction (session,request,db,mongo)
 
 @application.route ('/file/<filename>')
 def file (filename):
@@ -274,16 +230,7 @@ def file (filename):
 
 @application.route ('/logdownload')
 def download_logfile ():
-    if 'gcs_user' in session and session ['gcs_logged_in']:
-        if 'id' not in request.args:
-            return "ERROR"
-        fileId = int (request.args.get ('id'))
-        file_instance = LogFile.query.filter_by (id = fileId).first ()
-        fname = file_instance.filename
-        return redirect ('/file/'+fname,code = 302)
-    else:
-        return redirect ('/gcslogin',code = 302)
-
+    return LogStorage.downloadLogFile (session,request,mongo)
 
 
 '''
@@ -342,7 +289,7 @@ def batchinventory_action ():
             else:
                 return "Invalid file format"
         else:
-            return redirect ('/gcslogin',code = 302)
+            return redirect ('/gcslogin?redirect',code = 302)
     else:
         return "ERROR"
 
@@ -363,7 +310,7 @@ def show_map ():
         jobslist = Job.query.all ()
         return render_template ('maps.html',jobs = jobslist)
     else:
-        return redirect ('/gcslogin',code=302)
+        return redirect ('/gcslogin?redirect',code=302)
 
 
 '''
@@ -377,7 +324,7 @@ def visualize_logs_input ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         return render_template ('visualize_input.html',parameters = visualise.params_list)
     else:
-        return redirect ('/gcslogin',code = 302)
+        return redirect ('/gcslogin?redirect',code = 302)
 
 @application.route ('/visualizefile',methods=['GET','POST'])
 def visualize_logs ():
@@ -401,7 +348,7 @@ def visualize_logs ():
             else:
                 return "Invalid file format"
         else:
-            return redirect ('/gcslogin',code = 302)
+            return redirect ('/gcslogin?redirect',code = 302)
         return "done"
     else:
         return redirect ('/gcsportal',code = 302)
@@ -414,7 +361,7 @@ def log_file_storage ():
         count = len(drones)
         return render_template ('logfilestorage.html',drones = drones,count = count)
     else:
-        return redirect ('/gcslogin',code = 302)
+        return redirect ('/gcslogin?redirect',code = 302)
 
 '''
 --------------------------------------
@@ -455,7 +402,7 @@ def send_request ():
         content = req.read ().decode (charset)
         return content
     else:
-        return redirect ('/gcslogin',code = 302)
+        return redirect ('/gcslogin?redirect',code = 302)
 
 
 '''
@@ -496,7 +443,7 @@ def filterjobs ():
         else:
             return render_template ('jobs/jobs.html',error = 'matcherror')
     else:
-        return redirect ('/gcslogin',code = 302)
+        return redirect ('/gcslogin?redirect',code = 302)
 
 # particular Job details view
 @application.route ('/jobview')
@@ -552,7 +499,7 @@ def view_pilots ():
         else:
             return render_template ('pilots/index.html',pilots = pilots,count = count,error=0, gcspair = gcspair)
     else:
-        return redirect ('/gcslogin',code = 302)
+        return redirect ('/gcslogin?redirect',code = 302)
 
 
 @application.route ('/newpilotform',methods=['POST'])
@@ -580,7 +527,7 @@ def rfm_index ():
         count = len (rfms)
         return render_template ('rfm/index.html',rfms = rfms,count = count)
     else:
-        return redirect ('/gcslogin',code = 302)
+        return redirect ('/gcslogin?redirect',code = 302)
 
 @application.route ('/newrfm')
 def newrfm ():
@@ -588,7 +535,7 @@ def newrfm ():
         rfmps = RegisteredFlightModuleProvider.query.all ()
         return render_template ('rfm/newrfm.html',rfmps = rfmps)
     else:
-        return redirect ('/gcslogin',code = 302)
+        return redirect ('/gcslogin?redirect',code = 302)
 
 @application.route ('/newrfmaction',methods=['POST'])
 def rfmaction ():
@@ -618,7 +565,7 @@ def rfmp_index ():
         count = len (rfmps)
         return render_template ('rfmp/index.html',count = count,rfmps = rfmps)
     else:
-        return redirect ('/gcslogin',code = 302)
+        return redirect ('/gcslogin?redirect',code = 302)
 
 @application.route ('/newrfmpaction',methods=['POST'])
 def newrfmpaction ():
@@ -629,7 +576,7 @@ def newrfmpaction ():
         db.session.commit ()
         return redirect ('/registerdfmprovider')
     else:
-        return redirect ('/gcslogin',code = 302)
+        return redirect ('/gcslogin?redirect',code = 302)
 
 
 '''

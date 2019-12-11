@@ -9,13 +9,15 @@ def listAllDrones (session,request):
         drones = Drone.query.all ()
         return render_template ("drone/index.html",drones = drones,count = len(drones))
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_url'] = '/dronemonitor'
+        return redirect ('/gcslogin?redirect',code = 302)
 
 def newDronePage (session,request):
     if fmg.isValidSession (session):
         rfms = RegisteredFlightModule.query.all ()
         return render_template ('drone/newdrone.html',rfms = rfms)
     else:
+        session ['src_url'] = '/newdrone'
         return redirect ('/gcslogin',code = 302)
 
 def newDroneAction (session,request,db):
@@ -39,7 +41,8 @@ def editDronePage (session,request):
         return render_template ('drone/editdrone.html',drone = drone,
                 rfms = registered_fm_list)
     else:
-        return redirect ("/gcslogin",code = 302)
+        session ['src_url'] =  '/editdrone'
+        return redirect ("/gcslogin?redirect",code = 302)
 
 def editDroneAction (session,request,db):
     if fmg.isValidSession (session) and request.method == 'POST':
@@ -79,7 +82,8 @@ def viewSpecificDrone (session,request):
         else:
             return "ERROR"
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_url'] = '/droneview'
+        return redirect ('/gcslogin?redirect',code = 302)
 
 def terminateDrone (session,request,db):
     if fmg.isValidSession (session):
@@ -94,4 +98,5 @@ def terminateDrone (session,request,db):
         else:
             return "ERROR"
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_url'] = '/dronemonitor'
+        return redirect ('/gcslogin?redirect',code = 302)

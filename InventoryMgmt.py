@@ -10,13 +10,15 @@ def listAllInventory (session,request):
         return render_template ('inventory/index.html',inventory = payloads,
                 count = len (payloads))
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_url'] = '/inventory'
+        return redirect ('/gcslogin?redirect')
 
 def newInventoryPage (session,request):
     if fmg.isValidSession (session):
         return render_template ('inventory/newinventory.html')
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_redirect'] = '/addinventory'
+        return redirect ('/gcslogin?redirect')
 
 
 def newInventoryAction (session,request,db):
@@ -42,7 +44,8 @@ def batchInventoryUploadPage (session,request):
     if fmg.isValidSession (session):
         return render_template ('inventory/batchinventory_upload.html')
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_url'] = '/batchinventoryupload'
+        return redirect ('/gcslogin?redirect')
 
 def checkCSVAllowedFile (filename):
     return '.' in filename and \
@@ -52,5 +55,6 @@ def inventoryEditPage (session,request):
     if fmg.isValidSession (session):
         return "Work in progress"
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_url'] = '/inventory'
+        return redirect ('/gcslogin?redirect')
 

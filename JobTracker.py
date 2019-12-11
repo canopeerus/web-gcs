@@ -19,7 +19,11 @@ def listAllJobs (session,request,flag):
         return render_template (template_str,deployments = jobs,
                 length = len (jobs))
     else:
-        return redirect ("/gcslogin",code = 302)
+        if flag == 'npnt':
+            session ['src_url'] = '/npntauthentication'
+        else:
+            session ['src_url'] = '/jobtracker'
+        return redirect ("/gcslogin?redirect",code = 302)
 
 def scheduleNewJobPage (session,request):
     if fmg.isValidSession (session):
@@ -28,7 +32,8 @@ def scheduleNewJobPage (session,request):
         return render_template ('jobs/newjob.html',drones = drones,
                 payloads = payloads)
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_url'] = '/newdeployment'
+        return redirect ('/gcslogin?redirect',code = 302)
 
 def scheduleNewJobAction (session,request,db):
     if request.method == 'POST' and fmg.isValidSession (session):
@@ -90,6 +95,11 @@ def jobViewPage (session,request,flag = 'job'):
         else:
             return "<h2>ERROR!!!!</h2>"
     else:
+        if flag == 'job':
+            session ['src_url'] = '/jobview'
+        else:
+            session ['src_url'] = '/jobviewnpnt'
+
         return redirect ('/gcslogin',code = 302)
 
 def goDeploymentDict (session,request):
@@ -120,7 +130,11 @@ def goDeploymentDict (session,request):
         else:
             return "<h3>Something went wrong</h3>"
     else:
-        return redirect ('/gcslogin',code = 302)
+        session ['src_url'] = '/godeployment'
+        return redirect ('/gcslogin?error',code = 302)
 
 def goDeployment (session,request):
-    return json.dumps (goDeploymentDict (session,request),indent = 4)
+    if fmg.isValidSession (session):
+        return json.dumps (goDeploymentDict (session,request),indent = 4)
+    else:
+        return redirect ('/gcslogin')
