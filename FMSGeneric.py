@@ -11,7 +11,11 @@ def gcsLoginPage (session,request):
             redirect = 1
         else:
             redirect = 0
-        return render_template ('fmsgeneric/gcs_login.html',redirect = str(redirect))
+
+        if 'error' in request.args:
+            return render_template ('fmsgeneric/gcs_login.html',redirect = str (redirect),result = 'error')
+        else:
+            return render_template ('fmsgeneric/gcs_login.html', redirect = str (redirect))
     else:
         return redirect ('/gcsportal',code = 302)
 
@@ -23,7 +27,7 @@ def gcsLoginAction (session,request):
     pwval = request.form ['password']
     qresult = GCSUser.query.filter_by (username = usernameval).first ()
     if qresult is None:
-        return render_template ('fmsgeneric/gcs_login.html',result = 'error')
+        return redirect ('/gcslogin?error')
     
     qpassword = qresult.password
     qsalt = qresult.salt
@@ -38,7 +42,7 @@ def gcsLoginAction (session,request):
         else:
             return redirect ('/gcsportal')
     else:
-        return render_template ('fmsgeneric/gcs_login,html',result = 'error')
+        return redirect ('/gcslogin?error')
 
 def showUserProfile (session,request):
     if isValidSession (session):
