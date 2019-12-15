@@ -52,6 +52,8 @@ def editDroneAction (session,request,db):
 
 def viewSpecificDrone (session,request):
     if fmg.isValidSession (session):
+        return "ERROR .... work in Progress!"
+        '''
         if 'drone' in request.args:
             drone_arg = request.args.get ('drone')
             if drone_arg == 'undefined' or drone_arg is None:
@@ -81,6 +83,7 @@ def viewSpecificDrone (session,request):
                     jobs = jobslist,count = len(jobslist),error = strerr)
         else:
             return "ERROR"
+        '''
     else:
         session ['src_url'] = '/droneview'
         return redirect ('/gcslogin?redirect',code = 302)
