@@ -1,0 +1,124 @@
+ /*var framesPerSecond = 15; 
+                var initialOpacity = 1
+                var opacity = initialOpacity;
+                var initialRadius = 8;
+                var radius = initialRadius;
+                var maxRadius = 18;*/
+
+/*
+                    map.addSource('point', {
+                        "type": "geojson",
+                        "data": {
+                            "type": "Point",
+                            "coordinates": [
+                                olon, olat
+                            ]
+                        }
+                    });
+                    map.addSource ('point2', {
+                        "type":"geojson",
+                        "data": {
+                            "type": "Point",
+                            "coordinates": [
+                                dlon,dlat
+                                ]
+                        }
+                    });
+                    map.addLayer({
+                        "id": "point",
+                        "source": "point",
+                        "type": "circle",
+                        "paint": {
+                            "circle-radius": initialRadius,
+                            "circle-radius-transition": {duration: 0},
+                            "circle-opacity-transition": {duration: 0},
+                            "circle-color": "#007cbf"
+                        }
+                    });
+                    map.addLayer({
+                        "id": "point1",
+                        "source": "point",
+                        "type": "circle",
+                        "paint": {
+                            "circle-radius": initialRadius,
+                            "circle-color": "#007cbf"
+                        }
+                    });
+                    map.addLayer ({
+                        "id":"point2",
+                        "source":"point2",
+                        "type":"circle",
+                        "paint": {
+                            "circle-radius":initialRadius,
+                            "circle-radius-transition":{duration:0},
+                            "circlr-opacity-transition":{duration:0},
+                            "circle-color":"#cc0000"
+                        }
+                    });
+                    map.addLayer ({
+                        "id":"point3",
+                        "source":"point2",
+                        "type":"circle",
+                        "paint": {
+                            "circle-radius" : initialRadius,
+                            "circle-color": "#cc0000"
+                        }
+                    });
+                    map.addLayer({
+						"id": "route",
+						"type": "line",
+						"source": {
+							"type": "geojson",
+							"data": {
+								"type": "Feature",
+								"properties": {},
+								"geometry": {
+									"type": "LineString",
+									"coordinates": [
+										[olon,olat],
+										[dlon,dlat]
+									]
+								}
+							}
+						},
+						"layout": {
+							"line-join": "round",
+							"line-cap": "round"
+						},
+						"paint": {
+							"line-color": "#888",
+							"line-width": 2
+						}
+					});
+                    function animateMarker(timestamp) {
+                        setTimeout(function(){
+                            requestAnimationFrame(animateMarker);
+                            radius += (maxRadius - radius) / framesPerSecond;
+                            opacity -= ( .9 / framesPerSecond );
+                            map.setPaintProperty('point', 'circle-radius', radius);
+                            map.setPaintProperty('point', 'circle-opacity', opacity);
+                            if (opacity <= 0) {
+                                radius = initialRadius;
+                                opacity = initialOpacity;
+                            } 
+                        }, 1000 / framesPerSecond);
+        
+                    }
+                    function animateMarker2(timestamp) {
+                        setTimeout (function() {
+                            requestAnimationFrame (animateMarker2);
+                            radius += (maxRadius - radius) / framesPerSecond;
+                            opacity -= (.9 / framesPerSecond);
+                            map.setPaintProperty ('point2','circle-radius',radius);
+                            map.setPaintProperty ('point2','circle-opacity',opacity);
+                            if ( opacity <= 0 ){
+                                radius = initialRadius;
+                                opacity = initialOpacity;
+                            }
+                        }, 1000 / framesPerSecond);
+                    }
+                    // Start the animation.
+                    //animateMarker(0);
+                    //animateMarker2(0);
+                });*/
+

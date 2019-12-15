@@ -14,7 +14,6 @@ from datetime import datetime
 import os,uuid,visualise,shutil,time,geocoder,json
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot, RegisteredFlightModule,RegisteredFlightModuleProvider
-from flask_pymongo import PyMongo
 import pandas as pd
 import LogStorage,IncidentTracker,JobTracker,DroneMonitor,InventoryMgmt,FMSGeneric as fmg
 import urllib
@@ -68,10 +67,7 @@ application.config ["ACCEPTABLE_COLUMNS"] = ['type','item','storage_type','item_
 db.app = application
 db.init_app (application)
 
-mongo = PyMongo (application)
-mongo.init_app (application)
 
-logfile_collection = mongo.db.logfiles
 
 db.create_all ()
 db.session.commit ()
@@ -222,7 +218,7 @@ def newfile ():
 
 @application.route ('/newfileaction',methods=['POST'])
 def newfileaction ():
-    return LogStorage.newFileAction (session,request,db,mongo)
+    return LogStorage.newFileAction (session,request,db)
 
 @application.route ('/file/<filename>')
 def file (filename):
@@ -230,7 +226,9 @@ def file (filename):
 
 @application.route ('/logdownload')
 def download_logfile ():
-    return LogStorage.downloadLogFile (session,request,mongo)
+    return LogStorage.downloadLogFile (session, request)
+    
+
 
 
 '''
