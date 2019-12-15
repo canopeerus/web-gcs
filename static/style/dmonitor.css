@@ -1,3 +1,6 @@
+tr > td {
+    font-size:0.9em;
+}
 th {
     text-transform:uppercase;
     font-weight:bold;

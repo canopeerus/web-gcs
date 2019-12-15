@@ -1,3 +1,7 @@
+tr > td {
+    font-size: 0.9em;
+}
+
 .padded {
     padding:5px 5px 5px 5px;
     text-align:center;

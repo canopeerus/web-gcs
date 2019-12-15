@@ -1,3 +1,7 @@
+tr > td {
+    font-size:0.9em;
+}
+
 html, body {
     height: 100%;
     font-family:Roboto;
