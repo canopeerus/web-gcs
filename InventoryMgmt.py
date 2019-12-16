@@ -8,14 +8,15 @@ def listAllInventory (session,request):
     if fmg.isValidSession (session):
         payloads = Payload.query.all ()
         return render_template ('inventory/index.html',inventory = payloads,
-                count = len (payloads))
+                count = len (payloads),username = session ['gcs_user'])
     else:
         session ['src_url'] = '/inventory'
         return redirect ('/gcslogin?redirect')
 
 def newInventoryPage (session,request):
     if fmg.isValidSession (session):
-        return render_template ('inventory/newinventory.html')
+        return render_template ('inventory/newinventory.html',
+                username = session ['gcs_user'])
     else:
         session ['src_redirect'] = '/addinventory'
         return redirect ('/gcslogin?redirect')
@@ -42,7 +43,8 @@ def newInventoryAction (session,request,db):
 
 def batchInventoryUploadPage (session,request):
     if fmg.isValidSession (session):
-        return render_template ('inventory/batchinventory_upload.html')
+        return render_template ('inventory/batchinventory_upload.html',
+                username = session ['gcs_user'])
     else:
         session ['src_url'] = '/batchinventoryupload'
         return redirect ('/gcslogin?redirect')

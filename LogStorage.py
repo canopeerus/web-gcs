@@ -11,7 +11,7 @@ def logFileStoragePage (session,request):
     if fmg.isValidSession (session):
         files = LogFile.query.all ()
         return render_template ('LogStorage/index.html',files = files,
-                length = len (files))
+                length = len (files),username = session ['gcs_user'])
     else:
         session ['src_url'] = '/logfilestorage'
         return redirect ('/gcslogin?redirect')
@@ -19,7 +19,8 @@ def logFileStoragePage (session,request):
 def newFilePage (session,request):
     if fmg.isValidSession (session):
         drones = Drone.query.all ()
-        return render_template ('LogStorage/newfile.html',drones = drones)
+        return render_template ('LogStorage/newfile.html',drones = drones,
+                username = session ['gcs_user'])
     else:
         session ['src_url'] = '/newlogupload'
         return redirect ('/gcslogin?redirect')

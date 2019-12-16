@@ -1,5 +1,3 @@
-# Describes models for various entities in the GCS
-
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from queue import Queue
@@ -249,6 +247,7 @@ class LogFile (db.Model):
     drone_related_id = db.Column (db.Integer,db.ForeignKey ('drones.id'))
     drone_related_name = db.Column (db.String())
     file_blog = db.Column (db.LargeBinary)
+    job_id = db.Column (db.Integer,db.ForeignKey ('jobs.id'))
 
     def __init__ (self,filename,upload_user_id,drone_id,fsize,blob):
         self.filename = filename

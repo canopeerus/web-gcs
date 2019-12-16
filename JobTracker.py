@@ -17,7 +17,7 @@ def listAllJobs (session,request,flag):
         else:
             template_str = 'jobs/jobs.html'
         return render_template (template_str,deployments = jobs,
-                length = len (jobs))
+                length = len (jobs),username = session ['gcs_user'])
     else:
         if flag == 'npnt':
             session ['src_url'] = '/npntauthentication'
@@ -30,7 +30,7 @@ def scheduleNewJobPage (session,request):
         drones = Drone.query.all ()
         payloads = Payload.query.all ()
         return render_template ('jobs/newjob.html',drones = drones,
-                payloads = payloads)
+                payloads = payloads, username = session ['gcs_user'])
     else:
         session ['src_url'] = '/newdeployment'
         return redirect ('/gcslogin?redirect',code = 302)
@@ -87,7 +87,7 @@ def jobViewPage (session,request,flag = 'job'):
                             template_str = 'jobs/jobview.html'
                         return render_template (template_str,drone_name = 
                                 drone_instance.drone_name,payload_name = payload.item,
-                                job = job_instance)
+                                job = job_instancei,username = session ['gcs_user'])
                     else:
                         return  "<h2>Work In Progress</h2>"
                 else:

@@ -306,7 +306,7 @@ MAP
 def show_map ():
     if 'gcs_user' in session and session['gcs_logged_in']:
         jobslist = Job.query.all ()
-        return render_template ('maps.html',jobs = jobslist)
+        return render_template ('maps.html',jobs = jobslist,username = session['gcs_user'])
     else:
         return redirect ('/gcslogin?redirect',code=302)
 
@@ -380,7 +380,8 @@ def gonpnt ():
     jobid = int (request.args.get ('job'))
     json_dict = JobTracker.goDeploymentDict (session,request)
     return render_template ('npnt/permrequest.html',json = 
-            json.dumps (json_dict,indent = 4),jobid = jobid)
+            json.dumps (json_dict,indent = 4),jobid = jobid,
+            username = session ['gcs_user'])
 
 @application.route ('/sendrequest')
 def send_request ():
@@ -437,9 +438,11 @@ def filterjobs ():
 
         jobmatch = Job.query.filter (Job.date < enddatetime,Job.date >= begindatetime).all()
         if jobmatch is not None:
-            return render_template ('jobs/jobs.html',deployments = jobmatch)
+            return render_template ('jobs/jobs.html',deployments = jobmatch,
+                    username = session ['gcs_user'])
         else:
-            return render_template ('jobs/jobs.html',error = 'matcherror')
+            return render_template ('jobs/jobs.html',error = 'matcherror',
+                    username = session ['gcs_user'])
     else:
         return redirect ('/gcslogin?redirect',code = 302)
 
@@ -493,9 +496,13 @@ def view_pilots ():
         for g in gcsusers:
             gcspair.append ([g.id,g.username])
         if request.args.get ('error'):
-            return render_template ('pilots/index.html',pilots = pilots,count = count,error=1,gcspair = gcspair)
+            return render_template ('pilots/index.html',pilots = pilots,
+                    count = count,error=1,gcspair = gcspair,
+                    username = session ['gcs_user'])
         else:
-            return render_template ('pilots/index.html',pilots = pilots,count = count,error=0, gcspair = gcspair)
+            return render_template ('pilots/index.html',pilots = pilots,
+                    count = count,error=0, gcspair = gcspair,
+                    username = session ['gcs_user'])
     else:
         return redirect ('/gcslogin?redirect',code = 302)
 
@@ -531,7 +538,8 @@ def rfm_index ():
 def newrfm ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         rfmps = RegisteredFlightModuleProvider.query.all ()
-        return render_template ('rfm/newrfm.html',rfmps = rfmps)
+        return render_template ('rfm/newrfm.html',rfmps = rfmps,
+                username = session ['gcs_user'])
     else:
         return redirect ('/gcslogin?redirect',code = 302)
 
@@ -561,7 +569,8 @@ def rfmp_index ():
     if 'gcs_user' in session and session ['gcs_logged_in']:
         rfmps = RegisteredFlightModuleProvider.query.all ()
         count = len (rfmps)
-        return render_template ('rfmp/index.html',count = count,rfmps = rfmps)
+        return render_template ('rfmp/index.html',count = count,rfmps = rfmps,
+                username = session ['gcs_user'])
     else:
         return redirect ('/gcslogin?redirect',code = 302)
 

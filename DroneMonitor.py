@@ -39,7 +39,7 @@ def editDronePage (session,request):
         registered_fm_list = RegisteredFlightModule.query.all ()
         drone = Drone.query.filter_by (id = drone_id).first ()
         return render_template ('drone/editdrone.html',drone = drone,
-                rfms = registered_fm_list)
+                rfms = registered_fm_list,username = session ['gcs_user'])
     else:
         session ['src_url'] =  '/editdrone'
         return redirect ("/gcslogin?redirect",code = 302)

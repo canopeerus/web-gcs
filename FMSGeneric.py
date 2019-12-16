@@ -86,9 +86,11 @@ def gcsUserUpdatePasswordPage (session,request):
         if 'error' in request.args:
             err = True
         if err:
-            return render_template ('fmsgeneric/changepassword.html',result = 'error')
+            return render_template ('fmsgeneric/changepassword.html',result = 'error',
+                    username = session ['gcs_user'])
         else:
-            return render_template ('fmsgeneric/changepassword.html')
+            return render_template ('fmsgeneric/changepassword.html',
+                    username = session ['gcs_user'])
     else:
         session ['src_url'] = '/updatepassword'
         return redirect ('/gcslogin?redirect')
@@ -112,7 +114,7 @@ def gcsUserUpdatePasswordAction (session,request,db):
 def gcsLogout (session,request):
     if isValidSession (session):
         del session ['gcs_user']
-        del session ['src_url']
+        'src_url' in session and del session ['src_url']
         session ['gcs_logged_in'] = False
 
     return redirect ('/',code = 302)

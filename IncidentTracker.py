@@ -10,7 +10,7 @@ def listAllIncidents (session,request):
     if fmg.isValidSession (session):
         incidents = Incident.query.all ()
         return render_template ('incidents/index.html',incidents = incidents,
-                length = len (incidents))
+                length = len (incidents),username = session ['gcs_user'])
     else:
         session ['src_url'] = '/incidents'
         return redirect ('/gcslogin?redirect')
@@ -19,7 +19,7 @@ def newIncidentPage (session,request):
     if fmg.isValidSession (session):
         drones = Drone.query.all ()
         return render_template ('incidents/newincident.html',drones = drones,
-                priority_list = priority_list)
+                priority_list = priority_list,username = session ['gcs_user'])
     else:
         session ['src_url'] = '/newincidentreport'
         return redirect ('/gcslogin?redirect')
@@ -52,7 +52,7 @@ def viewIncidentPage (session,request):
             else:
                 return render_template ('incidents/view.html',incident = incident,
                         drones = drones,status_list = status_list,
-                        priority_list = priority_list)
+                        priority_list = priority_list,username = session ['gcs_user'])
         else:
             return redirect ('/incidents')
     else:
