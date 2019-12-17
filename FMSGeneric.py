@@ -38,7 +38,10 @@ def gcsLoginAction (session,request):
         session.modified = True
         print (request.form.get ('redirect'))
         if request.form.get ('redirect') == '1':
-            return redirect (session ['src_url'])
+            if 'src_url' in session:
+                return redirect (session ['src_url'])
+            else:
+                return redirect ('/gcsportal')
         else:
             return redirect ('/gcsportal')
     else:
@@ -114,7 +117,8 @@ def gcsUserUpdatePasswordAction (session,request,db):
 def gcsLogout (session,request):
     if isValidSession (session):
         del session ['gcs_user']
-        'src_url' in session and del session ['src_url']
+        if 'src_url' in session:
+            del session ['src_url']
         session ['gcs_logged_in'] = False
 
     return redirect ('/',code = 302)
