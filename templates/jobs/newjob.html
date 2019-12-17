@@ -240,7 +240,11 @@
                 /* Set map container div as visible and error_coords div as hidden */
                 $("#vmap").css ("display","block");
                 $("#error_coords").css("visibility","hidden");
-
+                
+                var flyarea_lon_list = geofence_lon_list.split (',').map (Number);
+                var flyarea_lat_list = geofence_lat_list.split (',').map (Number);
+                
+                console.log (flyarea_lon_list);
                 /*Initialize mapbox keys and other required variables and generate map*/
                 const AIRMAP_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHxKZ1FseEV6aDNhWFh2TENvZU1Za1JUeXFiZDJhIiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxHeGFZNTVxdFo4ZUE3Q1hBUEV3a2NuZ2RNTVEiLCJvcmdhbml6YXRpb25faWQiOiJkZXZlbG9wZXJ8S1ltUUd5WGZSd1o5MkxIZ2VaeG9SU0FHUkdQMyIsImlhdCI6MTU1OTI5MTAwNn0.f5BBtwQwuCNuiqDSQD3rQdNOfilmRzpcFYoDqXDYlTs'
                 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiY2Fub3BlZXJ1cyIsImEiOiJjandidGhuZDkwa2V2NDl0bDhvem0zcDMzIn0.g1NXF5VQiDwn66KAsr-_dw'
@@ -248,24 +252,14 @@
                 var map = new mapboxgl.Map ({
                     container:'vmap',
                     style:'https://api.airmap.io/maps/v4/tilejson/airports_recreational,class_b?apikey='+AIRMAP_API_KEY+'&theme=standard',
-                    zoom:9,
-                    center:[73,19]
+                    zoom:6,
+                    center:[flyarea_lon_list[1],flyarea_lat_list[1]]
                 });
 
                
                 var index = 0; 
                 
-                var lon_list_str = geofence_lon_list.split (',');
-                var lat_list_str = geofence_lat_list.split (',');
-                
-                var flyarea_lon_list = lon_list_str.map (Number);
-                var flyarea_lat_list = lat_list_str.map (Number);
-
-                console.log(flyarea_lon_list.toString());
-
-    
-                var llen = flyarea_lon_list.length;
-                for ( ;index < llen;index++) {
+                for ( ;index < flyarea_lon_list.length;index++) {
                     c_list[index] = new Array(flyarea_lon_list[index],flyarea_lat_list[index]);
                 }
 
