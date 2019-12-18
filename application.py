@@ -379,9 +379,10 @@ def jobviewnpnt ():
 def gonpnt ():
     jobid = int (request.args.get ('job'))
     json_dict = JobTracker.goDeploymentDict (session,request)
-    return render_template ('npnt/permrequest.html',json = 
-            json.dumps (json_dict,indent = 4),jobid = jobid,
-            username = session ['gcs_user'])
+    return json.dumps (json_dict)
+   # return render_template ('npnt/permrequest.html',json = 
+   #         json.dumps (json_dict,indent = 4),jobid = jobid,
+   #         username = session ['gcs_user'])
 
 @application.route ('/sendrequest')
 def send_request ():

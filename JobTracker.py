@@ -87,7 +87,7 @@ def jobViewPage (session,request,flag = 'job'):
                             template_str = 'jobs/jobview.html'
                         return render_template (template_str,drone_name = 
                                 drone_instance.drone_name,payload_name = payload.item,
-                                job = job_instancei,username = session ['gcs_user'])
+                                job = job_instance,username = session ['gcs_user'])
                     else:
                         return  "<h2>Work In Progress</h2>"
                 else:
@@ -135,6 +135,7 @@ def goDeploymentDict (session,request):
 
 def goDeployment (session,request):
     if fmg.isValidSession (session):
-        return json.dumps (goDeploymentDict (session,request),indent = 4)
+        return json.dumps (goDeploymentDict (session,request))
+        #return json.dumps (goDeploymentDict (session,request),indent = 4)
     else:
         return redirect ('/gcslogin')
