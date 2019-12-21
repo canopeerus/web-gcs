@@ -417,13 +417,12 @@ def xmlverifyaction ():
         if not 'file' in request.files:
             return 'error:nofile'
         inputfile = request.files.get ('file')
-        with open (inputfile.filename, 'wb') as f:
-            f.write (inputfile.read ())
-        if JobTracker.verify_xml_signature (inputfile.filename,"dgca.cert"):
+        #with open (inputfile.filename, 'wb') as f:
+        #    f.write (inputfile.read ())
+        if JobTracker.verify_xml_signature (inputfile):
             str = "Verified"
         else:
             str = "Not Verified"
-        os.remove (inputfile.filename)
         return str
     else:
         return redirect ('/gcslogin')
