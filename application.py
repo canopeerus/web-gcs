@@ -379,10 +379,9 @@ def jobviewnpnt ():
 def gonpnt ():
     jobid = int (request.args.get ('job'))
     json_dict = JobTracker.goDeploymentDict (session,request)
-    return json.dumps (json_dict)
-   # return render_template ('npnt/permrequest.html',json = 
-   #         json.dumps (json_dict,indent = 4),jobid = jobid,
-   #         username = session ['gcs_user'])
+    return render_template ('npnt/permrequest.html',json = 
+            json.dumps (json_dict,indent = 4),jobid = jobid,
+            username = session ['gcs_user'])
 
 @application.route ('/sendrequest')
 def send_request ():
@@ -404,6 +403,30 @@ def send_request ():
     else:
         return redirect ('/gcslogin?redirect',code = 302)
 
+@application.route ('/verifyxmlsig')
+def xmlVerifyPage ():
+    if fmg.isValidSession (session):
+        return render_template ("npnt/verifyxml.html")
+    else:
+        session ['src_url'] = '/verifyxmlsig'
+        return redirect ('gcslogin?redirect')
+
+@application.route ('/verifyxmlsigaction',methods = ['POST'])
+def xmlverifyaction ():
+    if request.method == 'POST' and fmg.isValidSession (session):
+        if not 'file' in request.files:
+            return 'error:nofile'
+        inputfile = request.files.get ('file')
+        with open (inputfile.filename, 'wb') as f:
+            f.write (inputfile.read ())
+        if JobTracker.verify_xml_signature (inputfile.filename,"dgca.cert"):
+            str = "Verified"
+        else:
+            str = "Not Verified"
+        os.remove (inputfile.filename)
+        return str
+    else:
+        return redirect ('/gcslogin')
 
 '''
 ---------------------------------------

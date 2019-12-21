@@ -4,9 +4,25 @@ Specific module source code for operations related to Job/Deployments
 --------------------------------------------------------------------------
 '''
 
+import base64
+import decimal
+import os
+from xml.etree.ElementTree import Element, SubElement, ElementTree
+import uuid
+
+import cryptography
+import signxml as sx
+import simplejson as json
+from Cryptodome.Hash import SHA256
+from Cryptodome.PublicKey import RSA
+from Cryptodome.Signature import pkcs1_15
+from lxml import etree
+
 from models import Job,Drone,Payload
 import FMSGeneric as fmg,datetime
-import MiscHelper,json
+import MiscHelper,json,dicttoxml
+from xml.dom import minidom
+
 from flask import render_template,redirect,url_for,send_from_directory
 
 def listAllJobs (session,request,flag):
@@ -135,7 +151,32 @@ def goDeploymentDict (session,request):
 
 def goDeployment (session,request):
     if fmg.isValidSession (session):
-        return json.dumps (goDeploymentDict (session,request))
+        xml = dicttoxml.dicttoxml (goDeploymentDict (session,request))
+        return str (xml.decode ())
+        #return json.dumps (goDeploymentDict (session,request))
         #return json.dumps (goDeploymentDict (session,request),indent = 4)
     else:
         return redirect ('/gcslogin')
+
+def verify_xml_signature (xml_file,certificate_path):
+    """
+    Verify the signature of a given xml file against a certificate
+    :param path xml_file: path to the xml file for verification
+    :param certificate_path: path to the certificate to be used for verification
+    :return: bool: the success of verification
+    """
+    # TODO -  refactor such that this verifies for generic stuff
+    tree = etree.parse(xml_file)
+    root = tree.getroot()
+    with open(certificate_path) as f:
+        certificate = f.read()
+        # for per_tag in root.iter('UAPermission'):
+        #     data_to_sign = per_tag
+        try:
+            verified_data = sx.XMLVerifier().verify(data=root, require_x509=True, x509_cert=certificate).signed_xml
+            # The file signature is authentic
+            return True
+        except cryptography.exceptions.InvalidSignature:
+            # print(verified_data)
+            # add the type of exception
+            return False

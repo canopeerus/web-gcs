@@ -6,10 +6,14 @@ Flask-PyMongo==2.3.0
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.1
 Jinja2==2.10
-psycopg2==2.7.7
+psycopg2-binary
 pymongo==3.7.1
 pandas
 geocoder
 numpy
 matplotlib
 seaborn
+lxml
+signxml
+jsonschema
+pycryptodomex
