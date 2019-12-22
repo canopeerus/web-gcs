@@ -18,6 +18,10 @@ import pandas as pd
 import LogStorage,IncidentTracker,JobTracker,DroneMonitor,InventoryMgmt,FMSGeneric as fmg
 import urllib
 
+import base64,decimal,uuid,cryptography,signxml as sx
+from lxml import etree
+from xml.etree.ElementTree import Element, SubElement, ElementTree
+
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'           # deprecated. No longer valid
 ALLOWED_LOGS_EXTENSIONS = set (['csv'])                     # Extensions set for log file upload
 ALLOWED_BATCH_INVENTORY_TYPES  = ALLOWED_LOGS_EXTENSIONS    # Batch Inventory Uploads also accept only CSV files
@@ -417,13 +421,11 @@ def xmlverifyaction ():
         if not 'file' in request.files:
             return 'error:nofile'
         inputfile = request.files.get ('file')
-        #with open (inputfile.filename, 'wb') as f:
-        #    f.write (inputfile.read ())
-        if JobTracker.verify_xml_signature (inputfile):
-            str = "Verified"
+        if JobTracker.verify_xml_signature (inputfile,'dgca.cert'):
+            return "Verified"
         else:
-            str = "Not Verified"
-        return str
+            return "Not verified"
+
     else:
         return redirect ('/gcslogin')
 

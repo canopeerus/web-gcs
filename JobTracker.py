@@ -153,7 +153,7 @@ def goDeployment (session,request):
     else:
         return redirect ('/gcslogin')
 
-def verify_xml_signature (xml_file):
+def verify_xml_signature(xml_file, certificate_path):
     """
     Verify the signature of a given xml file against a certificate
     :param path xml_file: path to the xml file for verification
@@ -163,15 +163,16 @@ def verify_xml_signature (xml_file):
     # TODO -  refactor such that this verifies for generic stuff
     tree = etree.parse(xml_file)
     root = tree.getroot()
-    certificate = ''
-    for x in root:
-        certificate = x.find ('X509Certificate')
-
-    try:
-        verified_data = sx.XMLVerifier().verify(data=root, require_x509=True, x509_cert=certificate).signed_xml
-        # The file signature is authentic
-        return True
-    except cryptography.exceptions.InvalidSignature:
+    with open(certificate_path) as f:
+        certificate = f.read()
+        # for per_tag in root.iter('UAPermission'):
+        #     data_to_sign = per_tag
+        try:
+            verified_data = sx.XMLVerifier().verify(data=root, require_x509=True, x509_cert=certificate).signed_xml
+            # The file signature is authentic
+            return True
+        except cryptography.exceptions.InvalidSignature:
             # print(verified_data)
             # add the type of exception
-        return False
+            return False
+
