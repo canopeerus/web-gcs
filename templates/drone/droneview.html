@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
         <!--Set title-->
-        <title>Jobs Schedule for {{ drone.drone_name }}</title>
+        <title>Jobs Schedule for {{ drone.rpa_name }}</title>
 
         <!--Load local jquery and bootstrap min js-->
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -89,7 +89,7 @@
         <div class="container-fluid">
             <br>
             <div id="header" class="page-header" style="display:none;">
-                <h1 style="text-align:center;">Job Schedule for Drone {{ drone.drone_name }}</h1>
+                <h1 style="text-align:center;">Job Schedule for Drone {{ drone.rpa_name }}</h1>
             </div>
             <br>
             <div id="no-msg" style="display:none;">

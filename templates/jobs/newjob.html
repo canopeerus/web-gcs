@@ -124,7 +124,7 @@
                     <label for='drone'>Drone:</label>
                     <select required class="form-control" id="drone_select" name='drone_select'>
                         {% for item in drones %}
-                        <option value="{{ item.id }}">{{ item.drone_name }}</option>
+                        <option value="{{ item.id }}">{{ item.rpa_name }}</option>
                         {% endfor %}
                     </select>
                 </div>

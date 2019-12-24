@@ -31,7 +31,7 @@ def newIncidentAction (session,request,db):
         username_val = session ['gcs_user']
         drone_sel_id = int (request.form.get ('drone_select'))
         username_id = GCSUser.query.filter_by (username = username_val).first ().id
-        drone_sel_name = Drone.query.filter_by (id = drone_sel_id).first ().drone_name
+        drone_sel_name = Drone.query.filter_by (id = drone_sel_id).first ().rpa_name
         priority_sel = request.form.get ('priority_sel')
         incident = Incident (incident_title,description,username_id,username_val,
                 drone_sel_id,drone_sel_name,priority_sel)
@@ -68,7 +68,7 @@ def updateIncidentAction (session,request,db):
         incident.title = request.form.get ('title').strip ()
         incident.drone_relatedId = int (request.form.get ('drone_select'))
         incident.drone_relatedName = Drone.query.filter_by (
-                id = incident.drone_relatedId).first ().drone_name
+                id = incident.drone_relatedId).first ().rpa_name
         incident.status = request.form.get ('status_select')
 
         db.session.commit ()

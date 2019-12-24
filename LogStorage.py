@@ -31,7 +31,7 @@ def newFileAction (session,request,db):
             return 'error:no file'
         inputfile = request.files.get ('file')
         drone_id = int (request.form.get ('drone_select'))
-        drone_name = Drone.query.filter_by (id = drone_id).first ().drone_name
+        drone_name = Drone.query.filter_by (id = drone_id).first ().rpa_name
         if drone_name is None:
             return "ERROR!!"
         if allowed_file (inputfile.filename):

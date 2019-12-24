@@ -83,24 +83,47 @@ class Drone (db.Model):
     __tablename__ = 'drones'
     id = db.Column (db.Integer,primary_key = True)
     unique_id_number = db.Column (db.String(),unique = True)
-    drone_name = db.Column (db.String(), unique = True)
-    model = db.Column (db.String())
+    rpa_weight_grams = db.Column (db.Float)
+    rpa_manufacturer = db.Column (db.String())
+    rpa_max_wt = db.Column (db.Float)
+    rpa_name = db.Column (db.String(), unique = True)
+    rpa_model = db.Column (db.String())
     motor_count = db.Column (db.Integer)
     battery_type = db.Column (db.String())
     status  = db.Column (db.String())
     jobid_queue = db.Column (ARRAY (db.Integer))
     r_flight_module_id = db.Column (db.Integer,db.ForeignKey ('rfmodules.id'))
     rfm_name = db.Column (db.String())
+    rpa_type = db.Column (db.String())
 
-    def __init__ (self,drone_name,model,motor_count,battery_type,rfm_id):
-        self.drone_name = drone_name
-        self.model = model
+    def assignStatus (self):
+        self.status = 'Available'
+
+    def assignRFM (self,rfm_id):
+        self.r_flight_module_id = rfm_id
+        rfm = RegisteredFlightModule.query.filter_by (id = rfm_id).first ()
+        self.rfm_name = rfm.rfm_name
+
+    def assignRPAType (self):
+        if self.rpa_weight_grams <= 250:
+            self.rpa_type = 'NANO'
+        elif self.rpa_weight_grams <= 2000:
+            self.rpa_type = 'MICRO'
+        elif self.rpa_weight_grams <= 25000:
+            self.rpa_type = 'SMALL'
+
+    def __init__ (self,rpa_weight,rpa_name,model,rpa_manufacturer,
+            motor_count,battery_type,rfm_id,rpa_max_wt):
+        self.rpa_name = rpa_name
+        self.rpa_weight_grams = rpa_weight
+        self.rpa_model = model
         self.motor_count = motor_count
         self.battery_type = battery_type
-        self.status = 'Available'
-        self.r_flight_module_id = rfm_id
-        rfm = RegisteredFlightModule.query.filter_by (id = rfm_id).first()
-        self.rfm_name = rfm.rfm_name
+        self.rpa_max_wt = rpa_max_wt
+        self.rpa_manufacturer = rpa_manufacturer
+        self.assignStatus ()
+        self.assignRFM (rfm_id)
+        self.assignRPAType ()
 
 
     def assign_job (self,job_id):
@@ -255,7 +278,7 @@ class LogFile (db.Model):
         self.upload_username = GCSUser.query.filter_by (id = upload_user_id).first ().username
         self.upload_timestamp = datetime.now()
         self.drone_related_id = drone_id
-        self.drone_related_name = Drone.query.filter_by (id = drone_id).first ().drone_name 
+        self.drone_related_name = Drone.query.filter_by (id = drone_id).first ().rpa_name 
         self.filesize = fsize
         self.file_blog = blob
 

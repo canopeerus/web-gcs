@@ -100,7 +100,7 @@ def jobViewPage (session,request,flag = 'job'):
                         else:
                             template_str = 'jobs/jobview.html'
                         return render_template (template_str,drone_name = 
-                                drone_instance.drone_name,payload_name = payload.item,
+                                drone_instance.rpa_name,payload_name = payload.item,
                                 job = job_instance,username = session ['gcs_user'])
                     else:
                         return  "<h2>Work In Progress</h2>"

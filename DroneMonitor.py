@@ -22,11 +22,15 @@ def newDronePage (session,request):
 
 def newDroneAction (session,request,db):
     if fmg.isValidSession (session) and request.method == 'POST':
-        drone = Drone (drone_name = request.form['droneName'],
-                motor_count = request.form['motorCount'],
-                model = request.form['droneModel'],
-                battery_type = request.form['batteryType'],
-                rfm_id = int(request.form['rfm_select']))
+        drone = Drone (
+                float (request.form ['rpa_weight']),
+                request.form ['droneName'].strip (),
+                request.form ['droneModel'].strip (),
+                request.form ['rpa_manufacturer'].strip (),
+                int (request.form ['motorCount'].strip ()),
+                request.form ['batteryType'].strip (),
+                int (request.form ['rfm_select'].strip ()),
+                float (request.form ['rpa_max_wt'].strip ()))
         db.session.add (drone)
         db.session.commit ()
         return redirect ('/dronemonitor',code = 302)

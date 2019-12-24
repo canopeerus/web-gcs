@@ -113,7 +113,7 @@
                         <div class="col-sm-10">
                             <select required class="form-control readonly" id="drone_select" name="drone_select" disabled>
                                 {% for item in drones %}
-                                <option class='drone' value="{{ item.id }}">{{ item.drone_name }}</option>
+                                <option class='drone' value="{{ item.id }}">{{ item.rpa_name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
