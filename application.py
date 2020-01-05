@@ -16,7 +16,7 @@ from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot, RegisteredFlightModule,RegisteredFlightModuleProvider
 import pandas as pd
 import LogStorage,IncidentTracker,JobTracker,DroneMonitor,InventoryMgmt,FMSGeneric as fmg
-import urllib
+import urllib,MiscHelper
 
 import base64,decimal,uuid,cryptography,signxml as sx
 from lxml import etree
@@ -94,6 +94,10 @@ def allowed_file (filename):
             filename.rsplit ('.',1)[1].lower() in ALLOWED_LOGS_EXTENSIONS
 
 
+
+@application.route ('/testindex')
+def fn ():
+    return render_template ("fms_index.html")
 
 '''
 ---------------------------------------------
@@ -418,14 +422,17 @@ def xmlVerifyPage ():
 @application.route ('/verifyxmlsigaction',methods = ['POST'])
 def xmlverifyaction ():
     if request.method == 'POST' and fmg.isValidSession (session):
+        return 'WIP'
+        '''
         if not 'file' in request.files:
             return 'error:nofile'
         inputfile = request.files.get ('file')
-        if JobTracker.verify_xml_signature (inputfile,'dgca.cert'):
-            return "Verified"
+        inputfile.save (inputfile.filename)
+        if MiscHelper.verifyXMLSignature (inputfile.filename):
+            print ("Verified")
         else:
-            return "Not verified"
-
+            print ("Not verified")
+        '''
     else:
         return redirect ('/gcslogin')
 

@@ -128,8 +128,7 @@ class Drone (db.Model):
 
     def assign_job (self,job_id):
         if job_id is None:
-            print ("WHYYYY")
-        print (job_id)
+            return 
         if self.jobid_queue is None:
             newlist = list()
             newlist.append (job_id)
@@ -272,7 +271,7 @@ class LogFile (db.Model):
     file_blog = db.Column (db.LargeBinary)
     job_id = db.Column (db.Integer,db.ForeignKey ('jobs.id'))
 
-    def __init__ (self,filename,upload_user_id,drone_id,fsize,blob):
+    def __init__ (self,filename,upload_user_id,drone_id,fsize,blob,job_id):
         self.filename = filename
         self.upload_user_id = upload_user_id
         self.upload_username = GCSUser.query.filter_by (id = upload_user_id).first ().username
@@ -281,6 +280,7 @@ class LogFile (db.Model):
         self.drone_related_name = Drone.query.filter_by (id = drone_id).first ().rpa_name 
         self.filesize = fsize
         self.file_blog = blob
+        self.job_id = job_id
 
 class IncidentModAction (db.Model):
     __tablename__ = 'incidentmodactions'

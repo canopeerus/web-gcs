@@ -1,11 +1,11 @@
-from models import GCSUser,Drone,Payload,LogFile
+from models import GCSUser,Drone,Payload,LogFile,Job
 from flask import render_template, redirect, url_for, send_from_directory, send_file
 import FMSGeneric as fmg
 import os
 
 def allowed_file (filename):
     return '.' in filename and \
-            filename.rsplit ('.',1)[1].lower () in ['csv','CSV']
+            filename.rsplit ('.',1)[1].lower () in ['JSON','json']
 
 def logFileStoragePage (session,request):
     if fmg.isValidSession (session):
@@ -30,7 +30,8 @@ def newFileAction (session,request,db):
         if not 'file' in request.files:
             return 'error:no file'
         inputfile = request.files.get ('file')
-        drone_id = int (request.form.get ('drone_select'))
+        job_id = int (request.form.get ('jobid'))
+        drone_id = Job.query.filter_by (id = job_id).first ().drone_id
         drone_name = Drone.query.filter_by (id = drone_id).first ().rpa_name
         if drone_name is None:
             return "ERROR!!"
@@ -40,7 +41,7 @@ def newFileAction (session,request,db):
             blob = inputfile.read ()
             fsize = len (blob)
             log_instance = LogFile (inputfile.filename,user_id,
-                    drone_id,fsize,blob)
+                    drone_id,fsize,blob,job_id)
             
 
             db.session.add (log_instance)

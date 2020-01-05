@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+        <!--Set title-->
+        <title>Redwing GCS</title>
+
+        <!--Load local jquery and bootstrap min js-->
+        <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+
+        <!--Load bootstrap css-->
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/bootstrap.min.css') }}"/>
+
+        <!--Load page specific CSS-->
+        <link rel='stylesheet' href='/static/style/navbar-style.css'/>
+        <link rel="stylesheet" href='/static/style/fms_index.css'/>
+        <link rel="stylesheet" href="{{ url_for('static',filename='style/font-awesome.min.css') }}"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <a href='/npntauthentication'>
+                <div class="quad" id="NW">
+                    <h3 style="text-align:center;">
+                        NPNT System
+                    </h3>
+                </div>
+            </a>
+            <a href='/inventory'>
+                <div class="quad" id="NE">
+                    <h3 style="text-align:center;">
+                        Inventory
+                    </h3>
+                </div>
+            </a>
+            <div class="quad" id="SE"></div>
+            <a href='/atc'>
+                <div class="quad" id="SW">
+                    <h3 style="text-align:center;">
+                        Air Traffic Control
+                    </h3>
+                </div>
+            </a>
+        </div>
+    <script>
+        $('#NW').click (function () {
+            window.location = $(this).find ('a').attr ('href');
+            return false;
+        });
+        $('#NE').click (function () {
+            window.location = $(this).find ('a').attr ('href');
+            return false;
+        });
+        $('#SW').click (function () {
+            window.location = $(this).find ('a').attr ('href');
+            return false;
+        });
+        $('#SE').click (function () {
+            window.location = $(this).find ('a').attr ('href');
+            return false;
+        });
+    </body>
+</html>
