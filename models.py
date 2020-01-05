@@ -177,6 +177,28 @@ class Payload (db.Model):
         self.stock = stock
         self.value = value
 
+class LogFile (db.Model):
+    __tablename__ = 'logfiles'
+    id = db.Column (db.Integer,primary_key = True)
+    filename = db.Column (db.String(),unique = True)
+    filesize = db.Column (db.Integer)
+    upload_user_id = db.Column (db.Integer,db.ForeignKey ('gcsusers.id'))
+    upload_username = db.Column (db.String())
+    upload_timestamp = db.Column (db.DateTime)
+    drone_related_id = db.Column (db.Integer,db.ForeignKey ('drones.id'))
+    drone_related_name = db.Column (db.String())
+    file_blog = db.Column (db.LargeBinary)
+
+    def __init__ (self,filename,upload_user_id,drone_id,fsize,blob):
+        self.filename = filename
+        self.upload_user_id = upload_user_id
+        self.upload_username = GCSUser.query.filter_by (id = upload_user_id).first ().username
+        self.upload_timestamp = datetime.now()
+        self.drone_related_id = drone_id
+        self.drone_related_name = Drone.query.filter_by (id = drone_id).first ().rpa_name 
+        self.filesize = fsize
+        self.file_blog = blob
+
 
 class Job (db.Model):
     __tablename__ = 'jobs'
@@ -201,6 +223,8 @@ class Job (db.Model):
 
     location_origin_str = db.Column (db.String())
     location_dest_str = db.Column (db.String())
+
+    logfile_local_id = db.Column (db.Integer,db.ForeignKey ('logfiles.id'))
 
     def __init__ (self, sdate, edate, drone_id, geofence_lat,
             geofence_long, payload_id,payload_stock, max_alt,
@@ -258,29 +282,6 @@ class Job (db.Model):
         return payload
 
 
-class LogFile (db.Model):
-    __tablename__ = 'logfiles'
-    id = db.Column (db.Integer,primary_key = True)
-    filename = db.Column (db.String(),unique = True)
-    filesize = db.Column (db.Integer)
-    upload_user_id = db.Column (db.Integer,db.ForeignKey ('gcsusers.id'))
-    upload_username = db.Column (db.String())
-    upload_timestamp = db.Column (db.DateTime)
-    drone_related_id = db.Column (db.Integer,db.ForeignKey ('drones.id'))
-    drone_related_name = db.Column (db.String())
-    file_blog = db.Column (db.LargeBinary)
-    job_id = db.Column (db.Integer,db.ForeignKey ('jobs.id'))
-
-    def __init__ (self,filename,upload_user_id,drone_id,fsize,blob,job_id):
-        self.filename = filename
-        self.upload_user_id = upload_user_id
-        self.upload_username = GCSUser.query.filter_by (id = upload_user_id).first ().username
-        self.upload_timestamp = datetime.now()
-        self.drone_related_id = drone_id
-        self.drone_related_name = Drone.query.filter_by (id = drone_id).first ().rpa_name 
-        self.filesize = fsize
-        self.file_blog = blob
-        self.job_id = job_id
 
 class IncidentModAction (db.Model):
     __tablename__ = 'incidentmodactions'

@@ -216,6 +216,8 @@ def terminate_drone ():
 LOG FILE STORAGE DATABASE
 ---------------------------------------
 '''
+'''
+PAUSE LOGSTORAGE FOR NOW
 @application.route ('/logfilestorage')
 def logfilestorage ():
     return LogStorage.logFileStoragePage (session,request)
@@ -236,7 +238,7 @@ def file (filename):
 def download_logfile ():
     return LogStorage.downloadLogFile (session, request)
     
-
+'''
 
 
 '''
