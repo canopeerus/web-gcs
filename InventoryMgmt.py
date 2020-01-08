@@ -1,8 +1,12 @@
 from flask import render_template,redirect,url_for,send_from_directory
 from models import Payload,Drone,Job
 import FMSGeneric as fmg
+import pandas as pd
+from collections import Counter
 
 ALLOWED_BATCH_INVENTORY_TYPES = ['csv','CSV']
+ACCEPTABLE_COLUMNS = ['type','item','storage_type','item_type','weight',
+        'uom','stock','value']
 
 def listAllInventory (session,request):
     if fmg.isValidSession (session):
@@ -60,3 +64,30 @@ def inventoryEditPage (session,request):
         session ['src_url'] = '/inventory'
         return redirect ('/gcslogin?redirect')
 
+def batchInventoryAction (session,request,db):
+    if fmg.isValidSession (session) and request.method == 'POST':
+        if not 'file' in request.files:
+            return 'error:no file'
+        inputfile = request.files.get ('file')
+        if inputfile is None:
+            return "ERror!"
+        if checkCSVAllowedFile (inputfile.filename):
+            inputfile.save (inputfile.filename)
+            df = pd.read_table (inputfile.filename,sep = ',')
+            read_columns = list (df.columns.values)
+            if Counter (read_columns) == Counter (ACCEPTABLE_COLUMNS):
+                for index,row in df.iterrows ():
+                    inventory_item = Payload (row ['type'],row['item'],
+                        row['storage_type'],int (row['weight']),row['uom'],
+                        int(row['stock']),float(row['value']))
+                    db.session.add (inventory_item)
+                db.session.commit ()
+                os.remove (inputfile.filename)
+            else:
+                return "Invalid CSV Format"
+            return redirect ('/inventory')
+        else:
+            return "Invalid File FOrmat"
+    else:
+        return redirect ('/gcslogin')
+            

@@ -7,14 +7,12 @@ Main GCS applicationlication source code for Redwing Aerospace Laboratories
 ------------------------------------------------------------------------------------------------------
 '''
 
-from collections import Counter
 from flask import Flask,render_template,redirect,session,abort,request,flash,url_for,send_from_directory,send_file
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os,uuid,visualise,shutil,time,geocoder,json
 from authutils import verify_password,hash_password
 from models import db,GCSUser,Drone,Job,Payload,Incident,LogFile,Pilot, RegisteredFlightModule,RegisteredFlightModuleProvider
-import pandas as pd
 import LogStorage,IncidentTracker,JobTracker,DroneMonitor,InventoryMgmt,FMSGeneric as fmg
 import urllib,MiscHelper
 
@@ -23,8 +21,8 @@ from lxml import etree
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 
 UPLOADS_FOLDER = '/var/www/html/web-gcs/uploads/'           # deprecated. No longer valid
-ALLOWED_LOGS_EXTENSIONS = set (['csv'])                     # Extensions set for log file upload
-ALLOWED_BATCH_INVENTORY_TYPES  = ALLOWED_LOGS_EXTENSIONS    # Batch Inventory Uploads also accept only CSV files
+ALLOWED_LOGS_EXTENSIONS = set (['json'])                     # Extensions set for log file upload
+ALLOWED_BATCH_INVENTORY_TYPES  = set (['csv','CSV'])    # Batch Inventory Uploads also accept only CSV files
 
 
 application = Flask (__name__)
@@ -269,38 +267,7 @@ def csv_allowed_file (filename):
 
 @application.route ('/batchinventoryaction',methods=['POST'])
 def batchinventory_action ():
-    if request.method == 'POST':
-        if 'gcs_user' in session and session ['gcs_logged_in']:
-            if not 'file' in request.files:
-                return 'error:no file'
-            inputfile = request.files.get ('file')
-            if inputfile is None:
-                return "Error!"
-            if csv_allowed_file (inputfile.filename):
-                filename = inputfile.filename
-                outpath = os.path.join (application.config['UPLOAD_FOLDER'],filename)
-                inputfile.save (outpath)
-                df = pd.read_table (outpath,sep=',')
-                read_columns = list (df.columns.values)
-                if Counter (read_columns) == Counter (application.config['ACCEPTABLE_COLUMNS']):
-                    for index,row in df.iterrows():
-                        inventory_item = Payload (row['type'],row['item'],row['storage_type'],
-                            row['item_type'],int(row['weight']),row['uom'],
-                            int(row['stock']),float(row['value']))
-                        db.session.add (inventory_item)
-                
-                    db.session.commit ()
-                    os.remove (outpath)
-                else:
-                    return "The uploaded csv file is of invalid format"
-                return redirect ('/inventory',code = 302)
-            else:
-                return "Invalid file format"
-        else:
-            return redirect ('/gcslogin?redirect',code = 302)
-    else:
-        return "ERROR"
-
+    return InventoryMgmt.batchInventoryAction (session,request,db)
 
 
 @application.route ('/inventoryitem',methods=['GET'])
